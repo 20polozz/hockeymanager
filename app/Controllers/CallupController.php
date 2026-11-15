@@ -45,7 +45,8 @@ final class CallupController extends Controller
             'm'         => $m,
             'callup'    => $callup,
             'selected'  => $selected,
-            'eligible'  => CallupRepository::eligible($m),
+            'eligible'  => $eligible = CallupRepository::eligible($m),
+            'away'      => \App\Repositories\AbsenceRepository::onDate(substr((string)$m['starts_at'], 0, 10), array_column($eligible, 'id')),
         ]);
     }
 

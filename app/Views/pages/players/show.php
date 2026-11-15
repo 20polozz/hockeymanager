@@ -1,5 +1,8 @@
 <?php
-/** @var array $player @var array $history @var array $attendance @var array $attHistory @var bool $canManage */
+/** @var array $player @var array $history @var array $attendance @var array $attHistory @var bool $canManage @var array $absences @var bool $canAbsence */
+use App\Repositories\AbsenceRepository;
+$isPlayerUser = App\Core\Auth::hasRole(App\Core\Auth::ROLE_PLAYER);
+$currentAbs = array_values(array_filter($absences, static function ($a) { return (int)$a['is_current'] === 1; }));
 $stLabels = ['present' => ['Present', 'green'], 'retard' => ['Retard', 'blue'], 'justificat' => ['Justificada', 'orange'], 'absent' => ['Absent', 'red']];
 $name = $player['first_name'] . ' ' . $player['last_name'];
 $age = $player['birth_date'] ? (int)date_diff(date_create($player['birth_date']), date_create('today'))->y : null;
@@ -16,6 +19,9 @@ $attended = $attendance['present'] + $attendance['retard'];
       <?php foreach ($current as $c): ?>
         <span class="pill pill-muted"><span class="team-dot" style="--team: <?= e($c['color']) ?>"></span><?= e($c['team_name']) ?><?= $c['dorsal'] !== null ? ' · #' . (int)$c['dorsal'] : '' ?></span>
       <?php endforeach; ?>
+      <?php foreach ($currentAbs as $a): ?>
+        <span class="pill pill-red"><?= icon('alert', 'icon icon-xs') ?> No disponible · <?= e(AbsenceRepository::period($a)) ?></span>
+      <?php endforeach; ?>
     </div>
   </div>
   <?php if (!empty($canManage)): ?>
@@ -24,6 +30,61 @@ $attended = $attendance['present'] + $attendance['retard'];
 </section>
 
 <div class="dash-grid">
+  <section class="panel panel-wide" id="absencies">
+    <?= component('panel_head', ['title' => 'Absències i baixes temporals']) ?>
+    <?php if ($absences): ?>
+      <ul class="absence-list">
+        <?php foreach ($absences as $a):
+            $past = (int)$a['is_past'] === 1; $cur = (int)$a['is_current'] === 1;
+            $mine = !$isPlayerUser || (int)$a['created_by'] === App\Core\Auth::id(); ?>
+          <li class="absence-item<?= $cur ? ' is-current' : ($past ? ' is-past' : ' is-upcoming') ?>">
+            <div class="absence-main">
+              <span class="pill <?= $cur ? 'pill-red' : ($past ? 'pill-muted' : 'pill-orange') ?>"><?= e(AbsenceRepository::label($a)) ?></span>
+              <strong class="absence-dates"><?= e(date('d/m/Y', strtotime($a['starts_on']))) ?> → <?= $a['ends_on'] ? e(date('d/m/Y', strtotime($a['ends_on']))) : 'sense data de tornada' ?></strong>
+              <span class="muted small"><?= $cur ? 'Ara no disponible' : ($past ? 'Acabada' : 'Pròximament') ?><?= $a['created_by_name'] ? ' · per ' . e($a['created_by_name']) : '' ?></span>
+              <?php if ($a['note']): ?><p class="absence-note"><?= e($a['note']) ?></p><?php endif; ?>
+            </div>
+            <?php if ($canAbsence && $mine): ?>
+              <div class="absence-actions">
+                <?php if ($cur): ?>
+                  <form method="post" action="<?= e(url('/absencies/' . (int)$a['id'] . '/tornada')) ?>"><?= csrf_field() ?>
+                    <button class="btn btn-sm" type="submit"><?= icon('check', 'icon icon-sm') ?> Ja ha tornat</button></form>
+                <?php endif; ?>
+                <form method="post" action="<?= e(url('/absencies/' . (int)$a['id'] . '/eliminar')) ?>" data-confirm="Segur que vols eliminar aquesta absència?"><?= csrf_field() ?>
+                  <button class="icon-btn" type="submit" aria-label="Elimina l'absència"><?= icon('x', 'icon icon-sm') ?></button></form>
+              </div>
+            <?php endif; ?>
+          </li>
+        <?php endforeach; ?>
+      </ul>
+    <?php else: ?>
+      <p class="muted">Cap absència registrada.</p>
+    <?php endif; ?>
+
+    <?php if ($canAbsence): ?>
+      <details class="absence-add"<?= $absences ? '' : ' open' ?>>
+        <summary class="btn"><?= icon('plus', 'icon icon-sm') ?> <?= $isPlayerUser ? 'Avisa que no podràs venir' : 'Afegeix una absència' ?></summary>
+        <form method="post" action="<?= e(url('/jugadors/' . (int)$player['id'] . '/absencies')) ?>" class="absence-form">
+          <?= csrf_field() ?>
+          <label class="field"><span>Motiu</span>
+            <select name="type" required>
+              <?php foreach (AbsenceRepository::TYPES as $k => $lbl): ?><option value="<?= e($k) ?>"><?= e($lbl) ?></option><?php endforeach; ?>
+            </select></label>
+          <div class="field-row">
+            <label class="field"><span>Des del dia</span>
+              <input type="date" name="starts_on" value="<?= e(date('Y-m-d')) ?>" required></label>
+            <label class="field" id="abs-ends"><span>Fins al dia <small class="muted">(últim dia que no hi és)</small></span>
+              <input type="date" name="ends_on" required></label>
+          </div>
+          <label class="check check-inline"><input type="checkbox" name="open_ended" value="1" data-hide="abs-ends"><span>Sense data de tornada (encara no se sap)</span></label>
+          <label class="field"><span>Nota <small class="muted">(opcional)</small></span>
+            <input type="text" name="note" maxlength="255" placeholder="Ex.: esquinç de turmell, viatge d'estudis…"></label>
+          <div class="form-actions"><button class="btn btn-primary" type="submit"><?= icon('check', 'icon icon-sm') ?> Desa</button></div>
+        </form>
+      </details>
+    <?php endif; ?>
+  </section>
+
   <section class="panel">
     <?= component('panel_head', ['title' => 'Dades personals']) ?>
     <dl class="data-list">

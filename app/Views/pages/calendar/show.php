@@ -1,5 +1,5 @@
 <?php
-/** @var array $event @var bool $canManage @var bool $canAttend @var array $attendance @var array $sessions @var array $roster @var bool $showStatus */
+/** @var array $event @var bool $canManage @var bool $canAttend @var array $attendance @var array $sessions @var array $roster @var bool $showStatus @var array $away */
 $isTraining = in_array($event['type'], ['entrenament', 'gimnas'], true);
 $typeLabel = App\Repositories\EventRepository::TYPES[$event['type']] ?? '';
 $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orange'][$event['type']] ?? 'muted';
@@ -35,7 +35,9 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
   <?php endif; ?>
 
   <?php
-  $called = array_values(array_filter($roster, static function ($p) { return !$p['guest']; }));
+  $called = array_values(array_filter($roster, static function ($p) use ($away) { return !$p['guest'] && !isset($away[(int)$p['id']]); }));
+  $awayList = array_values(array_filter($roster, static function ($p) use ($away) { return !$p['guest'] && isset($away[(int)$p['id']]); }));
+  $isStaff = App\Core\Gate::allows('attendance.view');
   $guests = array_values(array_filter($roster, static function ($p) { return $p['guest']; }));
   $dotTone = ['present' => 'green', 'retard' => 'blue', 'justificat' => 'orange', 'absent' => 'red'];
   $statusLabels = App\Repositories\AttendanceRepository::STATUSES;
@@ -55,6 +57,14 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
       </ul>
     <?php else: ?>
       <p class="muted">Cap jugadora assignada. Afegeix-les a l'equip o edita l'esdeveniment.</p>
+    <?php endif; ?>
+    <?php if ($awayList): ?>
+      <p class="muted small" style="margin:12px 0 6px"><?= icon('alert', 'icon icon-xs') ?> No disponibles (<?= count($awayList) ?>)</p>
+      <ul class="name-chips">
+        <?php foreach ($awayList as $p): $a = $away[(int)$p['id']]; ?>
+          <li class="chip-off"<?= $isStaff ? ' title="' . e(App\Repositories\AbsenceRepository::label($a) . ' · ' . App\Repositories\AbsenceRepository::period($a)) . '"' : '' ?>><?= e($p['first_name'] . ' ' . $p['last_name']) ?><?php if ($isStaff): ?> <span class="muted small">(<?= e(App\Repositories\AbsenceRepository::label($a)) ?>)</span><?php endif; ?></li>
+        <?php endforeach; ?>
+      </ul>
     <?php endif; ?>
     <?php if ($guests): ?>
       <p class="muted small" style="margin:12px 0 6px">També hi han vingut (<?= count($guests) ?>)</p>

@@ -77,6 +77,18 @@
     });
   });
 
+  // Amaga un camp quan es marca una casella (data-hide="id")
+  document.querySelectorAll('input[data-hide]').forEach(function (cb) {
+    var target = document.getElementById(cb.getAttribute('data-hide'));
+    if (!target) return;
+    var sync = function () {
+      target.hidden = cb.checked;
+      var inp = target.querySelector('input');
+      if (inp) { inp.required = !cb.checked; if (cb.checked) inp.value = ''; }
+    };
+    cb.addEventListener('change', sync); sync();
+  });
+
   // Mostra/amaga un camp lligat a una casella (data-reveal="id")
   document.querySelectorAll('input[data-reveal]').forEach(function (cb) {
     var target = document.getElementById(cb.getAttribute('data-reveal'));
@@ -109,6 +121,7 @@
     var all = document.querySelector('[data-all-present]');
     if (all) all.addEventListener('click', function () {
       items.forEach(function (li) {
+        if (li.hasAttribute('data-away')) return; // de baixa: ja ve marcada com a justificada
         var checked = li.querySelector('input[type=radio]:checked');
         if (!checked || checked.value === '') {
           var p = li.querySelector('input[value=present]');

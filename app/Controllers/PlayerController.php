@@ -26,7 +26,8 @@ final class PlayerController extends Controller
             'search'     => $search,
             'teams'      => TeamScope::teams(),
             'activeTeam' => $teamId,
-            'players'    => PlayerRepository::listForTeams($teamId > 0 ? [$teamId] : TeamScope::ids(), $search),
+            'players'    => $players = PlayerRepository::listForTeams($teamId > 0 ? [$teamId] : TeamScope::ids(), $search),
+            'away'       => \App\Repositories\AbsenceRepository::onDate(date('Y-m-d'), array_column($players, 'id')),
         ]);
     }
 
@@ -157,6 +158,8 @@ final class PlayerController extends Controller
             'attHistory' => \App\Repositories\AttendanceRepository::playerHistory($id, 10),
             'stats'      => \App\Repositories\StatsRepository::playerBySeason($id),
             'canManage'  => Gate::allows('players.manage') && (int)$player['active'] === 1,
+            'absences'   => \App\Repositories\AbsenceRepository::forPlayer($id),
+            'canAbsence' => (int)$player['active'] === 1 && AbsenceController::canManage($id),
         ]);
     }
 }

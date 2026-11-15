@@ -1,5 +1,9 @@
 <?php
-/** @var array $players @var string $search @var array $teams @var int $activeTeam */
+/** @var array $players @var string $search @var array $teams @var int $activeTeam @var array $away */
+$awayTag = static function (array $p) use ($away): string {
+    $a = $away[(int)$p['id']] ?? null;
+    return $a ? '<span class="tag-off" title="' . e(App\Repositories\AbsenceRepository::period($a)) . '">' . e(App\Repositories\AbsenceRepository::label($a)) . '</span>' : '';
+};
 $q = $search !== '' ? ['q' => $search] : [];
 $canManage = App\Core\Gate::allows('players.manage');
 ?>
@@ -23,7 +27,7 @@ $canManage = App\Core\Gate::allows('players.manage');
     <?php foreach ($players as $p): ?>
       <li><a class="m-card" href="<?= e(url('/jugadors/' . (int)$p['id'])) ?>">
         <span class="avatar"><?= e(initials($p['first_name'] . ' ' . $p['last_name'])) ?></span>
-        <span class="m-card-body"><strong><?= e($p['first_name'] . ' ' . $p['last_name']) ?></strong>
+        <span class="m-card-body"><strong><?= e($p['first_name'] . ' ' . $p['last_name']) ?><?= $awayTag($p) ?></strong>
           <span class="small muted"><?php foreach ($p['teams'] as $t): ?><span class="team-tag"><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['name']) ?><?= $t['dorsal'] !== null ? ' #' . (int)$t['dorsal'] : '' ?></span> <?php endforeach; ?></span></span>
         <?php if ($p['position'] === 'porter'): ?><span class="pill pill-orange">P</span><?php endif; ?>
         <?= icon('chevron-right', 'icon icon-sm muted') ?>
@@ -44,7 +48,7 @@ $canManage = App\Core\Gate::allows('players.manage');
                 <a class="person" href="<?= e(url('/jugadors/' . (int)$p['id'])) ?>">
                   <span class="avatar avatar-sm"><?= e(initials($p['first_name'] . ' ' . $p['last_name'])) ?></span>
                   <span><?= e($p['first_name'] . ' ' . $p['last_name']) ?></span>
-                </a>
+                </a><?= $awayTag($p) ?>
               </td>
               <td><span class="pill <?= $p['position'] === 'porter' ? 'pill-orange' : 'pill-blue' ?>"><?= $p['position'] === 'porter' ? 'Porter/a' : 'Jugador/a' ?></span></td>
               <td>

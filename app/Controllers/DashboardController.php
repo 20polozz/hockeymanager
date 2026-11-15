@@ -40,6 +40,7 @@ final class DashboardController extends Controller
             'results'         => $repo->lastResults(5),
             'activity'        => $isPlayer ? [] : ActivityLog::recent(TeamScope::ids(), Auth::isManager(), 6),
             'attendanceTeams' => $isPlayer ? [] : $repo->attendanceByTeam(30),
+            'unavailable'     => $isPlayer ? [] : \App\Repositories\AbsenceRepository::upcoming(TeamScope::ids(), 14),
         ]);
     }
 

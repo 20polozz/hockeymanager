@@ -48,7 +48,8 @@ final class AttendanceController extends Controller
             'pageTitle' => 'Passar llista',
             'activeNav' => 'attendance',
             'event'     => $event,
-            'sheet'     => AttendanceRepository::sheet($event),
+            'sheet'     => $sheet = AttendanceRepository::sheet($event),
+            'away'      => \App\Repositories\AbsenceRepository::onDate(substr((string)$event['starts_at'], 0, 10), array_column($sheet, 'id')),
         ]);
     }
 

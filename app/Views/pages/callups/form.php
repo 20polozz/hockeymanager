@@ -1,15 +1,17 @@
 <?php
-/** @var array $m @var array|null $callup @var array $selected @var array $eligible */
+/** @var array $m @var array|null $callup @var array $selected @var array $eligible @var array $away */
 $own = array_filter($eligible, function ($p) { return (int)$p['own'] === 1; });
 $others = array_filter($eligible, function ($p) { return (int)$p['own'] !== 1; });
 $sent = $callup && $callup['sent_at'];
-$row = function (array $p) use ($selected): string {
+$row = function (array $p) use ($selected, $away): string {
     $on = in_array((int)$p['id'], $selected, true);
-    return '<label class="pick' . ($on ? ' is-on' : '') . '"><input type="checkbox" name="players[]" value="' . (int)$p['id'] . '"' . ($on ? ' checked' : '') . ' data-pick>'
+    $ab = $away[(int)$p['id']] ?? null;
+    return '<label class="pick' . ($on ? ' is-on' : '') . ($ab ? ' is-away' : '') . '"><input type="checkbox" name="players[]" value="' . (int)$p['id'] . '"' . ($on ? ' checked' : '') . ' data-pick>'
         . '<span class="dorsal">' . ($p['dorsal'] !== null ? (int)$p['dorsal'] : '–') . '</span>'
         . '<span class="pick-name">' . e($p['first_name'] . ' ' . $p['last_name'])
         . ($p['position'] === 'porter' ? ' <span class="pill pill-orange">Porter/a</span>' : '')
-        . ((int)$p['own'] !== 1 && $p['other_teams'] ? ' <small class="muted">' . e($p['other_teams']) . '</small>' : '') . '</span></label>';
+        . ((int)$p['own'] !== 1 && $p['other_teams'] ? ' <small class="muted">' . e($p['other_teams']) . '</small>' : '')
+        . ($ab ? '<span class="tag-off">' . e(\App\Repositories\AbsenceRepository::label($ab)) . '</span>' : '') . '</span></label>';
 };
 ?>
 <div class="form-page">

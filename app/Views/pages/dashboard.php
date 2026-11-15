@@ -3,7 +3,7 @@
  * @var bool $isPlayer @var bool $hasTeams @var int $totalPlayers
  * @var array $attendance @var array|null $nextTraining @var array|null $nextMatch
  * @var array $quickCards @var array $upcoming @var array $results @var array $activity
- * @var array $attendanceTeams
+ * @var array $attendanceTeams @var array $unavailable
  */
 use App\Core\Auth;
 use App\Core\Gate;
@@ -123,6 +123,25 @@ $activityIcons = ['attendance' => ['checklist', 'green'], 'callup' => ['clipboar
         </ul>
       <?php else: ?>
         <?= component('empty_state', ['icon' => 'checklist', 'text' => 'Encara no s\'ha passat llista aquest mes.']) ?>
+      <?php endif; ?>
+    </section>
+
+    <section class="panel">
+      <?= component('panel_head', ['title' => 'Jugadores no disponibles']) ?>
+      <?php if ($unavailable): ?>
+        <ul class="absence-list">
+          <?php foreach ($unavailable as $a): ?>
+            <li class="absence-item<?= (int)$a['is_current'] === 1 ? ' is-current' : ' is-upcoming' ?>">
+              <a class="absence-main" href="<?= e(url('/jugadors/' . (int)$a['player_id'])) ?>#absencies">
+                <strong><?= e($a['first_name'] . ' ' . $a['last_name']) ?></strong>
+                <span class="pill <?= (int)$a['is_current'] === 1 ? 'pill-red' : 'pill-orange' ?>"><?= e(App\Repositories\AbsenceRepository::label($a)) ?></span>
+                <span class="muted small"><?= e(App\Repositories\AbsenceRepository::period($a)) ?></span>
+              </a>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      <?php else: ?>
+        <?= component('empty_state', ['icon' => 'users', 'text' => 'Totes les jugadores estan disponibles.']) ?>
       <?php endif; ?>
     </section>
 

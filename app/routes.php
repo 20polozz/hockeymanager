@@ -25,6 +25,9 @@ $router->get('/jugadors/{id}', 'PlayerController@show', ['can' => 'players.view'
 $router->get('/jugadors/{id}/editar', 'PlayerController@edit', ['can' => 'players.manage']);
 $router->post('/jugadors/{id}', 'PlayerController@update', ['can' => 'players.manage']);
 $router->post('/jugadors/{id}/baixa', 'PlayerController@deactivate', ['can' => 'players.manage']);
+$router->post('/jugadors/{id}/absencies', 'AbsenceController@store');
+$router->post('/absencies/{id}/tornada', 'AbsenceController@finish');
+$router->post('/absencies/{id}/eliminar', 'AbsenceController@destroy');
 $router->get('/perfil', 'PlayerController@own', ['can' => 'players.own']);
 
 // Equips
