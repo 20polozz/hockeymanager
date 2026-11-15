@@ -50,13 +50,31 @@ $router->get('/assistencia/estadistiques', 'AttendanceController@stats', ['can' 
 $router->get('/assistencia/{id}', 'AttendanceController@take', ['can' => 'attendance.manage']);
 $router->post('/assistencia/{id}', 'AttendanceController@save', ['can' => 'attendance.manage']);
 
+// Exercicis
+$router->get('/exercicis', 'ExerciseController@index', ['can' => 'exercises.view']);
+$router->get('/exercicis/nou', 'ExerciseController@create', ['can' => 'exercises.manage']);
+$router->post('/exercicis', 'ExerciseController@store', ['can' => 'exercises.manage']);
+$router->get('/exercicis/{id}', 'ExerciseController@show', ['can' => 'exercises.view']);
+$router->get('/exercicis/{id}/editar', 'ExerciseController@edit', ['can' => 'exercises.manage']);
+$router->post('/exercicis/{id}', 'ExerciseController@update', ['can' => 'exercises.manage']);
+$router->post('/exercicis/{id}/eliminar', 'ExerciseController@destroy', ['can' => 'exercises.manage']);
+$router->post('/exercicis/{id}/preferit', 'ExerciseController@favorite', ['can' => 'exercises.view']);
+
+// Entrenaments (sessions)
+$router->get('/entrenaments', 'SessionController@index', ['can' => 'trainings.view']);
+$router->get('/entrenaments/nou', 'SessionController@create', ['can' => 'trainings.manage']);
+$router->post('/entrenaments', 'SessionController@store', ['can' => 'trainings.manage']);
+$router->get('/entrenaments/{id}', 'SessionController@show', ['can' => 'trainings.view']);
+$router->get('/entrenaments/{id}/editar', 'SessionController@edit', ['can' => 'trainings.manage']);
+$router->post('/entrenaments/{id}', 'SessionController@update', ['can' => 'trainings.manage']);
+$router->post('/entrenaments/{id}/eliminar', 'SessionController@destroy', ['can' => 'trainings.manage']);
+$router->post('/entrenaments/{id}/exercicis', 'SessionController@items', ['can' => 'trainings.manage']);
+
 // Configuració del compte
 $router->get('/configuracio', 'SettingsController@index', ['can' => 'settings.view']);
 $router->post('/configuracio/contrasenya', 'SettingsController@updatePassword', ['can' => 'settings.view']);
 
 // Mòduls de les properes fases (pàgina pròpia amb l'estat i el que inclourà)
-$router->get('/exercicis', 'ModuleController@exercises', ['can' => 'exercises.view']);
-$router->get('/entrenaments', 'ModuleController@trainings', ['can' => 'trainings.view']);
 $router->get('/partits', 'ModuleController@matches', ['can' => 'matches.view']);
 $router->get('/convocatories', 'ModuleController@callups', ['can' => 'callups.view']);
 $router->get('/estadistiques', 'ModuleController@stats', ['can' => 'stats.view']);

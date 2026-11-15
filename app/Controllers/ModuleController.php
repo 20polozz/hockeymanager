@@ -10,24 +10,6 @@ namespace App\Controllers;
  */
 final class ModuleController extends Controller
 {
-    public function exercises(): void
-    {
-        $this->show('exercises', 'Exercicis', 'cone', 3, 'Biblioteca d\'exercicis d\'hoquei patins per construir sessions.', [
-            'Fitxa: objectiu, categoria, dificultat, durada, material, edat i imatge/vídeo',
-            'Categories: patinatge, control de bola, passades, xuts, defensa, tàctica, preparació física i porters',
-            'Cerca, filtres i preferits',
-        ]);
-    }
-
-    public function trainings(): void
-    {
-        $this->show('trainings', 'Entrenaments', 'dumbbell', 3, 'Planifica les sessions combinant exercicis de la biblioteca.', [
-            'Crear sessions amb diversos exercicis ordenats',
-            'Durada total calculada automàticament',
-            'Vincular la sessió a un entrenament del calendari',
-        ]);
-    }
-
     public function matches(): void
     {
         $this->show('matches', 'Partits', 'trophy', 4, 'Calendari de competició, resultats i historial per temporada.', [

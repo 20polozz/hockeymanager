@@ -31,6 +31,22 @@ final class Migrator
      */
     public static function run(): array
     {
+        // Evita que dues peticions simultànies apliquin la mateixa migració
+        if ((int)Database::value('SELECT GET_LOCK(?, 10)', ['hm_migrations']) !== 1) {
+            return [];
+        }
+        try {
+            return self::runLocked();
+        } finally {
+            Database::value('SELECT RELEASE_LOCK(?)', ['hm_migrations']);
+        }
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private static function runLocked(): array
+    {
         $applied = [];
         foreach (self::pending() as $name) {
             $statements = require self::DIR . '/' . $name . '.php';
@@ -42,6 +58,28 @@ final class Migrator
             $applied[] = $name;
         }
         return $applied;
+    }
+
+    /**
+     * Aplica les migracions pendents si l'app ja està instal·lada.
+     * Un error no atura l'aplicació: queda al registre i es reintenta.
+     */
+    public static function autoRun(): void
+    {
+        if (!Config::isLoaded()) {
+            return;
+        }
+        try {
+            if (!Database::tableExists('users')) {
+                return; // encara no instal·lada: ho fa /install
+            }
+            $applied = self::run();
+            if ($applied) {
+                error_log('[HockeyManager] migracions aplicades: ' . implode(', ', $applied));
+            }
+        } catch (\Throwable $e) {
+            error_log('[HockeyManager] migració fallida: ' . $e->getMessage());
+        }
     }
 
     private static function ensureTable(): void
