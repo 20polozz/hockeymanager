@@ -129,7 +129,7 @@ final class Auth
         return [
             self::ROLE_COORDINATOR => 'Coordinador',
             self::ROLE_COACH       => 'Entrenador',
-            self::ROLE_PLAYER      => 'Jugador',
+            self::ROLE_PLAYER      => 'Jugador/a',
         ];
     }
 }

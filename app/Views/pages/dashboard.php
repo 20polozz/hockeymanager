@@ -33,9 +33,9 @@ $activityIcons = ['attendance' => ['checklist', 'green'], 'callup' => ['clipboar
 <section class="stats-grid" aria-label="Resum">
   <?= component('stat_card', [
       'icon' => 'users', 'tone' => 'navy',
-      'label' => $isPlayer ? 'Jugadors al teu equip' : 'Total de jugadors',
+      'label' => $isPlayer ? 'Jugadors/es al teu equip' : 'Total de jugadors/es',
       'value' => (string)$totalPlayers,
-      'hint' => $isPlayer ? null : 'Jugadors actius',
+      'hint' => $isPlayer ? null : 'Jugadors/es actius',
       'href' => Gate::allows('players.view') ? url('/jugadors') : null,
   ]) ?>
   <?= component('stat_card', [

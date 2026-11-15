@@ -17,8 +17,8 @@
           </div>
         </div>
         <div class="team-figures">
-          <div><strong><?= (int)$t['players'] ?></strong><span>jugadors</span></div>
-          <div><strong><?= (int)$t['goalkeepers'] ?></strong><span>porters</span></div>
+          <div><strong><?= (int)$t['players'] ?></strong><span>jugadors/es</span></div>
+          <div><strong><?= (int)$t['goalkeepers'] ?></strong><span>porters/es</span></div>
           <div><strong><?= count($t['staff']) ?></strong><span>staff</span></div>
         </div>
         <div class="team-staff">
@@ -28,7 +28,7 @@
             <span class="muted small">Sense entrenador assignat</span>
           <?php endif; ?>
         </div>
-        <a class="btn btn-block" href="<?= e(url('/jugadors', ['equip' => (int)$t['id']])) ?>">Veure jugadors <?= icon('arrow-right', 'icon icon-sm') ?></a>
+        <a class="btn btn-block" href="<?= e(url('/jugadors', ['equip' => (int)$t['id']])) ?>">Veure jugadors/es <?= icon('arrow-right', 'icon icon-sm') ?></a>
       </article>
     <?php endforeach; ?>
   </div>

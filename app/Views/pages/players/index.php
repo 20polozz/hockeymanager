@@ -12,10 +12,10 @@ $q = $search !== '' ? ['q' => $search] : [];
 <?php endif; ?>
 
 <div class="page-head">
-  <p class="muted"><?= count($players) ?> jugadors<?= $search !== '' ? ' per a «' . e($search) . '»' : '' ?></p>
+  <p class="muted"><?= count($players) ?> jugadors/es<?= $search !== '' ? ' per a «' . e($search) . '»' : '' ?></p>
   <form class="inline-search" method="get" action="<?= e(url('/jugadors')) ?>">
     <?php if ($activeTeam > 0): ?><input type="hidden" name="equip" value="<?= (int)$activeTeam ?>"><?php endif; ?>
-    <label class="visually-hidden" for="player-search">Cerca jugadors</label>
+    <label class="visually-hidden" for="player-search">Cerca jugadors/es</label>
     <input id="player-search" type="search" name="q" value="<?= e($search) ?>" placeholder="Filtra per nom…" maxlength="80">
     <button class="btn" type="submit"><?= icon('search', 'icon icon-sm') ?> Filtra</button>
   </form>
@@ -25,7 +25,7 @@ $q = $search !== '' ? ['q' => $search] : [];
   <?php if ($players): ?>
     <div class="table-wrap">
       <table class="table">
-        <thead><tr><th scope="col">Dorsal</th><th scope="col">Jugador</th><th scope="col">Posició</th><th scope="col">Equip</th></tr></thead>
+        <thead><tr><th scope="col">Dorsal</th><th scope="col">Jugador/a</th><th scope="col">Posició</th><th scope="col">Equip</th></tr></thead>
         <tbody>
           <?php foreach ($players as $p): ?>
             <tr>
@@ -36,7 +36,7 @@ $q = $search !== '' ? ['q' => $search] : [];
                   <span><?= e($p['first_name'] . ' ' . $p['last_name']) ?></span>
                 </a>
               </td>
-              <td><span class="pill <?= $p['position'] === 'porter' ? 'pill-orange' : 'pill-blue' ?>"><?= $p['position'] === 'porter' ? 'Porter' : 'Jugador' ?></span></td>
+              <td><span class="pill <?= $p['position'] === 'porter' ? 'pill-orange' : 'pill-blue' ?>"><?= $p['position'] === 'porter' ? 'Porter/a' : 'Jugador/a' ?></span></td>
               <td>
                 <span class="team-list">
                   <?php foreach ($p['teams'] as $t): ?>
@@ -50,6 +50,6 @@ $q = $search !== '' ? ['q' => $search] : [];
       </table>
     </div>
   <?php else: ?>
-    <?= component('empty_state', ['icon' => 'users', 'text' => $search !== '' ? 'Cap jugador coincideix amb la cerca.' : 'Encara no hi ha jugadors en aquests equips.']) ?>
+    <?= component('empty_state', ['icon' => 'users', 'text' => $search !== '' ? 'Cap jugador/a coincideix amb la cerca.' : 'Encara no hi ha jugadors/es en aquests equips.']) ?>
   <?php endif; ?>
 </section>

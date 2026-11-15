@@ -19,7 +19,7 @@ final class PlayerController extends Controller
             $teamId = 0;
         }
         $this->view('pages/players/index', [
-            'pageTitle'  => 'Jugadors',
+            'pageTitle'  => 'Jugadors/es',
             'activeNav'  => 'players',
             'search'     => $search,
             'teams'      => TeamScope::teams(),

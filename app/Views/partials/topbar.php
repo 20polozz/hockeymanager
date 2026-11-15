@@ -45,7 +45,7 @@ if ($user) {
   <form class="search" action="<?= e(url('/cerca')) ?>" method="get" role="search">
     <label class="visually-hidden" for="global-search">Cerca</label>
     <?= icon('search', 'icon icon-sm search-icon') ?>
-    <input id="global-search" type="search" name="q" placeholder="Cerca jugadors o equips…" value="<?= e($_GET['q'] ?? '') ?>" minlength="2" maxlength="80" autocomplete="off">
+    <input id="global-search" type="search" name="q" placeholder="Cerca jugadors/es o equips…" value="<?= e($_GET['q'] ?? '') ?>" minlength="2" maxlength="80" autocomplete="off">
   </form>
 
   <div class="topbar-actions">

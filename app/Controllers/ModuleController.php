@@ -17,7 +17,7 @@ final class ModuleController extends Controller
             'Marcar presents, absents, absències justificades i retards',
             'Observacions per jugador',
             'Percentatge per jugador i per equip',
-            'Historial mensual i jugadors amb més absències',
+            'Historial mensual i jugadors/es amb més absències',
         ]);
     }
 
@@ -60,8 +60,8 @@ final class ModuleController extends Controller
 
     public function callups(): void
     {
-        $this->show('callups', 'Convocatòries', 'clipboard', 4, 'L\'entrenador convoca i els jugadors confirmen des del mòbil.', [
-            'Seleccionar partit i jugadors convocats',
+        $this->show('callups', 'Convocatòries', 'clipboard', 4, 'L\'entrenador convoca i els jugadors/es confirmen des del mòbil.', [
+            'Seleccionar partit i jugadors/es convocats',
             'Confirmar o rebutjar la convocatòria (jugador)',
             'Seguiment de confirmats, rebutjats i pendents',
             'Separació entre la resposta a la convocatòria i l\'assistència real al partit',

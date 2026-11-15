@@ -7,7 +7,7 @@
   <p class="muted">Resultats per a «<?= e($q) ?>»</p>
   <div class="dash-grid">
     <section class="panel">
-      <?= component('panel_head', ['title' => 'Jugadors']) ?>
+      <?= component('panel_head', ['title' => 'Jugadors/es']) ?>
       <?php if ($players): ?>
         <ul class="plain-list">
           <?php foreach ($players as $p): ?>
@@ -15,7 +15,7 @@
           <?php endforeach; ?>
         </ul>
       <?php else: ?>
-        <?= component('empty_state', ['icon' => 'users', 'text' => 'Cap jugador trobat.']) ?>
+        <?= component('empty_state', ['icon' => 'users', 'text' => 'Cap jugador/a trobat.']) ?>
       <?php endif; ?>
     </section>
     <section class="panel">

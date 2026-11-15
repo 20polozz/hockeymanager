@@ -11,7 +11,7 @@ $attended = $attendance['present'] + $attendance['retard'];
   <div class="profile-hero-body">
     <h2 class="module-title"><?= e($name) ?></h2>
     <div class="chips">
-      <span class="pill <?= $player['position'] === 'porter' ? 'pill-orange' : 'pill-blue' ?>"><?= $player['position'] === 'porter' ? 'Porter' : 'Jugador de camp' ?></span>
+      <span class="pill <?= $player['position'] === 'porter' ? 'pill-orange' : 'pill-blue' ?>"><?= $player['position'] === 'porter' ? 'Porter/a' : 'Jugador/a de camp' ?></span>
       <?php foreach ($current as $c): ?>
         <span class="pill pill-muted"><span class="team-dot" style="--team: <?= e($c['color']) ?>"></span><?= e($c['team_name']) ?><?= $c['dorsal'] !== null ? ' · #' . (int)$c['dorsal'] : '' ?></span>
       <?php endforeach; ?>

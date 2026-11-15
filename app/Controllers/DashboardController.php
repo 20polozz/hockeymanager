@@ -64,7 +64,7 @@ final class DashboardController extends Controller
             ['can' => 'calendar.view',   'path' => '/calendari',   'icon' => 'calendar',  'tone' => 'blue',   'title' => 'Calendari',     'text' => 'Entrenaments, partits i esdeveniments', 'meta' => null],
             ['can' => 'exercises.view',  'path' => '/exercicis',   'icon' => 'cone',      'tone' => 'orange', 'title' => 'Exercicis',     'text' => 'Biblioteca d\'exercicis i sessions', 'meta' => null],
             ['can' => 'matches.view',    'path' => '/partits',     'icon' => 'trophy',    'tone' => 'amber',  'title' => 'Partits',       'text' => 'Resultats, calendari de competició', 'meta' => null],
-            ['can' => 'players.view',    'path' => '/jugadors',    'icon' => 'users',     'tone' => 'navy',   'title' => 'Jugadors',      'text' => 'Fitxes i informació individual', 'meta' => null],
+            ['can' => 'players.view',    'path' => '/jugadors',    'icon' => 'users',     'tone' => 'navy',   'title' => 'Jugadors/es',      'text' => 'Fitxes i informació individual', 'meta' => null],
             ['can' => 'players.own',     'path' => '/perfil',      'icon' => 'user',      'tone' => 'navy',   'title' => 'El meu perfil', 'text' => 'Fitxa, equip i historial', 'meta' => null],
             ['can' => 'callups.view',    'path' => '/convocatories','icon' => 'clipboard','tone' => 'violet', 'title' => 'Convocatòries', 'text' => Gate::allows('callups.manage') ? 'Crea-les i segueix les confirmacions' : 'Consulta i confirma la teva assistència', 'meta' => null],
             ['can' => 'stats.view',      'path' => '/estadistiques','icon' => 'chart',    'tone' => 'teal',   'title' => 'Estadístiques', 'text' => 'Rendiment individual i col·lectiu', 'meta' => null],
