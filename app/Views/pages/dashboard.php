@@ -3,7 +3,7 @@
  * @var bool $isPlayer @var bool $hasTeams @var int $totalPlayers
  * @var array $attendance @var array|null $nextTraining @var array|null $nextMatch
  * @var array $quickCards @var array $upcoming @var array $results @var array $activity
- * @var array $attendanceTeams @var array $pendingCallups
+ * @var array $attendanceTeams
  */
 use App\Core\Auth;
 use App\Core\Gate;
@@ -79,44 +79,6 @@ $activityIcons = ['attendance' => ['checklist', 'green'], 'callup' => ['clipboar
       </ul>
     <?php else: ?>
       <?= component('empty_state', ['icon' => 'calendar', 'text' => 'No hi ha esdeveniments programats.']) ?>
-    <?php endif; ?>
-  </section>
-
-  <section class="panel">
-    <?= component('panel_head', ['title' => 'Convocatòries pendents', 'href' => url('/convocatories'), 'linkText' => 'Convocatòries']) ?>
-    <?php if ($pendingCallups): ?>
-      <ul class="callup-list">
-        <?php foreach ($pendingCallups as $c): ?>
-          <li class="callup-item">
-            <div class="callup-top">
-              <span class="team-dot" style="--team: <?= e($c['color']) ?>"></span>
-              <strong><?= e($c['team_name']) ?> <?= $c['is_home'] ? 'vs' : '@' ?> <?= e($c['opponent']) ?></strong>
-              <span class="muted"><?= e(fdate($c['starts_at'], 'short')) ?></span>
-            </div>
-            <?php if (isset($c['total'])):
-                $total = max(1, (int)$c['total']); ?>
-              <div class="stack-bar" role="img" aria-label="<?= (int)$c['confirmed'] ?> confirmats, <?= (int)$c['declined'] ?> rebutjats, <?= (int)$c['pending'] ?> pendents">
-                <span class="seg seg-green" style="width: <?= round((int)$c['confirmed'] / $total * 100, 1) ?>%"></span>
-                <span class="seg seg-red" style="width: <?= round((int)$c['declined'] / $total * 100, 1) ?>%"></span>
-                <span class="seg seg-muted" style="width: <?= round((int)$c['pending'] / $total * 100, 1) ?>%"></span>
-              </div>
-              <div class="legend">
-                <span><i class="dot dot-green"></i><?= (int)$c['confirmed'] ?> confirmats</span>
-                <span><i class="dot dot-red"></i><?= (int)$c['declined'] ?> rebutjats</span>
-                <span><i class="dot dot-muted"></i><?= (int)$c['pending'] ?> pendents</span>
-              </div>
-            <?php else: ?>
-              <p class="muted small">
-                <?= icon('pin', 'icon icon-xs') ?> <?= e($c['location'] ?: 'Pista per confirmar') ?>
-                <?php if (!empty($c['meeting_at'])): ?> · Citació <?= e(fdate($c['meeting_at'], 'time')) ?><?php endif; ?>
-              </p>
-              <a class="btn btn-sm btn-primary" href="<?= e(url('/convocatories')) ?>">Respon la convocatòria</a>
-            <?php endif; ?>
-          </li>
-        <?php endforeach; ?>
-      </ul>
-    <?php else: ?>
-      <?= component('empty_state', ['icon' => 'clipboard', 'text' => 'No hi ha cap resposta pendent.']) ?>
     <?php endif; ?>
   </section>
 

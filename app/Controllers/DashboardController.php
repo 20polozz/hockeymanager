@@ -25,9 +25,6 @@ final class DashboardController extends Controller
             ];
         }
 
-        $pendingCallups = $isPlayer
-            ? (!empty($user['player_id']) ? DashboardRepository::pendingCallupsForPlayer((int)$user['player_id']) : [])
-            : $repo->pendingCallups();
 
         $this->view('pages/dashboard', [
             'pageTitle'       => 'Dashboard',
@@ -43,7 +40,6 @@ final class DashboardController extends Controller
             'results'         => $repo->lastResults(5),
             'activity'        => $isPlayer ? [] : ActivityLog::recent(TeamScope::ids(), Auth::isManager(), 6),
             'attendanceTeams' => $isPlayer ? [] : $repo->attendanceByTeam(30),
-            'pendingCallups'  => $pendingCallups,
         ]);
     }
 

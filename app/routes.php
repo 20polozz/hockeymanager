@@ -87,11 +87,9 @@ $router->get('/partits/{id}/acta', 'MatchController@sheet', ['can' => 'matches.m
 $router->post('/partits/{id}/acta', 'MatchController@saveSheet', ['can' => 'matches.manage']);
 
 // Convocatòries
-$router->get('/convocatories', 'CallupController@index', ['can' => 'callups.view']);
 $router->get('/partits/{id}/convocatoria', 'CallupController@edit', ['can' => 'callups.manage']);
 $router->post('/partits/{id}/convocatoria', 'CallupController@save', ['can' => 'callups.manage']);
 $router->post('/partits/{id}/convocatoria/eliminar', 'CallupController@destroy', ['can' => 'callups.manage']);
-$router->post('/convocatories/{id}/resposta', 'CallupController@respond', ['can' => 'callups.respond']);
 
 // Usuaris
 $router->get('/usuaris', 'UserController@index', ['can' => 'users.manage']);

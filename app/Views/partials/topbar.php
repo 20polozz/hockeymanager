@@ -5,34 +5,10 @@
  */
 use App\Core\Auth;
 use App\Core\Gate;
-use App\Core\TeamScope;
-use App\Repositories\DashboardRepository;
 
 $user = Auth::user();
 
-// Notificacions: convocatòries pendents de resposta
 $notifications = [];
-if ($user) {
-    if (Auth::hasRole(Auth::ROLE_PLAYER)) {
-        if (!empty($user['player_id'])) {
-            foreach (DashboardRepository::pendingCallupsForPlayer((int)$user['player_id']) as $c) {
-                $notifications[] = [
-                    'icon' => 'clipboard', 'tone' => 'violet', 'href' => url('/convocatories'),
-                    'title' => 'Convocatòria pendent de resposta',
-                    'text' => $c['team_name'] . ' ' . ($c['is_home'] ? 'vs' : '@') . ' ' . $c['opponent'] . ' · ' . fdate($c['starts_at'], 'short'),
-                ];
-            }
-        }
-    } elseif (Gate::allows('callups.manage')) {
-        foreach ((new DashboardRepository(TeamScope::ids()))->pendingCallups() as $c) {
-            $notifications[] = [
-                'icon' => 'clipboard', 'tone' => 'orange', 'href' => url('/convocatories'),
-                'title' => (int)$c['pending'] . ' respostes pendents',
-                'text' => $c['team_name'] . ' ' . ($c['is_home'] ? 'vs' : '@') . ' ' . $c['opponent'] . ' · ' . fdate($c['starts_at'], 'short'),
-            ];
-        }
-    }
-}
 ?>
 <header class="topbar">
   <button type="button" class="icon-btn menu-btn" data-sidebar-open aria-label="Obre el menú" aria-controls="sidebar"><?= icon('menu') ?></button>
