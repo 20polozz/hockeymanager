@@ -48,7 +48,7 @@ final class AttendanceController extends Controller
             'pageTitle' => 'Passar llista',
             'activeNav' => 'attendance',
             'event'     => $event,
-            'sheet'     => AttendanceRepository::sheet($eventId, (int)$event['team_id']),
+            'sheet'     => AttendanceRepository::sheet($event),
         ]);
     }
 
@@ -57,7 +57,7 @@ final class AttendanceController extends Controller
         $event = $this->training($eventId);
         $allowed = array_map(function (array $r): int {
             return (int)$r['id'];
-        }, AttendanceRepository::sheet($eventId, (int)$event['team_id']));
+        }, AttendanceRepository::sheet($event));
 
         $statuses = is_array($_POST['status'] ?? null) ? $_POST['status'] : [];
         $notes = is_array($_POST['observation'] ?? null) ? $_POST['observation'] : [];
@@ -70,7 +70,7 @@ final class AttendanceController extends Controller
             ];
         }
         $saved = AttendanceRepository::save($eventId, $rows);
-        ActivityLog::add('attendance', 'Ha passat llista de «' . $event['title'] . '» (' . date('d/m', strtotime((string)$event['starts_at'])) . ')', (int)$event['team_id']);
+        ActivityLog::add('attendance', 'Ha passat llista de «' . $event['title'] . '» (' . date('d/m', strtotime((string)$event['starts_at'])) . ')', $event['team_id'] !== null ? (int)$event['team_id'] : null);
         flash('success', 'Llista desada: ' . $saved . ' jugadors/es marcats.');
         redirect('/calendari/' . $eventId);
     }
@@ -112,7 +112,7 @@ final class AttendanceController extends Controller
     private function training(int $id): array
     {
         $event = EventRepository::find($id);
-        if (!$event || $event['type'] !== 'entrenament' || !TeamScope::canAccess((int)$event['team_id'])) {
+        if (!$event || !in_array($event['type'], EventRepository::TRAINING_TYPES, true) || !EventRepository::canAccess($event)) {
             throw new HttpException(404);
         }
         return $event;

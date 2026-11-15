@@ -41,7 +41,7 @@ final class CalendarController extends Controller
                 $next = (clone $first)->modify('+1 month');
         }
 
-        $items = EventRepository::calendarItems(team_filter_ids(), $from->format('Y-m-d 00:00:00'), $to->format('Y-m-d 00:00:00'));
+        $items = EventRepository::calendarItems(team_filter_ids(), $from->format('Y-m-d 00:00:00'), $to->format('Y-m-d 00:00:00'), team_filter());
         $byDay = [];
         foreach ($items as $it) {
             $byDay[substr((string)$it['starts_at'], 0, 10)][] = $it;
@@ -72,7 +72,7 @@ final class CalendarController extends Controller
             'activeNav'  => 'calendar',
             'event'      => $event,
             'canManage'  => Gate::allows('calendar.manage'),
-            'canAttend'  => Gate::allows('attendance.manage') && $event['type'] === 'entrenament',
+            'canAttend'  => Gate::allows('attendance.manage') && in_array($event['type'], EventRepository::TRAINING_TYPES, true),
             'attendance' => \App\Repositories\AttendanceRepository::summaryForEvent($id),
             'sessions'   => class_exists(\App\Repositories\SessionRepository::class) ? \App\Repositories\SessionRepository::forEvent($id) : [],
         ]);
@@ -84,18 +84,18 @@ final class CalendarController extends Controller
         $this->form(null, [
             'date' => $date->format('Y-m-d'),
             'team_id' => (string)team_filter(),
-            'type' => ($_GET['tipus'] ?? '') === 'especial' ? 'especial' : 'entrenament',
+            'type' => isset(EventRepository::TYPES[$_GET['tipus'] ?? '']) ? (string)$_GET['tipus'] : 'entrenament',
         ]);
     }
 
     public function store(): void
     {
-        [$d, $repeat, $errors] = EventRepository::validate($_POST, TeamScope::ids(), true);
+        [$d, $repeat, $participants, $errors] = EventRepository::validate($_POST, TeamScope::ids(), true);
         if ($errors) {
             $this->fail($errors, '/calendari/nou');
         }
-        $id = EventRepository::create($d, $repeat);
-        ActivityLog::add('event', 'Ha programat «' . $d['title'] . '»' . ($repeat ? ' (cada setmana)' : ''), (int)$d['team_id']);
+        $id = EventRepository::create($d, $repeat, $participants);
+        ActivityLog::add('event', 'Ha programat «' . $d['title'] . '»' . ($repeat ? ' (cada setmana)' : ''), $d['team_id'] ?: null);
         forget_input();
         flash('success', $repeat ? 'Esdeveniments creats cada setmana fins al ' . date('d/m/Y', strtotime($repeat)) . '.' : 'Esdeveniment creat.');
         redirect('/calendari/' . $id);
@@ -105,6 +105,8 @@ final class CalendarController extends Controller
     {
         $event = $this->findOr404($id);
         $this->form($event, [
+            'team_id'    => $event['team_id'] === null ? 'club' : (string)$event['team_id'],
+            'who'        => $event['participants'] ? 'llista' : 'tots',
             'date'       => substr((string)$event['starts_at'], 0, 10),
             'start_time' => substr((string)$event['starts_at'], 11, 5),
             'end_time'   => $event['ends_at'] ? substr((string)$event['ends_at'], 11, 5) : '',
@@ -114,12 +116,12 @@ final class CalendarController extends Controller
     public function update(int $id): void
     {
         $this->findOr404($id);
-        [$d, , $errors] = EventRepository::validate($_POST, TeamScope::ids(), false);
+        [$d, , $participants, $errors] = EventRepository::validate($_POST, TeamScope::ids(), false);
         if ($errors) {
             $this->fail($errors, '/calendari/' . $id . '/editar');
         }
-        EventRepository::update($id, $d);
-        ActivityLog::add('event', 'Ha modificat «' . $d['title'] . '»', (int)$d['team_id']);
+        EventRepository::update($id, $d, $participants);
+        ActivityLog::add('event', 'Ha modificat «' . $d['title'] . '»', $d['team_id'] ?: null);
         forget_input();
         flash('success', 'Esdeveniment actualitzat.');
         redirect('/calendari/' . $id);
@@ -128,9 +130,10 @@ final class CalendarController extends Controller
     public function destroy(int $id): void
     {
         $event = $this->findOr404($id);
-        EventRepository::delete($id);
-        ActivityLog::add('event', 'Ha eliminat «' . $event['title'] . '» del ' . date('d/m', strtotime((string)$event['starts_at'])), (int)$event['team_id']);
-        flash('success', 'Esdeveniment eliminat.');
+        $following = ($_POST['scope'] ?? '') === 'serie';
+        $n = EventRepository::delete($event, $following);
+        ActivityLog::add('event', 'Ha eliminat «' . $event['title'] . '» del ' . date('d/m', strtotime((string)$event['starts_at'])) . ($n > 1 ? ' i els següents de la sèrie' : ''), $event['team_id'] !== null ? (int)$event['team_id'] : null);
+        flash('success', $n > 1 ? $n . ' esdeveniments eliminats.' : 'Esdeveniment eliminat.');
         redirect('/calendari?' . http_build_query(['data' => substr((string)$event['starts_at'], 0, 10)]));
     }
 
@@ -146,6 +149,7 @@ final class CalendarController extends Controller
             'event'     => $event,
             'defaults'  => $defaults,
             'teams'     => TeamScope::teams(),
+            'players'   => EventRepository::selectablePlayers(),
         ]);
         forget_input();
     }
@@ -156,7 +160,7 @@ final class CalendarController extends Controller
     private function findOr404(int $id): array
     {
         $event = EventRepository::find($id);
-        if (!$event || !TeamScope::canAccess((int)$event['team_id'])) {
+        if (!$event || !EventRepository::canAccess($event)) {
             throw new HttpException(404);
         }
         return $event;

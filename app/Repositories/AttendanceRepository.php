@@ -24,23 +24,52 @@ final class AttendanceRepository
     }
 
     /**
-     * Plantilla de l'equip amb el que s'hagi marcat en aquest entrenament.
-     * També hi surten jugadors/es d'altres equips que ja tinguin assistència
-     * marcada en aquest entrenament (per exemple, si van pujar a entrenar).
+     * Llista per passar llista:
+     *  - si l'esdeveniment té llista pròpia (p. ex. gimnàs): aquelles jugadores
+     *  - si és de tot el club: totes les jugadores actives dels equips de la temporada
+     *  - si és d'un equip: la plantilla de l'equip
+     * Sempre s'hi afegeix qui ja tingui assistència marcada en aquest esdeveniment.
      * @return array<int,array<string,mixed>>
      */
-    public static function sheet(int $eventId, int $teamId): array
+    public static function sheet(array $event): array
     {
+        $eventId = (int)$event['id'];
+        $hasList = (bool)Database::value('SELECT 1 FROM event_players WHERE event_id = ? LIMIT 1', [$eventId]);
+        if ($hasList) {
+            $in = 'EXISTS (SELECT 1 FROM event_players ep WHERE ep.event_id = ? AND ep.player_id = p.id)';
+            $params = [$eventId];
+        } elseif ($event['team_id'] === null) {
+            $in = 'EXISTS (SELECT 1 FROM team_players tp2 JOIN teams t2 ON t2.id = tp2.team_id JOIN seasons s2 ON s2.id = t2.season_id AND s2.is_current = 1
+                           WHERE tp2.player_id = p.id AND tp2.left_at IS NULL)';
+            $params = [];
+        } else {
+            $in = 'EXISTS (SELECT 1 FROM team_players tp2 WHERE tp2.player_id = p.id AND tp2.team_id = ? AND tp2.left_at IS NULL)';
+            $params = [(int)$event['team_id']];
+        }
         return Database::all(
-            "SELECT p.id, p.first_name, p.last_name, p.position, tp.dorsal,
-                    a.status, a.observation, (tp.id IS NULL) AS guest
+            "SELECT p.id, p.first_name, p.last_name, p.position,
+                    (SELECT tp.dorsal FROM team_players tp WHERE tp.player_id = p.id AND tp.team_id = ? AND tp.left_at IS NULL LIMIT 1) AS dorsal,
+                    a.status, a.observation, (NOT ($in)) AS guest
              FROM players p
-             LEFT JOIN team_players tp ON tp.player_id = p.id AND tp.team_id = ? AND tp.left_at IS NULL
              LEFT JOIN attendance a ON a.player_id = p.id AND a.event_id = ?
-             WHERE p.active = 1 AND (tp.id IS NOT NULL OR a.id IS NOT NULL)
-             ORDER BY guest, p.position = 'porter' DESC, tp.dorsal IS NULL, tp.dorsal, p.last_name, p.first_name",
-            [$teamId, $eventId]
+             WHERE (p.active = 1 AND $in) OR a.id IS NOT NULL
+             ORDER BY guest, p.position = 'porter' DESC, p.last_name, p.first_name",
+            array_merge([(int)($event['team_id'] ?? 0)], $params, [$eventId], $params)
         );
+    }
+
+    /**
+     * Condició: assistència d'esdeveniments dels equips, o de club per a jugadores d'aquests equips.
+     * @param array<int,int> $teamIds
+     * @return array{0:string,1:array<int,int>}
+     */
+    public static function scope(array $teamIds): array
+    {
+        $in = Database::in($teamIds);
+        return [
+            "(e.team_id IN ($in) OR (e.team_id IS NULL AND a.player_id IN (SELECT tps.player_id FROM team_players tps WHERE tps.team_id IN ($in) AND tps.left_at IS NULL)))",
+            array_merge($teamIds, $teamIds),
+        ];
     }
 
     /**
@@ -97,10 +126,10 @@ final class AttendanceRepository
              FROM attendance a
              JOIN events e ON e.id = a.event_id
              JOIN players p ON p.id = a.player_id AND p.active = 1
-             WHERE e.team_id IN (" . Database::in($teamIds) . ") AND e.starts_at >= ? AND e.starts_at < ?
+             WHERE " . self::scope($teamIds)[0] . " AND e.starts_at >= ? AND e.starts_at < ?
              GROUP BY p.id, p.first_name, p.last_name
              ORDER BY p.last_name, p.first_name",
-            array_merge($teamIds, [$from, $to])
+            array_merge(self::scope($teamIds)[1], [$from, $to])
         );
         foreach ($rows as &$r) {
             $r['percent'] = (int)$r['total'] > 0 ? (int)round(((int)$r['present'] + (int)$r['retard']) / (int)$r['total'] * 100) : null;
@@ -118,17 +147,20 @@ final class AttendanceRepository
         if (!$teamIds) {
             return [];
         }
-        $rows = Database::all(
-            "SELECT t.id, t.name, t.color, COUNT(a.id) AS total,
-                    SUM(a.status IN ('present','retard')) AS attended,
-                    COUNT(DISTINCT e.id) AS sessions
-             FROM teams t
-             LEFT JOIN events e ON e.team_id = t.id AND e.type = 'entrenament' AND e.starts_at >= ? AND e.starts_at < ?
-             LEFT JOIN attendance a ON a.event_id = e.id
-             WHERE t.id IN (" . Database::in($teamIds) . ")
-             GROUP BY t.id, t.name, t.color ORDER BY t.name",
-            array_merge([$from, $to], $teamIds)
-        );
+        $rows = Database::all('SELECT id, name, color FROM teams WHERE id IN (' . Database::in($teamIds) . ') ORDER BY name', $teamIds);
+        foreach ($rows as &$r) {
+            [$w, $p] = self::scope([(int)$r['id']]);
+            $agg = Database::first(
+                "SELECT COUNT(a.id) AS total, SUM(a.status IN ('present','retard')) AS attended, COUNT(DISTINCT e.id) AS sessions
+                 FROM attendance a JOIN events e ON e.id = a.event_id
+                 WHERE $w AND e.starts_at >= ? AND e.starts_at < ?",
+                array_merge($p, [$from, $to])
+            );
+            $r['total'] = (int)$agg['total'];
+            $r['attended'] = (int)$agg['attended'];
+            $r['sessions'] = (int)$agg['sessions'];
+        }
+        unset($r);
         foreach ($rows as &$r) {
             $r['percent'] = (int)$r['total'] > 0 ? (int)round((int)$r['attended'] / (int)$r['total'] * 100) : null;
         }
@@ -149,9 +181,9 @@ final class AttendanceRepository
             foreach (Database::all(
                 "SELECT DATE_FORMAT(e.starts_at, '%Y-%m') AS ym, COUNT(a.id) AS total, SUM(a.status IN ('present','retard')) AS attended
                  FROM attendance a JOIN events e ON e.id = a.event_id
-                 WHERE e.team_id IN (" . Database::in($teamIds) . ") AND e.starts_at >= ?
+                 WHERE " . self::scope($teamIds)[0] . " AND e.starts_at >= ?
                  GROUP BY ym",
-                array_merge($teamIds, [$start->format('Y-m-d H:i:s')])
+                array_merge(self::scope($teamIds)[1], [$start->format('Y-m-d H:i:s')])
             ) as $r) {
                 $data[$r['ym']] = $r;
             }
@@ -176,9 +208,9 @@ final class AttendanceRepository
     public static function playerHistory(int $playerId, int $limit = 12): array
     {
         return Database::all(
-            'SELECT a.status, a.observation, e.id AS event_id, e.title, e.starts_at, t.name AS team_name, t.color
-             FROM attendance a JOIN events e ON e.id = a.event_id JOIN teams t ON t.id = e.team_id
-             WHERE a.player_id = ? ORDER BY e.starts_at DESC LIMIT ?',
+            "SELECT a.status, a.observation, e.id AS event_id, e.title, e.starts_at, COALESCE(t.name, e.title) AS team_name, COALESCE(t.color, '#64748b') AS color
+             FROM attendance a JOIN events e ON e.id = a.event_id LEFT JOIN teams t ON t.id = e.team_id
+             WHERE a.player_id = ? ORDER BY e.starts_at DESC LIMIT ?",
             [$playerId, $limit]
         );
     }

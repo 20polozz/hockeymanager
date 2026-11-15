@@ -886,3 +886,8 @@ a.bar-label { color: var(--text); }
 .settings-links { display: flex; flex-wrap: wrap; gap: 8px; }
 .pill-navy { background: var(--navy-bg); color: var(--navy); } .pill-violet { background: var(--violet-bg); color: var(--violet); }
 .row-actions-start { justify-content: flex-start; }
+.kind-gimnas.cal-item { background: var(--violet-bg); border-color: var(--violet); }
+.cal-dots i.kind-gimnas { background: var(--violet); }
+.agenda-item.kind-gimnas { border-left-color: var(--violet); }
+.name-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.name-chips li { padding: 4px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: .86rem; }

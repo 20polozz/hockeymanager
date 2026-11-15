@@ -34,10 +34,10 @@ final class SessionController extends Controller
         $eventId = (int)($_GET['esdeveniment'] ?? 0);
         if ($eventId > 0) {
             $ev = EventRepository::find($eventId);
-            if ($ev && $ev['type'] === 'entrenament' && TeamScope::canAccess((int)$ev['team_id'])) {
+            if ($ev && $ev['type'] === 'entrenament' && EventRepository::canAccess($ev)) {
                 $defaults = [
                     'event_id' => (string)$eventId,
-                    'team_id'  => (string)$ev['team_id'],
+                    'team_id'  => (string)($ev['team_id'] ?? 0),
                     'title'    => 'Sessió ' . $ev['team_name'] . ' · ' . date('d/m', strtotime((string)$ev['starts_at'])),
                 ];
             }

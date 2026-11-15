@@ -1,5 +1,5 @@
 <?php
-/** @var array|null $event @var array $defaults @var array $teams */
+/** @var array|null $event @var array $defaults @var array $teams @var array $players */
 $isEdit = $event !== null;
 $v = function (string $key) use ($event, $defaults): string {
     return form_val($event, $key, $defaults[$key] ?? '');
@@ -15,22 +15,43 @@ $back = $isEdit ? '/calendari/' . (int)$event['id'] : '/calendari';
       <fieldset class="field">
         <legend>Tipus</legend>
         <div class="segmented">
-          <label><input type="radio" name="type" value="entrenament"<?= $type !== 'especial' ? ' checked' : '' ?>><span>Entrenament</span></label>
-          <label><input type="radio" name="type" value="especial"<?= $type === 'especial' ? ' checked' : '' ?>><span>Esdeveniment especial</span></label>
+          <label><input type="radio" name="type" value="entrenament"<?= $type === 'entrenament' ? ' checked' : '' ?>><span>Entrenament</span></label>
+          <label><input type="radio" name="type" value="gimnas"<?= $type === 'gimnas' ? ' checked' : '' ?>><span>Gimnàs</span></label>
+          <label><input type="radio" name="type" value="especial"<?= $type === 'especial' ? ' checked' : '' ?>><span>Especial</span></label>
         </div>
         <small class="muted">Els partits es creen des de l'apartat Partits.</small>
       </fieldset>
 
-      <label class="field"><span>Equip</span>
+      <label class="field"><span>Per a</span>
         <select name="team_id" required>
-          <option value="">Tria un equip…</option>
+          <option value="">Tria…</option>
+          <option value="club"<?= $v('team_id') === 'club' ? ' selected' : '' ?>>Tot el club</option>
           <?php foreach ($teams as $t): ?>
             <option value="<?= (int)$t['id'] ?>"<?= $v('team_id') === (string)$t['id'] ? ' selected' : '' ?>><?= e($t['name']) ?></option>
           <?php endforeach; ?>
         </select></label>
 
-      <label class="field"><span>Títol <small class="muted">(per als entrenaments, si el deixes buit es posa «Entrenament + equip»)</small></span>
-        <input type="text" name="title" value="<?= e($v('title')) ?>" maxlength="120" placeholder="Ex.: Entrenament de tècnica"></label>
+      <?php $who = $v('who') ?: 'tots'; $oldP = old_array('participants');
+            $checkedP = $oldP !== null ? array_map('intval', $oldP) : array_map('intval', array_column($event['participants'] ?? [], 'id')); ?>
+      <fieldset class="field">
+        <legend>Qui hi ha d'anar</legend>
+        <div class="segmented">
+          <label><input type="radio" name="who" value="tots"<?= $who !== 'llista' ? ' checked' : '' ?> data-who><span>Tot l'equip / tot el club</span></label>
+          <label><input type="radio" name="who" value="llista"<?= $who === 'llista' ? ' checked' : '' ?> data-who><span>Només unes jugadores</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="field" id="who-list"<?= $who === 'llista' ? '' : ' hidden' ?>>
+        <legend>Jugadores <small class="muted" data-pick-count data-pick-label="seleccionades"></small></legend>
+        <div class="pick-list">
+          <?php foreach ($players as $p): $on = in_array((int)$p['id'], $checkedP, true); ?>
+            <label class="pick<?= $on ? ' is-on' : '' ?>"><input type="checkbox" name="participants[]" value="<?= (int)$p['id'] ?>"<?= $on ? ' checked' : '' ?> data-pick>
+              <span class="pick-name"><?= e($p['first_name'] . ' ' . $p['last_name']) ?> <small class="muted"><?= e((string)$p['teams']) ?></small></span></label>
+          <?php endforeach; ?>
+        </div>
+      </fieldset>
+
+      <label class="field"><span>Títol <small class="muted">(si el deixes buit: «Entrenament + equip» o «Gimnàs»)</small></span>
+        <input type="text" name="title" value="<?= e($v('title')) ?>" maxlength="120" placeholder="Ex.: Gym grup 1"></label>
 
       <div class="field-row field-row-3">
         <label class="field"><span>Data</span>

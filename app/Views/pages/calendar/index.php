@@ -11,7 +11,7 @@ $link = function (string $v, DateTime $d) use ($base): string {
     return url('/calendari', $base + ['vista' => $v, 'data' => $d->format('Y-m-d')]);
 };
 $today = date('Y-m-d');
-$kinds = ['entrenament' => 'Entrenament', 'partit' => 'Partit', 'especial' => 'Especial'];
+$kinds = ['entrenament' => 'Entrenament', 'partit' => 'Partit', 'especial' => 'Especial', 'gimnas' => 'Gimnàs'];
 $itemUrl = function (array $it): string {
     return $it['kind'] === 'partit' ? url('/partits/' . (int)$it['id']) : url('/calendari/' . (int)$it['id']);
 };
@@ -51,6 +51,7 @@ switch ($calView) {
 <div class="cal-legend">
   <span><i class="dot dot-blue"></i>Entrenament</span>
   <span><i class="dot dot-green"></i>Partit</span>
+  <span><i class="dot dot-violet"></i>Gimnàs</span>
   <span><i class="dot dot-orange"></i>Esdeveniment especial</span>
 </div>
 
@@ -101,10 +102,10 @@ switch ($calView) {
                   <span class="agenda-time"><?= e(fdate($it['starts_at'], 'time')) ?><?php if ($it['ends_at']): ?><small><?= e(fdate($it['ends_at'], 'time')) ?></small><?php endif; ?></span>
                   <span class="agenda-body">
                     <strong><?= e($it['title']) ?></strong>
-                    <span class="muted small"><span class="team-dot" style="--team: <?= e($it['color']) ?>"></span><?= e($it['team_name']) ?><?= $it['location'] ? ' · ' . e($it['location']) : '' ?></span>
+                    <span class="muted small"><span class="team-dot" style="--team: <?= e($it['color']) ?>"></span><?= (int)$it['participants'] > 0 && $it['team_id'] === null ? (int)$it['participants'] . ' jugadores' : e($it['team_name']) ?><?= $it['location'] ? ' · ' . e($it['location']) : '' ?></span>
                   </span>
-                  <span class="pill pill-<?= $it['kind'] === 'partit' ? 'green' : ($it['kind'] === 'especial' ? 'orange' : 'blue') ?>"><?= e($kinds[$it['kind']] ?? '') ?></span>
-                  <?php if ($it['kind'] === 'entrenament' && (int)$it['attendance_count'] > 0): ?>
+                  <span class="pill pill-<?= ['partit' => 'green', 'especial' => 'orange', 'gimnas' => 'violet'][$it['kind']] ?? 'blue' ?>"><?= e($kinds[$it['kind']] ?? '') ?></span>
+                  <?php if (in_array($it['kind'], ['entrenament', 'gimnas'], true) && (int)$it['attendance_count'] > 0): ?>
                     <span class="pill pill-muted" title="Llista passada"><?= icon('check', 'icon icon-xs') ?> Llista</span>
                   <?php endif; ?>
                 </a>

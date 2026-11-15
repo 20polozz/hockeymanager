@@ -55,13 +55,14 @@ final class DashboardRepository
         if ($this->isEmpty()) {
             return ['percent' => null, 'sessions' => 0];
         }
+        [$w, $p] = AttendanceRepository::scope($this->teamIds);
         $row = Database::first(
             "SELECT COUNT(*) AS total,
                     SUM(a.status IN ('present','retard')) AS attended,
                     COUNT(DISTINCT a.event_id) AS sessions
              FROM attendance a JOIN events e ON e.id = a.event_id
-             WHERE e.team_id IN ($this->in) AND e.starts_at BETWEEN ? AND ?",
-            array_merge($this->teamIds, [date('Y-m-d H:i:s', time() - $days * 86400), $this->now])
+             WHERE $w AND e.starts_at BETWEEN ? AND ?",
+            array_merge($p, [date('Y-m-d H:i:s', time() - $days * 86400), $this->now])
         );
         $total = (int)($row['total'] ?? 0);
         return [
@@ -78,12 +79,13 @@ final class DashboardRepository
         if ($this->isEmpty()) {
             return null;
         }
+        [$vw, $vp] = EventRepository::visibility('e', $this->teamIds);
         return Database::first(
-            "SELECT e.id, e.title, e.starts_at, e.ends_at, e.location, t.name AS team_name, t.color
-             FROM events e JOIN teams t ON t.id = e.team_id
-             WHERE e.type = 'entrenament' AND e.team_id IN ($this->in) AND e.starts_at >= ?
+            "SELECT e.id, e.title, e.starts_at, e.ends_at, e.location, COALESCE(t.name, e.title) AS team_name, COALESCE(t.color, '#64748b') AS color
+             FROM events e LEFT JOIN teams t ON t.id = e.team_id
+             WHERE e.type = 'entrenament' AND $vw AND e.starts_at >= ?
              ORDER BY e.starts_at LIMIT 1",
-            array_merge($this->teamIds, [$this->now])
+            array_merge($vp, [$this->now])
         );
     }
 
@@ -113,11 +115,12 @@ final class DashboardRepository
         if ($this->isEmpty()) {
             return [];
         }
-        $params = array_merge($this->teamIds, [$this->now], $this->teamIds, [$this->now], [$limit]);
+        [$vw, $vp] = EventRepository::visibility('e', $this->teamIds);
+        $params = array_merge($vp, [$this->now], $this->teamIds, [$this->now], [$limit]);
         return Database::all(
-            "(SELECT e.type AS kind, e.title, e.starts_at, e.location, t.name AS team_name, t.color
-              FROM events e JOIN teams t ON t.id = e.team_id
-              WHERE e.team_id IN ($this->in) AND e.starts_at >= ?)
+            "(SELECT e.type AS kind, e.title, e.starts_at, e.location, COALESCE(t.name, 'Tot el club') AS team_name, COALESCE(t.color, '#64748b') AS color
+              FROM events e LEFT JOIN teams t ON t.id = e.team_id
+              WHERE $vw AND e.starts_at >= ?)
              UNION ALL
              (SELECT 'partit' AS kind,
                      CONCAT(IF(m.is_home, 'vs ', '@ '), m.opponent) AS title,
@@ -156,13 +159,14 @@ final class DashboardRepository
         if ($this->isEmpty()) {
             return null;
         }
+        [$vw, $vp] = EventRepository::visibility('e', $this->teamIds);
         $event = Database::first(
-            "SELECT e.id, e.title, e.starts_at, t.name AS team_name
-             FROM events e JOIN teams t ON t.id = e.team_id
-             WHERE e.team_id IN ($this->in) AND e.starts_at <= ?
+            "SELECT e.id, e.title, e.starts_at, COALESCE(t.name, e.title) AS team_name
+             FROM events e LEFT JOIN teams t ON t.id = e.team_id
+             WHERE $vw AND e.starts_at <= ?
                AND EXISTS (SELECT 1 FROM attendance a WHERE a.event_id = e.id)
              ORDER BY e.starts_at DESC LIMIT 1",
-            array_merge($this->teamIds, [$this->now])
+            array_merge($vp, [$this->now])
         );
         if (!$event) {
             return null;
@@ -183,21 +187,9 @@ final class DashboardRepository
         if ($this->isEmpty()) {
             return [];
         }
-        $rows = Database::all(
-            "SELECT t.id, t.name, t.color,
-                    COUNT(a.id) AS total,
-                    SUM(a.status IN ('present','retard')) AS attended
-             FROM teams t
-             LEFT JOIN events e ON e.team_id = t.id AND e.starts_at BETWEEN ? AND ?
-             LEFT JOIN attendance a ON a.event_id = e.id
-             WHERE t.id IN ($this->in)
-             GROUP BY t.id, t.name, t.color
-             ORDER BY t.name",
-            array_merge([date('Y-m-d H:i:s', time() - $days * 86400), $this->now], $this->teamIds)
-        );
+        $rows = AttendanceRepository::byTeam($this->teamIds, date('Y-m-d H:i:s', time() - $days * 86400), $this->now);
         foreach ($rows as &$r) {
-            $total = (int)$r['total'];
-            $r['percent'] = $total > 0 ? (int)round(((int)$r['attended'] / $total) * 100) : null;
+            $r['percent'] = (int)$r['total'] > 0 ? (int)round((int)$r['attended'] / (int)$r['total'] * 100) : null;
         }
         return $rows;
     }

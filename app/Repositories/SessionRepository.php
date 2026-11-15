@@ -179,12 +179,13 @@ final class SessionRepository
         if (!$ids) {
             return [];
         }
+        [$vw, $vp] = EventRepository::visibility('e', $ids);
         return Database::all(
-            "SELECT e.id, e.title, e.starts_at, e.team_id, t.name AS team_name
-             FROM events e JOIN teams t ON t.id = e.team_id
-             WHERE e.type = 'entrenament' AND e.team_id IN (" . Database::in($ids) . ") AND e.starts_at >= ? AND e.starts_at < ?
+            "SELECT e.id, e.title, e.starts_at, e.team_id, COALESCE(t.name, 'Tot el club') AS team_name
+             FROM events e LEFT JOIN teams t ON t.id = e.team_id
+             WHERE e.type = 'entrenament' AND $vw AND e.starts_at >= ? AND e.starts_at < ?
              ORDER BY e.starts_at",
-            array_merge($ids, [date('Y-m-d 00:00:00', strtotime('-7 days')), date('Y-m-d 00:00:00', strtotime('+45 days'))])
+            array_merge($vp, [date('Y-m-d 00:00:00', strtotime('-7 days')), date('Y-m-d 00:00:00', strtotime('+45 days'))])
         );
     }
 
@@ -208,10 +209,10 @@ final class SessionRepository
             $errors[] = 'No tens accés a aquest equip.';
         }
         if ($d['event_id'] > 0) {
-            $ev = Database::first("SELECT team_id FROM events WHERE id = ? AND type = 'entrenament'", [$d['event_id']]);
-            if (!$ev || !TeamScope::canAccess((int)$ev['team_id'])) {
+            $ev = EventRepository::find($d['event_id']);
+            if (!$ev || $ev['type'] !== 'entrenament' || !EventRepository::canAccess($ev)) {
                 $errors[] = 'L\'entrenament triat no és vàlid.';
-            } elseif ($d['team_id'] === 0) {
+            } elseif ($d['team_id'] === 0 && $ev['team_id'] !== null) {
                 $d['team_id'] = (int)$ev['team_id'];
             }
         }

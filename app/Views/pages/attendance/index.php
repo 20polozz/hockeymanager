@@ -2,7 +2,6 @@
 /** @var array $teams @var int $team @var array $upcoming @var array $past */
 $row = function (array $t): string {
     $marked = (int)$t['marked'];
-    $squad = (int)$t['squad'];
     ob_start(); ?>
     <li>
       <a class="session-row" href="<?= e(url('/assistencia/' . (int)$t['id'])) ?>">
@@ -11,7 +10,7 @@ $row = function (array $t): string {
           <span class="date-chip-day"><?= e(fdate($t['starts_at'], 'daynum')) ?></span>
         </span>
         <span class="event-body">
-          <span class="event-title"><?= e($t['title']) ?></span>
+          <span class="event-title"><?= e($t['title']) ?><?php if ($t['type'] === 'gimnas'): ?> <span class="pill pill-violet">Gimnàs</span><?php endif; ?></span>
           <span class="event-meta"><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['team_name']) ?> · <?= e(fdate($t['starts_at'], 'short')) ?> · <?= e(fdate($t['starts_at'], 'time')) ?></span>
         </span>
         <?php if ($marked > 0): ?>

@@ -171,6 +171,14 @@
     });
   });
 
+  // Esdeveniment: llista de jugadores només si es tria "Només unes jugadores"
+  var whoList = document.getElementById('who-list');
+  if (whoList) {
+    document.querySelectorAll('input[data-who]').forEach(function (r) {
+      r.addEventListener('change', function () { if (r.checked) whoList.hidden = r.value !== 'llista'; });
+    });
+  }
+
   // Els missatges d'èxit desapareixen sols
   setTimeout(function () {
     document.querySelectorAll('.alert-success').forEach(function (a) { a.remove(); });

@@ -166,7 +166,7 @@ final class StatsRepository
         if (!$teamIds) {
             return [];
         }
-        $params = $teamIds;
+        [$scopeW, $params] = AttendanceRepository::scope($teamIds);
         $where = '';
         if ($seasonId > 0) {
             $s = Database::first('SELECT starts_on, ends_on FROM seasons WHERE id = ?', [$seasonId]);
@@ -180,7 +180,7 @@ final class StatsRepository
         foreach (Database::all(
             "SELECT a.player_id, COUNT(*) AS total, SUM(a.status IN ('present','retard')) AS attended
              FROM attendance a JOIN events e ON e.id = a.event_id
-             WHERE e.team_id IN (" . Database::in($teamIds) . ")$where
+             WHERE $scopeW$where
              GROUP BY a.player_id",
             $params
         ) as $r) {
