@@ -1,9 +1,20 @@
 <?php
-/** @var array $players @var string $search */
+/** @var array $players @var string $search @var array $teams @var int $activeTeam */
+$q = $search !== '' ? ['q' => $search] : [];
 ?>
+<?php if (count($teams) > 1): ?>
+  <nav class="filter-chips" aria-label="Filtra per equip">
+    <a class="chip<?= $activeTeam === 0 ? ' is-active' : '' ?>" href="<?= e(url('/jugadors', $q)) ?>"<?= $activeTeam === 0 ? ' aria-current="true"' : '' ?>>Tots els equips</a>
+    <?php foreach ($teams as $t): $on = $activeTeam === (int)$t['id']; ?>
+      <a class="chip<?= $on ? ' is-active' : '' ?>" href="<?= e(url('/jugadors', $q + ['equip' => (int)$t['id']])) ?>"<?= $on ? ' aria-current="true"' : '' ?>><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['name']) ?></a>
+    <?php endforeach; ?>
+  </nav>
+<?php endif; ?>
+
 <div class="page-head">
   <p class="muted"><?= count($players) ?> jugadors<?= $search !== '' ? ' per a «' . e($search) . '»' : '' ?></p>
   <form class="inline-search" method="get" action="<?= e(url('/jugadors')) ?>">
+    <?php if ($activeTeam > 0): ?><input type="hidden" name="equip" value="<?= (int)$activeTeam ?>"><?php endif; ?>
     <label class="visually-hidden" for="player-search">Cerca jugadors</label>
     <input id="player-search" type="search" name="q" value="<?= e($search) ?>" placeholder="Filtra per nom…" maxlength="80">
     <button class="btn" type="submit"><?= icon('search', 'icon icon-sm') ?> Filtra</button>

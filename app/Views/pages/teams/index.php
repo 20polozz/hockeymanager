@@ -28,12 +28,7 @@
             <span class="muted small">Sense entrenador assignat</span>
           <?php endif; ?>
         </div>
-        <form action="<?= e(url('/equip-actiu')) ?>" method="post">
-          <?= csrf_field() ?>
-          <input type="hidden" name="team_id" value="<?= (int)$t['id'] ?>">
-          <input type="hidden" name="back" value="/jugadors">
-          <button class="btn btn-block" type="submit">Veure jugadors <?= icon('arrow-right', 'icon icon-sm') ?></button>
-        </form>
+        <a class="btn btn-block" href="<?= e(url('/jugadors', ['equip' => (int)$t['id']])) ?>">Veure jugadors <?= icon('arrow-right', 'icon icon-sm') ?></a>
       </article>
     <?php endforeach; ?>
   </div>

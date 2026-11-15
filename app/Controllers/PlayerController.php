@@ -13,12 +13,18 @@ final class PlayerController extends Controller
     public function index(): void
     {
         $search = trim((string)($_GET['q'] ?? ''));
+        // Filtre propi de la pàgina (?equip=ID), independent del selector global
+        $teamId = (int)($_GET['equip'] ?? 0);
+        if ($teamId > 0 && !TeamScope::canAccess($teamId)) {
+            $teamId = 0;
+        }
         $this->view('pages/players/index', [
-            'pageTitle'      => 'Jugadors',
-            'activeNav'      => 'players',
-            'showTeamPicker' => true,
-            'search'         => $search,
-            'players'        => PlayerRepository::listForTeams(TeamScope::filterIds(), $search),
+            'pageTitle'  => 'Jugadors',
+            'activeNav'  => 'players',
+            'search'     => $search,
+            'teams'      => TeamScope::teams(),
+            'activeTeam' => $teamId,
+            'players'    => PlayerRepository::listForTeams($teamId > 0 ? [$teamId] : TeamScope::ids(), $search),
         ]);
     }
 
