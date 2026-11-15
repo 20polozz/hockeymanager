@@ -20,7 +20,7 @@ final class StatsController extends Controller
             }
         }
         $season = isset($_GET['temporada']) ? (int)$_GET['temporada'] : $current;
-        $ids = competition_filter_ids();
+        $ids = team_filter_ids();
         $user = Auth::user();
         // Un jugador/a només veu les seves estadístiques individuals
         $only = Auth::hasRole(Auth::ROLE_PLAYER) ? (int)($user['player_id'] ?? 0) : null;
@@ -30,7 +30,7 @@ final class StatsController extends Controller
             'activeNav'   => 'stats',
             'seasons'     => $seasons,
             'season'      => $season,
-            'teams'       => TeamScope::competitionTeams(),
+            'teams'       => TeamScope::teams(),
             'team'        => team_filter(),
             'isPlayer'    => $only !== null,
             'summary'     => StatsRepository::teamSummary($ids, $season),

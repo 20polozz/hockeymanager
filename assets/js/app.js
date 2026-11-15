@@ -155,7 +155,7 @@
   var pickCount = document.querySelector('[data-pick-count]');
   var updatePick = function () {
     var n = document.querySelectorAll('input[data-pick]:checked').length;
-    if (pickCount) pickCount.textContent = n + ' ' + (pickCount.getAttribute('data-pick-label') || 'convocades');
+    if (pickCount) pickCount.textContent = n + ' convocades';
   };
   document.querySelectorAll('input[data-pick]').forEach(function (cb) {
     cb.addEventListener('change', function () { cb.closest('.pick').classList.toggle('is-on', cb.checked); updatePick(); });
@@ -168,14 +168,6 @@
     r.addEventListener('change', function () {
       if (!r.checked) return;
       rolePanels.forEach(function (p) { p.hidden = p.getAttribute('data-role-panel') !== r.value; });
-    });
-  });
-
-  // Formulari d'equip: membres només per als grups
-  var kindPanels = document.querySelectorAll('[data-kind-panel]');
-  document.querySelectorAll('input[data-kind]').forEach(function (r) {
-    r.addEventListener('change', function () {
-      if (r.checked) kindPanels.forEach(function (p) { p.hidden = p.getAttribute('data-kind-panel') !== r.value; });
     });
   });
 

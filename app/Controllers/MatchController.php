@@ -24,7 +24,7 @@ final class MatchController extends Controller
             }
         }
         $season = isset($_GET['temporada']) ? (int)$_GET['temporada'] : $current;
-        $matches = MatchRepository::list(competition_filter_ids(), $tab, $season);
+        $matches = MatchRepository::list(team_filter_ids(), $tab, $season);
 
         $record = ['V' => 0, 'E' => 0, 'D' => 0, 'gf' => 0, 'ga' => 0];
         if ($tab === 'disputats') {
@@ -45,7 +45,7 @@ final class MatchController extends Controller
             'season'    => $season,
             'matches'   => $matches,
             'record'    => $record,
-            'teams'     => TeamScope::competitionTeams(),
+            'teams'     => TeamScope::teams(),
             'team'      => team_filter(),
             'canManage' => Gate::allows('matches.manage'),
         ]);
@@ -72,7 +72,7 @@ final class MatchController extends Controller
 
     public function store(): void
     {
-        [$d, $errors] = MatchRepository::validate($_POST, TeamScope::competitionIds());
+        [$d, $errors] = MatchRepository::validate($_POST, TeamScope::ids());
         if ($errors) {
             $this->fail($errors, '/partits/nou');
         }
@@ -92,7 +92,7 @@ final class MatchController extends Controller
     public function update(int $id): void
     {
         $old = $this->findOr404($id);
-        [$d, $errors] = MatchRepository::validate($_POST, TeamScope::competitionIds());
+        [$d, $errors] = MatchRepository::validate($_POST, TeamScope::ids());
         if ($errors) {
             $this->fail($errors, '/partits/' . $id . '/editar');
         }
@@ -189,7 +189,7 @@ final class MatchController extends Controller
             'activeNav'    => 'matches',
             'm'            => $m,
             'defaults'     => $defaults,
-            'teams'        => TeamScope::competitionTeams(),
+            'teams'        => TeamScope::teams(),
             'competitions' => MatchRepository::competitions(),
         ]);
         forget_input();

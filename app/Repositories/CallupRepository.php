@@ -55,7 +55,7 @@ final class CallupRepository
              JOIN team_players tp ON tp.player_id = p.id AND tp.left_at IS NULL
              JOIN teams t ON t.id = tp.team_id
              LEFT JOIN categories c ON c.id = t.category_id
-             WHERE p.active = 1 AND t.season_id = ? AND t.kind = 'equip'
+             WHERE p.active = 1 AND t.season_id = ?
                AND (tp.team_id = ? OR (? IS NOT NULL AND c.sort_order IS NOT NULL AND c.sort_order <= ?))
              GROUP BY p.id, p.first_name, p.last_name, p.position
              ORDER BY own DESC, p.position = 'porter' DESC, p.last_name, p.first_name",

@@ -11,18 +11,7 @@ $link = function (string $v, DateTime $d) use ($base): string {
     return url('/calendari', $base + ['vista' => $v, 'data' => $d->format('Y-m-d')]);
 };
 $today = date('Y-m-d');
-$kinds = ['entrenament' => 'Entrenament', 'partit' => 'Partit', 'especial' => 'Especial', 'gimnas' => 'Gimnàs'];
-// Els entrenaments d'un grup d'entrenament es mostren com a gimnàs
-foreach ($byDay as &$dayItems) {
-    foreach ($dayItems as &$it) {
-        if ($it['kind'] === 'entrenament' && ($it['team_kind'] ?? '') === 'grup') {
-            $it['display'] = 'gimnas';
-        }
-        $it['display'] = $it['display'] ?? $it['kind'];
-    }
-    unset($it);
-}
-unset($dayItems);
+$kinds = ['entrenament' => 'Entrenament', 'partit' => 'Partit', 'especial' => 'Especial'];
 $itemUrl = function (array $it): string {
     return $it['kind'] === 'partit' ? url('/partits/' . (int)$it['id']) : url('/calendari/' . (int)$it['id']);
 };
@@ -62,7 +51,6 @@ switch ($calView) {
 <div class="cal-legend">
   <span><i class="dot dot-blue"></i>Entrenament</span>
   <span><i class="dot dot-green"></i>Partit</span>
-  <span><i class="dot dot-violet"></i>Gimnàs</span>
   <span><i class="dot dot-orange"></i>Esdeveniment especial</span>
 </div>
 
@@ -77,7 +65,7 @@ switch ($calView) {
         <div class="cal-cell<?= $out ? ' is-out' : '' ?><?= $key === $today ? ' is-today' : '' ?>" role="gridcell">
           <a class="cal-daynum" href="<?= e($link('dia', $d)) ?>" aria-label="<?= e(fdate($key, 'day')) ?>"><?= $d->format('j') ?></a>
           <?php foreach (array_slice($items, 0, 3) as $it): ?>
-            <a class="cal-item kind-<?= e($it['display']) ?>" href="<?= e($itemUrl($it)) ?>" title="<?= e($it['team_name'] . ' · ' . $it['title']) ?>">
+            <a class="cal-item kind-<?= e($it['kind']) ?>" href="<?= e($itemUrl($it)) ?>" title="<?= e($it['team_name'] . ' · ' . $it['title']) ?>">
               <span class="cal-item-time"><?= e(fdate($it['starts_at'], 'time')) ?></span>
               <span class="cal-item-title"><?= e($team > 0 || $it['kind'] === 'partit' ? $it['title'] : $it['team_name']) ?></span>
             </a>
@@ -86,7 +74,7 @@ switch ($calView) {
             <a class="cal-more" href="<?= e($link('dia', $d)) ?>">+<?= count($items) - 3 ?> més</a>
           <?php endif; ?>
           <?php if ($items): ?>
-            <span class="cal-dots" aria-hidden="true"><?php foreach (array_slice($items, 0, 4) as $it): ?><i class="kind-<?= e($it['display']) ?>"></i><?php endforeach; ?></span>
+            <span class="cal-dots" aria-hidden="true"><?php foreach (array_slice($items, 0, 4) as $it): ?><i class="kind-<?= e($it['kind']) ?>"></i><?php endforeach; ?></span>
           <?php endif; ?>
         </div>
       <?php endfor; ?>
@@ -109,13 +97,13 @@ switch ($calView) {
           <ul class="agenda-list">
             <?php foreach ($items as $it): ?>
               <li>
-                <a class="agenda-item kind-<?= e($it['display']) ?>" href="<?= e($itemUrl($it)) ?>">
+                <a class="agenda-item kind-<?= e($it['kind']) ?>" href="<?= e($itemUrl($it)) ?>">
                   <span class="agenda-time"><?= e(fdate($it['starts_at'], 'time')) ?><?php if ($it['ends_at']): ?><small><?= e(fdate($it['ends_at'], 'time')) ?></small><?php endif; ?></span>
                   <span class="agenda-body">
                     <strong><?= e($it['title']) ?></strong>
                     <span class="muted small"><span class="team-dot" style="--team: <?= e($it['color']) ?>"></span><?= e($it['team_name']) ?><?= $it['location'] ? ' · ' . e($it['location']) : '' ?></span>
                   </span>
-                  <span class="pill pill-<?= ['partit' => 'green', 'especial' => 'orange', 'gimnas' => 'violet'][$it['display']] ?? 'blue' ?>"><?= e($kinds[$it['display']] ?? '') ?></span>
+                  <span class="pill pill-<?= $it['kind'] === 'partit' ? 'green' : ($it['kind'] === 'especial' ? 'orange' : 'blue') ?>"><?= e($kinds[$it['kind']] ?? '') ?></span>
                   <?php if ($it['kind'] === 'entrenament' && (int)$it['attendance_count'] > 0): ?>
                     <span class="pill pill-muted" title="Llista passada"><?= icon('check', 'icon icon-xs') ?> Llista</span>
                   <?php endif; ?>

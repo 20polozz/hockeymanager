@@ -19,9 +19,9 @@ final class CallupController extends Controller
             $this->view('pages/callups/staff', [
                 'pageTitle' => 'Convocatòries',
                 'activeNav' => 'callups',
-                'teams'     => TeamScope::competitionTeams(),
+                'teams'     => TeamScope::teams(),
                 'team'      => team_filter(),
-                'rows'      => CallupRepository::upcomingForStaff(competition_filter_ids()),
+                'rows'      => CallupRepository::upcomingForStaff(team_filter_ids()),
             ]);
             return;
         }

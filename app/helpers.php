@@ -104,12 +104,6 @@ function team_filter_ids(): array
     return $id > 0 ? [$id] : \App\Core\TeamScope::ids();
 }
 
-/** Com team_filter_ids(), però només amb equips de competició. */
-function competition_filter_ids(): array
-{
-    return array_values(array_intersect(team_filter_ids(), \App\Core\TeamScope::competitionIds()));
-}
-
 /** Combina data (Y-m-d) i hora (H:i) d'un formulari. Retorna null si no és vàlid. */
 function parse_datetime(string $date, string $time): ?string
 {

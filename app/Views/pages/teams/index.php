@@ -6,7 +6,6 @@ $canManage = Gate::allows('teams.manage');
 ?>
 <?php if ($canManage): ?>
   <div class="page-head page-head-end">
-    <a class="btn" href="<?= e(url('/equips/nou', ['tipus' => 'grup'])) ?>"><?= icon('dumbbell', 'icon icon-sm') ?> Nou grup d'entrenament</a>
     <a class="btn btn-primary" href="<?= e(url('/equips/nou')) ?>"><?= icon('plus', 'icon icon-sm') ?> Nou equip</a>
   </div>
 <?php endif; ?>
@@ -14,18 +13,15 @@ $canManage = Gate::allows('teams.manage');
   <section class="panel">
     <?= component('empty_state', ['icon' => 'shield', 'text' => 'Encara no hi ha equips a la temporada actual.']) ?>
   </section>
-<?php else: $sections = ['equip' => 'Equips de competició', 'grup' => 'Grups d\'entrenament']; foreach ($sections as $kindKey => $sectionTitle):
-    $list = array_filter($teams, function ($t) use ($kindKey) { return ($t['kind'] ?? 'equip') === $kindKey; });
-    if (!$list) { continue; } ?>
-  <h2 class="section-title section-gap"><?= e($sectionTitle) ?></h2>
+<?php else: ?>
   <div class="team-grid">
-    <?php foreach ($list as $t): $isGroup = ($t['kind'] ?? 'equip') === 'grup'; ?>
+    <?php foreach ($teams as $t): ?>
       <article class="team-card" style="--team: <?= e($t['color']) ?>">
         <div class="team-card-head">
-          <span class="team-badge"><?= icon($isGroup ? 'dumbbell' : 'shield') ?></span>
+          <span class="team-badge"><?= icon('shield') ?></span>
           <div>
             <h2 class="team-name"><?= e($t['name']) ?></h2>
-            <span class="muted small"><?= $isGroup ? 'Grup d\'entrenament' : e((string)$t['category']) ?> · <?= e($t['season']) ?></span>
+            <span class="muted small"><?= e((string)$t['category']) ?> · <?= e($t['season']) ?></span>
           </div>
         </div>
         <div class="team-figures">
@@ -49,4 +45,4 @@ $canManage = Gate::allows('teams.manage');
       </article>
     <?php endforeach; ?>
   </div>
-<?php endforeach; endif; ?>
+<?php endif; ?>

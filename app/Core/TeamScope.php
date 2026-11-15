@@ -26,7 +26,7 @@ final class TeamScope
         if (!$user) {
             return self::$teams = [];
         }
-        $base = 'SELECT t.id, t.name, t.kind, t.color, c.name AS category
+        $base = 'SELECT t.id, t.name, t.color, c.name AS category
                  FROM teams t
                  LEFT JOIN categories c ON c.id = t.category_id
                  JOIN seasons s ON s.id = t.season_id AND s.is_current = 1';
@@ -34,17 +34,17 @@ final class TeamScope
         switch ($user['role']) {
             case Auth::ROLE_ADMIN:
             case Auth::ROLE_COORDINATOR:
-                $rows = Database::all($base . ' ORDER BY t.kind, c.sort_order, t.name');
+                $rows = Database::all($base . ' ORDER BY c.sort_order, t.name');
                 break;
             case Auth::ROLE_COACH:
                 $rows = Database::all(
-                    $base . ' JOIN team_staff ts ON ts.team_id = t.id AND ts.user_id = ? ORDER BY t.kind, c.sort_order, t.name',
+                    $base . ' JOIN team_staff ts ON ts.team_id = t.id AND ts.user_id = ? ORDER BY c.sort_order, t.name',
                     [$user['id']]
                 );
                 break;
             default:
                 $rows = Database::all(
-                    $base . ' JOIN team_players tp ON tp.team_id = t.id AND tp.player_id = ? AND tp.left_at IS NULL ORDER BY t.kind, c.sort_order, t.name',
+                    $base . ' JOIN team_players tp ON tp.team_id = t.id AND tp.player_id = ? AND tp.left_at IS NULL ORDER BY c.sort_order, t.name',
                     [(int)$user['player_id']]
                 );
         }
@@ -59,28 +59,6 @@ final class TeamScope
         return array_map(function (array $t): int {
             return (int)$t['id'];
         }, self::teams());
-    }
-
-    /**
-     * Només equips de competició (sense grups d'entrenament): partits,
-     * convocatòries i estadístiques.
-     * @return array<int,array<string,mixed>>
-     */
-    public static function competitionTeams(): array
-    {
-        return array_values(array_filter(self::teams(), function (array $t): bool {
-            return ($t['kind'] ?? 'equip') === 'equip';
-        }));
-    }
-
-    /**
-     * @return array<int,int>
-     */
-    public static function competitionIds(): array
-    {
-        return array_map(function (array $t): int {
-            return (int)$t['id'];
-        }, self::competitionTeams());
     }
 
     public static function canAccess(int $teamId): bool

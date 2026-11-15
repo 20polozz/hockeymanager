@@ -27,7 +27,7 @@ final class EventRepository
         $in = Database::in($teamIds);
         return Database::all(
             "(SELECT e.id, e.type AS kind, e.title, e.starts_at, e.ends_at, e.location, e.team_id,
-                     t.name AS team_name, t.color, t.kind AS team_kind,
+                     t.name AS team_name, t.color,
                      (SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.id) AS attendance_count
               FROM events e JOIN teams t ON t.id = e.team_id
               WHERE e.team_id IN ($in) AND e.starts_at >= ? AND e.starts_at < ?)
@@ -35,7 +35,7 @@ final class EventRepository
              (SELECT m.id, 'partit' AS kind,
                      CONCAT(IF(m.is_home, 'vs ', '@ '), m.opponent) AS title,
                      m.starts_at, NULL AS ends_at, m.location, m.team_id,
-                     t.name AS team_name, t.color, t.kind AS team_kind, 0 AS attendance_count
+                     t.name AS team_name, t.color, 0 AS attendance_count
               FROM matches m JOIN teams t ON t.id = m.team_id
               WHERE m.team_id IN ($in) AND m.starts_at >= ? AND m.starts_at < ? AND m.status <> 'cancel·lat')
              ORDER BY starts_at, team_name",
