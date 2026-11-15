@@ -88,6 +88,20 @@ $router->post('/partits/{id}/convocatoria', 'CallupController@save', ['can' => '
 $router->post('/partits/{id}/convocatoria/eliminar', 'CallupController@destroy', ['can' => 'callups.manage']);
 $router->post('/convocatories/{id}/resposta', 'CallupController@respond', ['can' => 'callups.respond']);
 
+// Usuaris
+$router->get('/usuaris', 'UserController@index', ['can' => 'users.manage']);
+$router->get('/usuaris/nou', 'UserController@create', ['can' => 'users.manage']);
+$router->post('/usuaris', 'UserController@store', ['can' => 'users.manage']);
+$router->get('/usuaris/{id}/editar', 'UserController@edit', ['can' => 'users.manage']);
+$router->post('/usuaris/{id}', 'UserController@update', ['can' => 'users.manage']);
+$router->post('/usuaris/{id}/estat', 'UserController@toggle', ['can' => 'users.manage']);
+
+// Importació de dades
+$router->get('/configuracio/importacio', 'ImportController@index', ['can' => 'players.manage']);
+$router->get('/configuracio/importacio/plantilla', 'ImportController@template', ['can' => 'players.manage']);
+$router->post('/configuracio/importacio/csv', 'ImportController@preview', ['can' => 'players.manage']);
+$router->post('/configuracio/importacio/confirmar', 'ImportController@confirm', ['can' => 'players.manage']);
+
 // Configuració del compte
 $router->get('/configuracio', 'SettingsController@index', ['can' => 'settings.view']);
 $router->post('/configuracio/contrasenya', 'SettingsController@updatePassword', ['can' => 'settings.view']);

@@ -58,11 +58,19 @@ Copia la carpeta `hockeymanager/` a l'arrel del nou hosting, importa la BD i cre
 - CSRF a tots els formularis, contrasenyes amb `password_hash`, límit d'intents de login,
   sessió regenerada en entrar, sortida escapada, carpetes internes bloquejades.
 
-## Fases
+## Mòduls
 
-1. ✅ Nucli, login i rols, layout, sidebar, header, dashboard, jugadors i equips (lectura)
-2. Assistència i calendari
-3. Exercicis i sessions d'entrenament
-4. Partits i convocatòries
-5. Estadístiques (incloent porters)
-6. Gestió d'usuaris/equips/jugadors i connectors d'importació (FECAPA, RFEP…)
+- **Dashboard** amb resum, accés ràpid, esdeveniments, resultats, assistència i activitat
+- **Calendari** (mes/setmana/dia) amb entrenaments recurrents i esdeveniments especials
+- **Assistència**: passar llista des del mòbil i estadístiques
+- **Exercicis** (biblioteca amb categories, preferits i vídeo) i **Entrenaments** (sessions)
+- **Partits**, **acta** (participació i estadístiques, també de porteria) i **Convocatòries**
+- **Estadístiques** d'equip, jugadors/es i porters/es (només dades registrades)
+- **Jugadors/es** i **Equips** amb historial; **Usuaris** amb rols i equips assignats
+- **Importació**: CSV de jugadors/es i connectors preparats per a FECAPA, RFEP i
+  Hockey Telemetry (`app/Import/`), desactivats fins a tenir API oficial o autorització
+
+## Actualitzacions de la BD
+
+Les migracions noves de `database/migrations/` s'apliquen soles en la primera petició
+després de desplegar (amb un bloqueig per evitar execucions simultànies).

@@ -20,13 +20,24 @@ use App\Core\Gate;
       <?= csrf_field() ?>
       <label class="field"><span>Contrasenya actual</span>
         <input type="password" name="current_password" required autocomplete="current-password"></label>
-      <label class="field"><span>Nova contrasenya <small class="muted">(mínim 10 caràcters)</small></span>
-        <input type="password" name="new_password" required minlength="10" autocomplete="new-password"></label>
+      <label class="field"><span>Nova contrasenya <small class="muted">(mínim 8 caràcters)</small></span>
+        <input type="password" name="new_password" required minlength="8" autocomplete="new-password"></label>
       <label class="field"><span>Repeteix la nova contrasenya</span>
-        <input type="password" name="new_password_confirmation" required minlength="10" autocomplete="new-password"></label>
+        <input type="password" name="new_password_confirmation" required minlength="8" autocomplete="new-password"></label>
       <button class="btn btn-primary" type="submit">Desa la contrasenya</button>
     </form>
   </section>
+
+  <?php if (Gate::allows('users.manage') || Gate::allows('players.manage')): ?>
+    <section class="panel">
+      <?= component('panel_head', ['title' => 'Gestió del club']) ?>
+      <div class="settings-links">
+        <?php if (Gate::allows('users.manage')): ?><a class="btn" href="<?= e(url('/usuaris')) ?>"><?= icon('lock', 'icon icon-sm') ?> Usuaris i accessos</a><?php endif; ?>
+        <?php if (Gate::allows('teams.manage')): ?><a class="btn" href="<?= e(url('/equips')) ?>"><?= icon('shield', 'icon icon-sm') ?> Equips</a><?php endif; ?>
+        <?php if (Gate::allows('players.manage')): ?><a class="btn" href="<?= e(url('/configuracio/importacio')) ?>"><?= icon('database', 'icon icon-sm') ?> Importació de dades</a><?php endif; ?>
+      </div>
+    </section>
+  <?php endif; ?>
 
   <?php if (Gate::allows('system.install')): ?>
     <section class="panel">

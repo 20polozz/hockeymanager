@@ -30,8 +30,8 @@ final class SettingsController extends Controller
         $hash = (string)Database::value('SELECT password_hash FROM users WHERE id = ?', [Auth::id()]);
         if (!password_verify($current, $hash)) {
             flash('error', 'La contrasenya actual no és correcta.');
-        } elseif (strlen($new) < 10) {
-            flash('error', 'La nova contrasenya ha de tenir com a mínim 10 caràcters.');
+        } elseif (strlen($new) < \App\Repositories\UserRepository::MIN_PASSWORD) {
+            flash('error', 'La nova contrasenya ha de tenir com a mínim ' . \App\Repositories\UserRepository::MIN_PASSWORD . ' caràcters.');
         } elseif ($new !== $confirm) {
             flash('error', 'Les contrasenyes noves no coincideixen.');
         } else {

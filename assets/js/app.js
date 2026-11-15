@@ -162,6 +162,15 @@
   });
   updatePick();
 
+  // Formulari d'usuari: camps segons el rol
+  var rolePanels = document.querySelectorAll('[data-role-panel]');
+  document.querySelectorAll('input[data-role]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      if (!r.checked) return;
+      rolePanels.forEach(function (p) { p.hidden = p.getAttribute('data-role-panel') !== r.value; });
+    });
+  });
+
   // Els missatges d'èxit desapareixen sols
   setTimeout(function () {
     document.querySelectorAll('.alert-success').forEach(function (a) { a.remove(); });

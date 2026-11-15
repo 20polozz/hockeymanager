@@ -864,3 +864,24 @@ a.match-body:hover { text-decoration: none; }
 .bar-fill.bar-violet { background: linear-gradient(90deg, #a78bfa, var(--violet)); }
 a.bar-label { color: var(--text); }
 .panel-hint { margin: 0; border-radius: 0; }
+
+/* ---------- Usuaris i importació ---------- */
+.role-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.role-card { position: relative; cursor: pointer; }
+.role-card input { position: absolute; opacity: 0; }
+.role-card span { display: flex; flex-direction: column; gap: 2px; height: 100%; padding: 12px; border: 1px solid var(--border-strong); border-radius: 12px; background: #fff; }
+.role-card small { color: var(--muted); font-weight: 400; font-size: .78rem; }
+.role-card input:checked + span { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary) inset; background: #f5f8ff; }
+.role-card input:focus-visible + span { outline: 3px solid rgba(37,99,235,.45); }
+.role-card input:disabled + span { opacity: .45; cursor: not-allowed; }
+.select-xs { height: 34px; padding: 0 8px; border: 1px solid var(--border-strong); border-radius: 8px; background: #fff; font-size: .84rem; }
+.row-off td { opacity: .55; }
+.row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.table td.wrap { white-space: normal; }
+.connector { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; border-top: 1px solid var(--border); }
+.connector:first-of-type { border-top: 0; }
+.connector-body { flex: 1; }
+.connector-body p { margin: 4px 0 0; }
+.preview-table td.err { color: var(--red); }
+.settings-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill-navy { background: var(--navy-bg); color: var(--navy); } .pill-violet { background: var(--violet-bg); color: var(--violet); }
