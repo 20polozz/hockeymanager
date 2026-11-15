@@ -86,7 +86,6 @@ final class ModuleController extends Controller
         $this->view('pages/module', [
             'pageTitle'      => $title,
             'activeNav'      => $nav,
-            'showTeamPicker' => true,
             'moduleIcon'     => $icon,
             'phase'          => $phase,
             'intro'          => $intro,

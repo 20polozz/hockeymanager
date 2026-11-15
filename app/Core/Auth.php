@@ -105,7 +105,6 @@ final class Auth
     {
         session_regenerate_id(true);
         $_SESSION['hm_user_id'] = $userId;
-        unset($_SESSION['hm_active_team']);
         self::$user = false;
         Database::query('UPDATE users SET last_login_at = ? WHERE id = ?', [date('Y-m-d H:i:s'), $userId]);
     }

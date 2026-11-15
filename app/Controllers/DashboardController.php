@@ -15,7 +15,7 @@ final class DashboardController extends Controller
     {
         $user = Auth::user();
         $isPlayer = Auth::hasRole(Auth::ROLE_PLAYER);
-        $repo = new DashboardRepository(TeamScope::filterIds());
+        $repo = new DashboardRepository(TeamScope::ids());
 
         $attendance = $repo->attendanceRate(30);
         if ($isPlayer && !empty($user['player_id'])) {
@@ -32,7 +32,6 @@ final class DashboardController extends Controller
         $this->view('pages/dashboard', [
             'pageTitle'       => 'Dashboard',
             'activeNav'       => 'dashboard',
-            'showTeamPicker'  => true,
             'isPlayer'        => $isPlayer,
             'hasTeams'        => !$repo->isEmpty(),
             'totalPlayers'    => $repo->totalPlayers(),
@@ -42,7 +41,7 @@ final class DashboardController extends Controller
             'quickCards'      => $this->quickCards($repo),
             'upcoming'        => $repo->upcomingEvents(6),
             'results'         => $repo->lastResults(5),
-            'activity'        => $isPlayer ? [] : ActivityLog::recent(TeamScope::filterIds(), Auth::hasRole(Auth::ROLE_COORDINATOR) && TeamScope::activeId() === 0, 6),
+            'activity'        => $isPlayer ? [] : ActivityLog::recent(TeamScope::ids(), Auth::hasRole(Auth::ROLE_COORDINATOR), 6),
             'attendanceTeams' => $isPlayer ? [] : $repo->attendanceByTeam(30),
             'pendingCallups'  => $pendingCallups,
         ]);

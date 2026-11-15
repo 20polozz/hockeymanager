@@ -1,18 +1,14 @@
 <?php
 /**
- * Barra superior: títol, cercador, selector d'equip, notificacions i perfil.
+ * Barra superior: títol, cercador, notificacions i perfil.
  * @var string $pageTitle
- * @var bool $showTeamPicker
  */
-use App\Core\App;
 use App\Core\Auth;
 use App\Core\Gate;
 use App\Core\TeamScope;
 use App\Repositories\DashboardRepository;
 
 $user = Auth::user();
-$teams = TeamScope::teams();
-$activeTeam = TeamScope::activeId();
 
 // Notificacions: convocatòries pendents de resposta
 $notifications = [];
@@ -49,21 +45,6 @@ if ($user) {
   </form>
 
   <div class="topbar-actions">
-    <?php if ($showTeamPicker && count($teams) > 1): ?>
-      <form class="team-picker" action="<?= e(url('/equip-actiu')) ?>" method="post">
-        <?= csrf_field() ?>
-        <input type="hidden" name="back" value="<?= e(App::path()) ?>">
-        <label class="visually-hidden" for="team-picker">Equip</label>
-        <?= icon('shield', 'icon icon-sm') ?>
-        <select id="team-picker" name="team_id" data-autosubmit>
-          <option value="0">Tots els equips</option>
-          <?php foreach ($teams as $t): ?>
-            <option value="<?= (int)$t['id'] ?>"<?= $activeTeam === (int)$t['id'] ? ' selected' : '' ?>><?= e($t['name']) ?></option>
-          <?php endforeach; ?>
-        </select>
-        <noscript><button type="submit" class="btn btn-sm">Aplica</button></noscript>
-      </form>
-    <?php endif; ?>
 
     <details class="dropdown">
       <summary class="icon-btn" aria-label="Notificacions (<?= count($notifications) ?>)">

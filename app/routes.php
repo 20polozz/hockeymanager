@@ -15,7 +15,6 @@ $router->post('/logout', 'AuthController@logout');
 
 // Dashboard i elements globals de la barra superior
 $router->get('/', 'DashboardController@index', ['can' => 'dashboard.view']);
-$router->post('/equip-actiu', 'TeamSelectorController@update', ['can' => 'dashboard.view']);
 $router->get('/cerca', 'SearchController@index', ['can' => 'dashboard.view']);
 
 // Jugadors i equips

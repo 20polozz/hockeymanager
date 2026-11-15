@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 /**
- * Quins equips pot veure l'usuari actual i quin té seleccionat.
+ * Quins equips pot veure l'usuari actual.
  *  - Coordinador: tots els equips de la temporada actual.
  *  - Entrenador: els equips que té assignats (team_staff).
  *  - Jugador: l'equip (o equips) on està inscrit ara mateix.
@@ -63,29 +63,5 @@ final class TeamScope
     public static function canAccess(int $teamId): bool
     {
         return in_array($teamId, self::ids(), true);
-    }
-
-    /**
-     * Equip seleccionat al selector de la barra superior (0 = tots).
-     */
-    public static function activeId(): int
-    {
-        $id = (int)($_SESSION['hm_active_team'] ?? 0);
-        return ($id > 0 && self::canAccess($id)) ? $id : 0;
-    }
-
-    public static function setActive(int $teamId): void
-    {
-        $_SESSION['hm_active_team'] = ($teamId > 0 && self::canAccess($teamId)) ? $teamId : 0;
-    }
-
-    /**
-     * Equips a filtrar: el seleccionat o, si no n'hi ha, tots els accessibles.
-     * @return array<int,int>
-     */
-    public static function filterIds(): array
-    {
-        $active = self::activeId();
-        return $active > 0 ? [$active] : self::ids();
     }
 }

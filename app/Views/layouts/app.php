@@ -27,7 +27,7 @@ $appName = (string)Config::get('app.name', 'HockeyManager');
   <div class="sidebar-backdrop" data-sidebar-close></div>
 
   <div class="main">
-    <?= App\Core\View::partial('partials/topbar', ['pageTitle' => $pageTitle ?? '', 'showTeamPicker' => !empty($showTeamPicker)]) ?>
+    <?= App\Core\View::partial('partials/topbar', ['pageTitle' => $pageTitle ?? '']) ?>
 
     <main id="main" class="content" tabindex="-1">
       <?php if (Settings::hasDemoData()): ?>
