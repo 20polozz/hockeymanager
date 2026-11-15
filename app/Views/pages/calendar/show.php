@@ -1,5 +1,5 @@
 <?php
-/** @var array $event @var bool $canManage @var bool $canAttend @var array $attendance @var array $sessions @var array $roster @var bool $showStatus @var array $away @var array $removed @var array $pickable */
+/** @var array $event @var bool $canManage @var bool $canAttend @var array $attendance @var array $sessions @var array $roster @var bool $showStatus @var array $away @var array $removed @var array $pickable @var array $eventTeams @var array $allTeams */
 $isTraining = in_array($event['type'], ['entrenament', 'gimnas'], true);
 $typeLabel = App\Repositories\EventRepository::TYPES[$event['type']] ?? '';
 $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orange'][$event['type']] ?? 'muted';
@@ -7,7 +7,7 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
 <div class="form-page">
   <a class="back-link" href="<?= e(url('/calendari', ['vista' => 'setmana', 'data' => substr((string)$event['starts_at'], 0, 10)])) ?>"><?= icon('chevron-right', 'icon icon-sm flip') ?> Calendari</a>
 
-  <section class="panel event-hero">
+  <section class="panel event-hero" id="ev-hero">
     <span class="date-chip date-chip-lg">
       <span class="date-chip-month"><?= e(fdate($event['starts_at'], 'monthshort')) ?></span>
       <span class="date-chip-day"><?= e(fdate($event['starts_at'], 'daynum')) ?></span>
@@ -25,12 +25,22 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
     </div>
   </section>
 
-  <?php if (!empty($event['teams'])): ?>
-    <section class="panel">
+  <?php if ($eventTeams):
+    $teamIdsNow = array_map('intval', array_column($eventTeams, 'id'));
+    $teamsToAdd = array_values(array_filter($allTeams, static function ($t) use ($teamIdsNow) { return !in_array((int)$t['id'], $teamIdsNow, true); })); ?>
+    <section class="panel" id="equips">
       <?= component('panel_head', ['title' => 'Equips']) ?>
-      <ul class="name-chips">
-        <?php foreach ($event['teams'] as $t): ?><li><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['name']) ?></li><?php endforeach; ?>
-      </ul>
+      <form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/equips')) ?>" data-live>
+        <?= csrf_field() ?>
+        <ul class="name-chips">
+          <?php foreach ($eventTeams as $t): ?>
+            <li class="<?= $canManage ? 'chip-edit' : '' ?>"><span><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['name']) ?></span><?php if ($canManage && count($eventTeams) > 1): ?><button class="chip-x" type="submit" name="op" value="treure:<?= (int)$t['id'] ?>" aria-label="Treu <?= e($t['name']) ?>" title="Treu d'aquest entreno"><?= icon('x', 'icon icon-xs') ?></button><?php endif; ?></li>
+          <?php endforeach; ?>
+          <?php if ($canManage): foreach ($teamsToAdd as $t): ?>
+            <li class="chip-edit chip-removed"><span><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['name']) ?></span><button class="chip-x chip-undo" type="submit" name="op" value="afegir:<?= (int)$t['id'] ?>" aria-label="Afegeix <?= e($t['name']) ?>" title="Afegeix a aquest entreno"><?= icon('plus', 'icon icon-xs') ?></button></li>
+          <?php endforeach; endif; ?>
+        </ul>
+      </form>
     </section>
   <?php endif; ?>
 
@@ -59,7 +69,7 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
   ?>
   <section class="panel" id="convocades">
     <?= component('panel_head', ['title' => 'Jugadores convocades (' . count($called) . ')']) ?>
-    <?php if ($editRoster): ?><form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/jugadores')) ?>"><?= csrf_field() ?><input type="hidden" name="action" value="treure"><?php endif; ?>
+    <?php if ($editRoster): ?><form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/jugadores')) ?>" data-live><?= csrf_field() ?><input type="hidden" name="action" value="treure"><?php endif; ?>
     <?php if ($called): ?>
       <ul class="name-chips">
         <?php foreach ($called as $p) { echo $chip($p); } ?>
@@ -82,7 +92,7 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
     <?php if ($editRoster): ?></form><?php endif; ?>
 
     <?php if ($editRoster && $removed): ?>
-      <form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/jugadores')) ?>">
+      <form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/jugadores')) ?>" data-live>
         <?= csrf_field() ?><input type="hidden" name="action" value="afegir">
         <p class="muted small roster-sub">Tretes d'aquest entreno (<?= count($removed) ?>)</p>
         <ul class="name-chips">
@@ -96,7 +106,7 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
     <?php if ($editRoster && $toAdd): ?>
       <details class="roster-add">
         <summary class="btn"><?= icon('plus', 'icon icon-sm') ?> Afegeix jugadores</summary>
-        <form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/jugadores')) ?>">
+        <form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/jugadores')) ?>" data-live>
           <?= csrf_field() ?><input type="hidden" name="action" value="afegir">
           <div class="pick-list">
             <?php foreach ($toAdd as $p): ?>

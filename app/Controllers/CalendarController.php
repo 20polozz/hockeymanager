@@ -78,6 +78,8 @@ final class CalendarController extends Controller
             'away'       => \App\Repositories\AbsenceRepository::onDate(substr((string)$event['starts_at'], 0, 10), array_column($roster, 'id')),
             'showStatus' => Gate::allows('attendance.manage'),
             'removed'    => \App\Repositories\AttendanceRepository::removed($id),
+            'eventTeams' => EventRepository::eventTeams($event),
+            'allTeams'   => TeamScope::teams(),
             'pickable'   => Gate::allows('calendar.manage') ? EventRepository::selectablePlayers() : [],
             'sessions'   => class_exists(\App\Repositories\SessionRepository::class) ? \App\Repositories\SessionRepository::forEvent($id) : [],
         ]);
@@ -182,6 +184,31 @@ final class CalendarController extends Controller
             ? ($n === 1 ? 'Jugadora treta d\'aquest entreno.' : $n . ' jugadores tretes d\'aquest entreno.')
             : ($n === 1 ? 'Jugadora afegida.' : $n . ' jugadores afegides.'));
         redirect('/calendari/' . $id . '#convocades');
+    }
+
+    /** Afegeix o treu un equip d'aquest esdeveniment concret. */
+    public function teams(int $id): void
+    {
+        $event = $this->findOr404($id);
+        $current = array_map('intval', array_column(EventRepository::eventTeams($event), 'id'));
+        [$action, $teamId] = array_pad(explode(':', (string)($_POST['op'] ?? ''), 2), 2, '0');
+        $teamId = (int)$teamId;
+        if (!$current || !TeamScope::canAccess($teamId) || !in_array($action, ['afegir', 'treure'], true)) {
+            throw new HttpException(400);
+        }
+        if ($action === 'afegir') {
+            $current[] = $teamId;
+            flash('success', 'Equip afegit.');
+        } else {
+            $current = array_values(array_diff($current, [$teamId]));
+            if (!$current) {
+                flash('error', 'Hi ha d\'haver almenys un equip.');
+                redirect('/calendari/' . $id . '#equips');
+            }
+            flash('success', 'Equip tret d\'aquest entreno.');
+        }
+        EventRepository::setTeams($id, $current);
+        redirect('/calendari/' . $id . '#equips');
     }
 
     private function findOr404(int $id): array

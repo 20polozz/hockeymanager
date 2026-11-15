@@ -243,6 +243,43 @@ final class EventRepository
      * Jugadors/es que es poden afegir a la llista d'un esdeveniment.
      * @return array<int,array<string,mixed>>
      */
+    /**
+     * Canvia els equips d'aquest esdeveniment concret: un sol equip → team_id; diversos → event_teams.
+     * @param array<int,int> $teamIds
+     */
+    public static function setTeams(int $eventId, array $teamIds): void
+    {
+        $teamIds = array_values(array_unique(array_map('intval', $teamIds)));
+        Database::pdo()->beginTransaction();
+        try {
+            Database::query('DELETE FROM event_teams WHERE event_id = ?', [$eventId]);
+            if (count($teamIds) === 1) {
+                Database::query('UPDATE events SET team_id = ? WHERE id = ?', [$teamIds[0], $eventId]);
+            } else {
+                Database::query('UPDATE events SET team_id = NULL WHERE id = ?', [$eventId]);
+                foreach ($teamIds as $tid) {
+                    Database::query('INSERT INTO event_teams (event_id, team_id) VALUES (?, ?)', [$eventId, $tid]);
+                }
+            }
+            Database::pdo()->commit();
+        } catch (\Throwable $e) {
+            Database::pdo()->rollBack();
+            throw $e;
+        }
+    }
+
+    /** Equips actuals de l'esdeveniment (buit si és per llista de jugadores). */
+    public static function eventTeams(array $event): array
+    {
+        if (!empty($event['teams'])) {
+            return $event['teams'];
+        }
+        if ($event['team_id'] !== null) {
+            return [['id' => (int)$event['team_id'], 'name' => $event['team_name'], 'color' => $event['color']]];
+        }
+        return [];
+    }
+
     public static function selectablePlayers(): array
     {
         $ids = TeamScope::ids();

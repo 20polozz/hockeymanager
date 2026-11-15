@@ -175,6 +175,48 @@
   });
   updatePick();
 
+
+  // Canvis en directe (sense recarregar ni moure la pàgina): formularis amb data-live.
+  // S'envia per fetch i es substitueixen les seccions marcades amb id de la pàgina resultant.
+  var LIVE_IDS = ['ev-hero', 'equips', 'convocades'];
+  var toast = function (msg, type) {
+    var t = document.createElement('div');
+    t.className = 'live-toast live-toast-' + (type || 'success');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add('is-on'); });
+    setTimeout(function () { t.classList.remove('is-on'); setTimeout(function () { t.remove(); }, 300); }, 2200);
+  };
+  document.addEventListener('submit', function (ev) {
+    var form = ev.target;
+    if (!form.matches || !form.matches('form[data-live]') || !window.fetch || !window.DOMParser) return;
+    ev.preventDefault();
+    var fd = new FormData(form);
+    var btn = ev.submitter;
+    if (btn && btn.name) fd.append(btn.name, btn.value);
+    if (btn) btn.disabled = true;
+    var openAdd = !!document.querySelector('.roster-add[open]');
+    fetch(form.getAttribute('action'), { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        LIVE_IDS.forEach(function (id) {
+          var cur = document.getElementById(id), next = doc.getElementById(id);
+          if (cur && next) cur.replaceWith(next);
+        });
+        var add = document.querySelector('.roster-add');
+        if (add && openAdd) add.open = true;
+        var alert = doc.querySelector('.alert');
+        if (alert) toast(alert.textContent.trim(), alert.classList.contains('alert-error') ? 'error' : 'success');
+      })
+      .catch(function () { form.removeAttribute('data-live'); if (btn && btn.name) { var h = document.createElement('input'); h.type = 'hidden'; h.name = btn.name; h.value = btn.value; form.appendChild(h); } form.submit(); });
+  });
+  // Caselles de selecció també dins de contingut substituït
+  document.addEventListener('change', function (ev) {
+    var cb = ev.target;
+    if (cb.matches && cb.matches('input[data-pick]') && cb.closest('.pick')) cb.closest('.pick').classList.toggle('is-on', cb.checked);
+  });
+
   // Formulari d'usuari: camps segons el rol
   var rolePanels = document.querySelectorAll('[data-role-panel]');
   document.querySelectorAll('input[data-role]').forEach(function (r) {
