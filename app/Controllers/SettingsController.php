@@ -5,8 +5,6 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Database;
-use App\Core\Gate;
-use App\Core\Migrator;
 use App\Repositories\ActivityLog;
 
 final class SettingsController extends Controller
@@ -17,7 +15,6 @@ final class SettingsController extends Controller
             'pageTitle' => 'Configuració',
             'activeNav' => 'settings',
             'user'      => Auth::user(),
-            'pending'   => Gate::allows('system.install') ? Migrator::pending() : [],
         ]);
     }
 

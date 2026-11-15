@@ -104,11 +104,6 @@ $router->get('/usuaris/{id}/editar', 'UserController@edit', ['can' => 'users.man
 $router->post('/usuaris/{id}', 'UserController@update', ['can' => 'users.manage']);
 $router->post('/usuaris/{id}/estat', 'UserController@toggle', ['can' => 'users.manage']);
 
-// Importació de dades
-$router->get('/configuracio/importacio', 'ImportController@index', ['can' => 'players.manage']);
-$router->get('/configuracio/importacio/plantilla', 'ImportController@template', ['can' => 'players.manage']);
-$router->post('/configuracio/importacio/csv', 'ImportController@preview', ['can' => 'players.manage']);
-$router->post('/configuracio/importacio/confirmar', 'ImportController@confirm', ['can' => 'players.manage']);
 
 // Configuració del compte
 $router->get('/configuracio', 'SettingsController@index', ['can' => 'settings.view']);

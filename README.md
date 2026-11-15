@@ -67,8 +67,6 @@ Copia la carpeta `hockeymanager/` a l'arrel del nou hosting, importa la BD i cre
 - **Partits**, **acta** (participació i estadístiques, també de porteria) i **Convocatòries**
 - **Estadístiques** d'equip, jugadors/es i porters/es (només dades registrades)
 - **Jugadors/es** i **Equips** amb historial; **Usuaris** amb rols i equips assignats
-- **Importació**: CSV de jugadors/es i connectors preparats per a FECAPA, RFEP i
-  Hockey Telemetry (`app/Import/`), desactivats fins a tenir API oficial o autorització
 
 ## Actualitzacions de la BD
 
