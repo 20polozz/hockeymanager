@@ -1,0 +1,32 @@
+# HockeyManager — tot passa per index.php (front controller).
+# Aquest fitxer substitueix les regles de reescriptura de la carpeta pare,
+# de manera que l'aplicació funciona igual a /hockeymanager o a l'arrel
+# d'un domini propi.
+DirectoryIndex index.php
+Options -Indexes -MultiViews
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Carpetes i fitxers interns: mai accessibles des del navegador
+    RewriteRule ^(app|database|storage)(/|$) - [F,L]
+    RewriteRule ^config(\.example)?\.php$ - [F,L]
+
+    # Fitxers estàtics que existeixen (css, js, imatges)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # La resta → router
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+<FilesMatch "\.(sql|md|log)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

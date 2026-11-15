@@ -1,0 +1,113 @@
+<?php
+/**
+ * Barra superior: títol, cercador, selector d'equip, notificacions i perfil.
+ * @var string $pageTitle
+ * @var bool $showTeamPicker
+ */
+use App\Core\App;
+use App\Core\Auth;
+use App\Core\Gate;
+use App\Core\TeamScope;
+use App\Repositories\DashboardRepository;
+
+$user = Auth::user();
+$teams = TeamScope::teams();
+$activeTeam = TeamScope::activeId();
+
+// Notificacions: convocatòries pendents de resposta
+$notifications = [];
+if ($user) {
+    if (Auth::hasRole(Auth::ROLE_PLAYER)) {
+        if (!empty($user['player_id'])) {
+            foreach (DashboardRepository::pendingCallupsForPlayer((int)$user['player_id']) as $c) {
+                $notifications[] = [
+                    'icon' => 'clipboard', 'tone' => 'violet', 'href' => url('/convocatories'),
+                    'title' => 'Convocatòria pendent de resposta',
+                    'text' => $c['team_name'] . ' ' . ($c['is_home'] ? 'vs' : '@') . ' ' . $c['opponent'] . ' · ' . fdate($c['starts_at'], 'short'),
+                ];
+            }
+        }
+    } elseif (Gate::allows('callups.manage')) {
+        foreach ((new DashboardRepository(TeamScope::ids()))->pendingCallups() as $c) {
+            $notifications[] = [
+                'icon' => 'clipboard', 'tone' => 'orange', 'href' => url('/convocatories'),
+                'title' => (int)$c['pending'] . ' respostes pendents',
+                'text' => $c['team_name'] . ' ' . ($c['is_home'] ? 'vs' : '@') . ' ' . $c['opponent'] . ' · ' . fdate($c['starts_at'], 'short'),
+            ];
+        }
+    }
+}
+?>
+<header class="topbar">
+  <button type="button" class="icon-btn menu-btn" data-sidebar-open aria-label="Obre el menú" aria-controls="sidebar"><?= icon('menu') ?></button>
+  <h1 class="page-title"><?= e($pageTitle) ?></h1>
+
+  <form class="search" action="<?= e(url('/cerca')) ?>" method="get" role="search">
+    <label class="visually-hidden" for="global-search">Cerca</label>
+    <?= icon('search', 'icon icon-sm search-icon') ?>
+    <input id="global-search" type="search" name="q" placeholder="Cerca jugadors o equips…" value="<?= e($_GET['q'] ?? '') ?>" minlength="2" maxlength="80" autocomplete="off">
+  </form>
+
+  <div class="topbar-actions">
+    <?php if ($showTeamPicker && count($teams) > 1): ?>
+      <form class="team-picker" action="<?= e(url('/equip-actiu')) ?>" method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="back" value="<?= e(App::path()) ?>">
+        <label class="visually-hidden" for="team-picker">Equip</label>
+        <?= icon('shield', 'icon icon-sm') ?>
+        <select id="team-picker" name="team_id" data-autosubmit>
+          <option value="0">Tots els equips</option>
+          <?php foreach ($teams as $t): ?>
+            <option value="<?= (int)$t['id'] ?>"<?= $activeTeam === (int)$t['id'] ? ' selected' : '' ?>><?= e($t['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+        <noscript><button type="submit" class="btn btn-sm">Aplica</button></noscript>
+      </form>
+    <?php endif; ?>
+
+    <details class="dropdown">
+      <summary class="icon-btn" aria-label="Notificacions (<?= count($notifications) ?>)">
+        <?= icon('bell') ?>
+        <?php if ($notifications): ?><span class="badge-dot"><?= count($notifications) ?></span><?php endif; ?>
+      </summary>
+      <div class="dropdown-menu dropdown-wide">
+        <div class="dropdown-head">Notificacions</div>
+        <?php if (!$notifications): ?>
+          <p class="dropdown-empty">No tens res pendent.</p>
+        <?php else: foreach ($notifications as $n): ?>
+          <a class="notif" href="<?= e($n['href']) ?>">
+            <span class="tile tile-sm tone-<?= e($n['tone']) ?>"><?= icon($n['icon'], 'icon icon-sm') ?></span>
+            <span><strong><?= e($n['title']) ?></strong><small><?= e($n['text']) ?></small></span>
+          </a>
+        <?php endforeach; endif; ?>
+      </div>
+    </details>
+
+    <?php if ($user): ?>
+      <details class="dropdown">
+        <summary class="profile-btn" aria-label="Menú del perfil">
+          <span class="avatar"><?= e(initials((string)$user['name'])) ?></span>
+          <span class="profile-text">
+            <span class="profile-name"><?= e(first_name((string)$user['name'])) ?></span>
+            <span class="profile-role"><?= e(Auth::roleLabels()[$user['role']] ?? '') ?></span>
+          </span>
+          <?= icon('chevron-down', 'icon icon-sm profile-caret') ?>
+        </summary>
+        <div class="dropdown-menu">
+          <div class="dropdown-head">
+            <strong><?= e($user['name']) ?></strong>
+            <small><?= e($user['email']) ?></small>
+          </div>
+          <?php if (Gate::allows('players.own')): ?>
+            <a class="dropdown-item" href="<?= e(url('/perfil')) ?>"><?= icon('user', 'icon icon-sm') ?> El meu perfil</a>
+          <?php endif; ?>
+          <a class="dropdown-item" href="<?= e(url('/configuracio')) ?>"><?= icon('settings', 'icon icon-sm') ?> Configuració</a>
+          <form action="<?= e(url('/logout')) ?>" method="post">
+            <?= csrf_field() ?>
+            <button type="submit" class="dropdown-item danger"><?= icon('logout', 'icon icon-sm') ?> Tanca la sessió</button>
+          </form>
+        </div>
+      </details>
+    <?php endif; ?>
+  </div>
+</header>
