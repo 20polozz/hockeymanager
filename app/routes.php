@@ -30,6 +30,11 @@ $router->get('/perfil', 'PlayerController@own', ['can' => 'players.own']);
 // Equips
 $router->get('/equips', 'TeamController@index', ['can' => 'teams.view']);
 $router->get('/equips/nou', 'TeamController@create', ['can' => 'teams.manage']);
+$router->get('/equips/categories', 'CategoryController@index', ['can' => 'teams.manage']);
+$router->post('/equips/categories', 'CategoryController@store', ['can' => 'teams.manage']);
+$router->post('/equips/categories/{id}', 'CategoryController@update', ['can' => 'teams.manage']);
+$router->post('/equips/categories/{id}/moure', 'CategoryController@move', ['can' => 'teams.manage']);
+$router->post('/equips/categories/{id}/eliminar', 'CategoryController@destroy', ['can' => 'teams.manage']);
 $router->post('/equips', 'TeamController@store', ['can' => 'teams.manage']);
 $router->get('/equips/{id}/editar', 'TeamController@edit', ['can' => 'teams.manage']);
 $router->post('/equips/{id}', 'TeamController@update', ['can' => 'teams.manage']);

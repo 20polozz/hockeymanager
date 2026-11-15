@@ -26,7 +26,8 @@ $color = $val('color', '#1e3a8a');
           <?php foreach ($categories as $c): ?>
             <option value="<?= (int)$c['id'] ?>"<?= $val('category_id') === (string)$c['id'] ? ' selected' : '' ?>><?= e($c['name']) ?></option>
           <?php endforeach; ?>
-        </select></label>
+        </select>
+        <small class="muted">Falta alguna categoria? <a href="<?= e(url('/equips/categories')) ?>">Gestiona les categories</a>.</small></label>
 
       <fieldset class="field">
         <legend>Color</legend>

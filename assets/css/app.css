@@ -885,3 +885,4 @@ a.bar-label { color: var(--text); }
 .preview-table td.err { color: var(--red); }
 .settings-links { display: flex; flex-wrap: wrap; gap: 8px; }
 .pill-navy { background: var(--navy-bg); color: var(--navy); } .pill-violet { background: var(--violet-bg); color: var(--violet); }
+.row-actions-start { justify-content: flex-start; }
