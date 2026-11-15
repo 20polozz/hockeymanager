@@ -9,6 +9,9 @@
  * 3. Posa una "install_key" llarga i obre /hockeymanager/install.
  *
  * config.php NO es puja a GitHub (.gitignore): s'ha de pujar a mà per FTP.
+ *
+ * Mentre l'app és dins de hockeyfantasy.eu no cal: sense config.php s'agafen
+ * les credencials del config.php de HockeyFantasy amb la BD "hockeymanager".
  */
 return [
     'db' => [

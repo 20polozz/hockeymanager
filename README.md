@@ -33,19 +33,23 @@ hockeymanager/
 
 ## Posar-ho en marxa (cdmon)
 
-1. Panell de cdmon → crea una **base de dades nova** (p. ex. `hockeymanager`) amb el seu usuari.
-2. Copia `config.example.php` com a `config.php`, omple-hi les dades de la BD i una
-   `install_key` llarga, i puja'l per FTP a la carpeta `hockeymanager/` del servidor.
-   (El desplegament automàtic de GitHub no el toca perquè no és al repositori.)
-3. Obre `https://hockeyfantasy.eu/hockeymanager/install`, escriu la clau i crea el
-   compte de coordinador. Opcionalment, carrega les dades de demostració.
+Mentre viu dins de hockeyfantasy.eu **no cal cap config.php propi**: si no n'hi ha,
+l'app agafa el servidor, l'usuari i la contrasenya del `config.php` de HockeyFantasy
+i es connecta a la base de dades **`hockeymanager`** (la seva, no la de HockeyFantasy).
+
+1. Panell de cdmon → comprova que la BD `hockeymanager` existeix i que l'usuari de
+   HockeyFantasy hi té permisos.
+2. Fusiona la PR (es desplega sola per FTP).
+3. Obre `https://hockeyfantasy.eu/hockeymanager/install`. La clau d'instal·lació és
+   l'`ADMIN_KEY` del `config.php` de HockeyFantasy. Crea el compte de coordinador i,
+   si vols, carrega les dades de demostració.
 
 Quan arribin noves migracions, un coordinador les aplica des de **Configuració → Base de dades**.
 
 ## Moure-ho a un domini propi
 
-Copia la carpeta `hockeymanager/` a l'arrel del nou hosting, importa (o recrea) la BD i
-actualitza `config.php`. La ruta base es detecta sola (`base_path => null`).
+Copia la carpeta `hockeymanager/` a l'arrel del nou hosting, importa la BD i crea
+`config.php` a partir de `config.example.php` amb les noves credencials. La ruta base es detecta sola (`base_path => null`).
 
 ## Seguretat
 
