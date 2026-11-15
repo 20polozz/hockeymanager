@@ -1,5 +1,6 @@
 <?php
-/** @var array $player @var array $history @var array $attendance @var bool $canManage */
+/** @var array $player @var array $history @var array $attendance @var array $attHistory @var bool $canManage */
+$stLabels = ['present' => ['Present', 'green'], 'retard' => ['Retard', 'blue'], 'justificat' => ['Justificada', 'orange'], 'absent' => ['Absent', 'red']];
 $name = $player['first_name'] . ' ' . $player['last_name'];
 $age = $player['birth_date'] ? (int)date_diff(date_create($player['birth_date']), date_create('today'))->y : null;
 $current = array_values(array_filter($history, function ($h) { return $h['left_at'] === null; }));
@@ -43,6 +44,17 @@ $attended = $attendance['present'] + $attendance['retard'];
         <span><i class="dot dot-orange"></i><?= $attendance['justificat'] ?> absències justificades</span>
         <span><i class="dot dot-red"></i><?= $attendance['absent'] ?> absències</span>
       </div>
+      <?php if ($attHistory): ?>
+        <h3 class="sub-title">Últimes sessions</h3>
+        <ul class="att-history">
+          <?php foreach ($attHistory as $h): [$lbl, $tone] = $stLabels[$h['status']] ?? ['—', 'muted']; ?>
+            <li>
+              <span class="small"><?= e(fdate($h['starts_at'], 'short')) ?> · <?= e($h['team_name']) ?></span>
+              <span class="pill pill-<?= $tone ?>" title="<?= e((string)$h['observation']) ?>"><?= $lbl ?></span>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
     <?php else: ?>
       <?= component('empty_state', ['icon' => 'checklist', 'text' => 'Encara no hi ha assistència registrada.']) ?>
     <?php endif; ?>

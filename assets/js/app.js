@@ -77,6 +77,55 @@
     });
   });
 
+  // Mostra/amaga un camp lligat a una casella (data-reveal="id")
+  document.querySelectorAll('input[data-reveal]').forEach(function (cb) {
+    var target = document.getElementById(cb.getAttribute('data-reveal'));
+    if (!target) return;
+    cb.addEventListener('change', function () {
+      target.hidden = !cb.checked;
+      var inp = target.querySelector('input');
+      if (inp) { inp.required = cb.checked; if (cb.checked) inp.focus(); }
+    });
+  });
+
+  // Passar llista
+  var roll = document.querySelector('form[data-attendance]');
+  if (roll) {
+    var items = roll.querySelectorAll('.roll-item');
+    var counter = roll.querySelector('[data-count]');
+    var refresh = function () {
+      var marked = 0, present = 0;
+      items.forEach(function (li) {
+        var c = li.querySelector('input[type=radio]:checked');
+        var v = c ? c.value : '';
+        li.className = 'roll-item' + (v ? ' st-' + v : '');
+        if (v) marked++;
+        if (v === 'present' || v === 'retard') present++;
+      });
+      if (counter) counter.textContent = marked + '/' + items.length + ' marcats · ' + present + ' presents';
+    };
+    roll.addEventListener('change', refresh);
+    refresh();
+    var all = document.querySelector('[data-all-present]');
+    if (all) all.addEventListener('click', function () {
+      items.forEach(function (li) {
+        var checked = li.querySelector('input[type=radio]:checked');
+        if (!checked || checked.value === '') {
+          var p = li.querySelector('input[value=present]');
+          if (p) p.checked = true;
+        }
+      });
+      refresh();
+    });
+    roll.querySelectorAll('[data-note-toggle]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var note = b.closest('.roll-item').querySelector('.roll-note');
+        note.hidden = !note.hidden;
+        if (!note.hidden) note.focus();
+      });
+    });
+  }
+
   // Els missatges d'èxit desapareixen sols
   setTimeout(function () {
     document.querySelectorAll('.alert-success').forEach(function (a) { a.remove(); });

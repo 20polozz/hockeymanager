@@ -3,14 +3,7 @@
 $q = $search !== '' ? ['q' => $search] : [];
 $canManage = App\Core\Gate::allows('players.manage');
 ?>
-<?php if (count($teams) > 1): ?>
-  <nav class="filter-chips" aria-label="Filtra per equip">
-    <a class="chip<?= $activeTeam === 0 ? ' is-active' : '' ?>" href="<?= e(url('/jugadors', $q)) ?>"<?= $activeTeam === 0 ? ' aria-current="true"' : '' ?>>Tots els equips</a>
-    <?php foreach ($teams as $t): $on = $activeTeam === (int)$t['id']; ?>
-      <a class="chip<?= $on ? ' is-active' : '' ?>" href="<?= e(url('/jugadors', $q + ['equip' => (int)$t['id']])) ?>"<?= $on ? ' aria-current="true"' : '' ?>><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['name']) ?></a>
-    <?php endforeach; ?>
-  </nav>
-<?php endif; ?>
+<?= component('team_chips', ['teams' => $teams, 'active' => $activeTeam, 'path' => '/jugadors', 'query' => $q]) ?>
 
 <div class="page-head">
   <p class="muted"><?= count($players) ?> jugadors/es<?= $search !== '' ? ' per a «' . e($search) . '»' : '' ?></p>

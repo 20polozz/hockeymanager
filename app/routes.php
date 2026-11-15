@@ -35,13 +35,26 @@ $router->get('/equips/{id}/editar', 'TeamController@edit', ['can' => 'teams.mana
 $router->post('/equips/{id}', 'TeamController@update', ['can' => 'teams.manage']);
 $router->post('/equips/{id}/eliminar', 'TeamController@destroy', ['can' => 'teams.manage']);
 
+// Calendari
+$router->get('/calendari', 'CalendarController@index', ['can' => 'calendar.view']);
+$router->get('/calendari/nou', 'CalendarController@create', ['can' => 'calendar.manage']);
+$router->post('/calendari', 'CalendarController@store', ['can' => 'calendar.manage']);
+$router->get('/calendari/{id}', 'CalendarController@show', ['can' => 'calendar.view']);
+$router->get('/calendari/{id}/editar', 'CalendarController@edit', ['can' => 'calendar.manage']);
+$router->post('/calendari/{id}', 'CalendarController@update', ['can' => 'calendar.manage']);
+$router->post('/calendari/{id}/eliminar', 'CalendarController@destroy', ['can' => 'calendar.manage']);
+
+// Assistència
+$router->get('/assistencia', 'AttendanceController@index', ['can' => 'attendance.view']);
+$router->get('/assistencia/estadistiques', 'AttendanceController@stats', ['can' => 'attendance.view']);
+$router->get('/assistencia/{id}', 'AttendanceController@take', ['can' => 'attendance.manage']);
+$router->post('/assistencia/{id}', 'AttendanceController@save', ['can' => 'attendance.manage']);
+
 // Configuració del compte
 $router->get('/configuracio', 'SettingsController@index', ['can' => 'settings.view']);
 $router->post('/configuracio/contrasenya', 'SettingsController@updatePassword', ['can' => 'settings.view']);
 
 // Mòduls de les properes fases (pàgina pròpia amb l'estat i el que inclourà)
-$router->get('/assistencia', 'ModuleController@attendance', ['can' => 'attendance.view']);
-$router->get('/calendari', 'ModuleController@calendar', ['can' => 'calendar.view']);
 $router->get('/exercicis', 'ModuleController@exercises', ['can' => 'exercises.view']);
 $router->get('/entrenaments', 'ModuleController@trainings', ['can' => 'trainings.view']);
 $router->get('/partits', 'ModuleController@matches', ['can' => 'matches.view']);

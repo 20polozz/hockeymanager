@@ -10,27 +10,6 @@ namespace App\Controllers;
  */
 final class ModuleController extends Controller
 {
-    public function attendance(): void
-    {
-        $this->show('attendance', 'Assistència', 'checklist', 2, 'Passa llista des del mòbil en pocs tocs i segueix l\'evolució de cada jugador.', [
-            'Seleccionar equip i entrenament',
-            'Marcar presents, absents, absències justificades i retards',
-            'Observacions per jugador',
-            'Percentatge per jugador i per equip',
-            'Historial mensual i jugadors/es amb més absències',
-        ]);
-    }
-
-    public function calendar(): void
-    {
-        $this->show('calendar', 'Calendari', 'calendar', 2, 'Tots els entrenaments, partits i esdeveniments del club en un sol lloc.', [
-            'Vistes mensual, setmanal i diària',
-            'Colors diferents per a entrenaments, partits i esdeveniments especials',
-            'Crear, modificar i eliminar esdeveniments',
-            'Filtrar per equip',
-        ]);
-    }
-
     public function exercises(): void
     {
         $this->show('exercises', 'Exercicis', 'cone', 3, 'Biblioteca d\'exercicis d\'hoquei patins per construir sessions.', [

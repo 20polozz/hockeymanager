@@ -77,6 +77,40 @@ function old_array(string $key): ?array
     return is_array($v) ? $v : [];
 }
 
+/**
+ * Valor d'un camp de formulari: dada antiga (després d'un error), registre o valor per defecte.
+ * @param array<string,mixed>|null $record
+ */
+function form_val(?array $record, string $key, string $default = ''): string
+{
+    $old = old($key, "\0");
+    if ($old !== "\0") {
+        return $old;
+    }
+    return $record !== null && isset($record[$key]) ? (string)$record[$key] : $default;
+}
+
+/** Equip triat a ?equip=ID si l'usuari hi té accés (0 = tots). */
+function team_filter(): int
+{
+    $id = (int)($_GET['equip'] ?? 0);
+    return ($id > 0 && \App\Core\TeamScope::canAccess($id)) ? $id : 0;
+}
+
+/** Equips a consultar segons el filtre: l'escollit o tots els accessibles. */
+function team_filter_ids(): array
+{
+    $id = team_filter();
+    return $id > 0 ? [$id] : \App\Core\TeamScope::ids();
+}
+
+/** Combina data (Y-m-d) i hora (H:i) d'un formulari. Retorna null si no és vàlid. */
+function parse_datetime(string $date, string $time): ?string
+{
+    $dt = DateTime::createFromFormat('!Y-m-d H:i', trim($date) . ' ' . trim($time));
+    return $dt && $dt->format('Y-m-d H:i') === trim($date) . ' ' . trim($time) ? $dt->format('Y-m-d H:i:s') : null;
+}
+
 function remember_input(array $data): void
 {
     $_SESSION['hm_old'] = $data;
