@@ -100,6 +100,112 @@ switch ($calView) {
       </section>
     <?php endforeach; ?>
   </div>
+<?php elseif ($calView === 'setmana'):
+  // ---- Setmana: graella horària (ordinador) + franja de dies i llista (mòbil) ----
+  $days = [];
+  for ($d = clone $from; $d < $to; $d->modify('+1 day')) { $days[] = $d->format('Y-m-d'); }
+  $toMin = static function (string $dt): int { return (int)substr($dt, 11, 2) * 60 + (int)substr($dt, 14, 2); };
+  $startH = 24; $endH = 0; $blocks = [];
+  foreach ($days as $key) {
+      $evs = [];
+      foreach ($byDay[$key] ?? [] as $it) {
+          $s0 = $toMin((string)$it['starts_at']);
+          $e0 = $it['ends_at'] && substr((string)$it['ends_at'], 0, 10) === $key ? $toMin((string)$it['ends_at']) : $s0 + ($it['kind'] === 'partit' ? 90 : 60);
+          $e0 = max($e0, $s0 + 30);
+          $startH = min($startH, intdiv($s0, 60)); $endH = max($endH, (int)ceil($e0 / 60));
+          $evs[] = ['it' => $it, 's' => $s0, 'e' => $e0];
+      }
+      // Carrils per als que es solapen
+      usort($evs, static function ($a, $b) { return [$a['s'], $a['e']] <=> [$b['s'], $b['e']]; });
+      $lanesEnd = []; $group = []; $groupEnd = -1; $out = [];
+      $flush = static function () use (&$group, &$out, &$lanesEnd) {
+          $n = max(1, count($lanesEnd));
+          foreach ($group as $g) { $g['n'] = $n; $out[] = $g; }
+          $group = []; $lanesEnd = [];
+      };
+      foreach ($evs as $ev) {
+          if ($ev['s'] >= $groupEnd && $group) { $flush(); }
+          $lane = null;
+          foreach ($lanesEnd as $i => $end) { if ($end <= $ev['s']) { $lane = $i; break; } }
+          if ($lane === null) { $lane = count($lanesEnd); }
+          $lanesEnd[$lane] = $ev['e'];
+          $ev['lane'] = $lane; $group[] = $ev; $groupEnd = max($groupEnd, $ev['e']);
+      }
+      if ($group) { $flush(); }
+      $blocks[$key] = $out;
+  }
+  if ($startH > $endH) { $startH = 17; $endH = 22; }
+  if ($endH - $startH < 5) { $startH = max(0, min($startH, $endH - 5)); $endH = min(24, $startH + 5); }
+  $hourPx = 60; $gridH = ($endH - $startH) * $hourPx;
+  $kindTone = ['partit' => 'green', 'especial' => 'orange', 'gimnas' => 'violet', 'entrenament' => 'blue'];
+?>
+  <!-- Mòbil: franja de dies -->
+  <nav class="week-strip" aria-label="Dies de la setmana">
+    <?php foreach ($days as $i => $key): $n = count($byDay[$key] ?? []); ?>
+      <a href="<?= $n ? '#dia-' . $key : e($link('dia', new DateTime($key))) ?>" class="week-strip-day<?= $key === $today ? ' is-today' : '' ?><?= $n ? '' : ' is-empty' ?>">
+        <span class="week-strip-dow"><?= $dows[$i] ?></span>
+        <span class="week-strip-num"><?= (int)substr($key, 8, 2) ?></span>
+        <span class="week-strip-dots"><?php foreach (array_slice($byDay[$key] ?? [], 0, 3) as $it): ?><i class="tone-dot-<?= $kindTone[$it['kind']] ?? 'blue' ?>"></i><?php endforeach; ?></span>
+      </a>
+    <?php endforeach; ?>
+  </nav>
+
+  <!-- Mòbil: llista compacta (només dies amb activitat) -->
+  <div class="week-list">
+    <?php if ($count === 0): ?>
+      <section class="panel"><?= component('empty_state', ['icon' => 'calendar', 'text' => 'No hi ha res programat aquesta setmana.']) ?></section>
+    <?php endif; ?>
+    <?php foreach ($days as $key): if (empty($byDay[$key])) { continue; } ?>
+      <section class="week-list-day<?= $key === $today ? ' is-today' : '' ?>" id="dia-<?= $key ?>">
+        <h3 class="week-list-date"><?= e(ucfirst(fdate($key, 'day'))) ?><?= $key === $today ? ' <span class="pill pill-blue">Avui</span>' : '' ?></h3>
+        <ul class="week-list-items">
+          <?php foreach ($byDay[$key] as $it): ?>
+            <li><a class="wl-item tone-<?= $kindTone[$it['kind']] ?? 'blue' ?>" href="<?= e($itemUrl($it)) ?>">
+              <span class="wl-time"><?= e(fdate($it['starts_at'], 'time')) ?><?php if ($it['ends_at']): ?><small><?= e(fdate($it['ends_at'], 'time')) ?></small><?php endif; ?></span>
+              <span class="wl-body"><strong><?= e($it['title']) ?></strong>
+                <span class="small muted"><?= e($it['team_name']) ?><?= $it['location'] ? ' · ' . e($it['location']) : '' ?></span></span>
+              <?php if (in_array($it['kind'], ['entrenament', 'gimnas'], true) && (int)$it['attendance_count'] > 0): ?><span class="wl-check" title="Llista passada"><?= icon('check', 'icon icon-sm') ?></span><?php endif; ?>
+              <?= icon('chevron-right', 'icon icon-sm muted') ?>
+            </a></li>
+          <?php endforeach; ?>
+        </ul>
+      </section>
+    <?php endforeach; ?>
+  </div>
+
+  <!-- Ordinador: graella horària -->
+  <section class="panel panel-flush week-grid-panel">
+    <div class="week-grid" style="--hour: <?= $hourPx ?>px">
+      <div class="wg-corner"></div>
+      <?php foreach ($days as $i => $key): ?>
+        <div class="wg-head<?= $key === $today ? ' is-today' : '' ?>">
+          <a href="<?= e($link('dia', new DateTime($key))) ?>"><span><?= $dows[$i] ?></span><b><?= (int)substr($key, 8, 2) ?></b></a>
+          <?php if ($canManage): ?><a class="wg-add" href="<?= e(url('/calendari/nou', ['data' => $key])) ?>" aria-label="Nou el <?= e(fdate($key, 'day')) ?>"><?= icon('plus', 'icon icon-xs') ?></a><?php endif; ?>
+        </div>
+      <?php endforeach; ?>
+
+      <div class="wg-hours" style="height: <?= $gridH ?>px">
+        <?php for ($h = $startH; $h < $endH; $h++): ?><span style="top: <?= ($h - $startH) * $hourPx ?>px"><?= sprintf('%02d:00', $h) ?></span><?php endfor; ?>
+      </div>
+      <?php foreach ($days as $key): ?>
+        <div class="wg-col<?= $key === $today ? ' is-today' : '' ?>" style="height: <?= $gridH ?>px">
+          <?php if ($key === $today): $nowMin = (int)date('G') * 60 + (int)date('i');
+            if ($nowMin >= $startH * 60 && $nowMin <= $endH * 60): ?><span class="wg-now" style="top: <?= round(($nowMin - $startH * 60) / 60 * $hourPx) ?>px"></span><?php endif; endif; ?>
+          <?php foreach ($blocks[$key] as $b): $it = $b['it'];
+            $top = ($b['s'] - $startH * 60) / 60 * $hourPx; $h = ($b['e'] - $b['s']) / 60 * $hourPx;
+            $w = 100 / $b['n']; ?>
+            <a class="wg-ev tone-<?= $kindTone[$it['kind']] ?? 'blue' ?><?= $h < 44 ? ' is-short' : '' ?>" href="<?= e($itemUrl($it)) ?>"
+               style="top: <?= round($top) ?>px; height: <?= round($h) - 2 ?>px; left: calc(<?= round($w * $b['lane'], 3) ?>% + 2px); width: calc(<?= round($w, 3) ?>% - 4px)"
+               title="<?= e(fdate($it['starts_at'], 'time') . ($it['ends_at'] ? '–' . fdate($it['ends_at'], 'time') : '') . ' · ' . $it['title'] . ' · ' . $it['team_name']) ?>">
+              <span class="wg-ev-time"><?= e(fdate($it['starts_at'], 'time')) ?><?= $it['ends_at'] ? '–' . e(fdate($it['ends_at'], 'time')) : '' ?></span>
+              <strong class="wg-ev-title"><?= e($it['title']) ?></strong>
+              <span class="wg-ev-meta"><?= e($it['team_name']) ?></span>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </section>
 <?php else: ?>
   <?php if ($count === 0): ?>
     <section class="panel"><?= component('empty_state', ['icon' => 'calendar', 'text' => $calView === 'dia' ? 'No hi ha res programat aquest dia.' : 'No hi ha res programat aquesta setmana.']) ?></section>
