@@ -19,7 +19,24 @@ final class EventRepository
     public const TRAINING_TYPES = ['entrenament', 'gimnas'];
 
     /**
-     * Condició de visibilitat: esdeveniments dels equips indicats i els de tot el club.
+     * Expressió SQL amb el nom a mostrar: l'equip, els equips compartits o "N jugadores".
+     */
+    public static function labelSql(string $e = 'e', string $t = 't'): string
+    {
+        return "COALESCE($t.name,
+                    (SELECT CASE
+                              WHEN COUNT(*) = 0 THEN NULL
+                              WHEN COUNT(*) >= (SELECT COUNT(*) FROM teams ta JOIN seasons sa ON sa.id = ta.season_id AND sa.is_current = 1) THEN 'Tots els equips'
+                              WHEN COUNT(*) > 2 THEN CONCAT(COUNT(*), ' equips')
+                              ELSE GROUP_CONCAT(tl.name ORDER BY tl.name SEPARATOR ', ')
+                            END
+                     FROM event_teams etl JOIN teams tl ON tl.id = etl.team_id WHERE etl.event_id = $e.id),
+                    (SELECT CONCAT(COUNT(*), ' jugadores') FROM event_players epl WHERE epl.event_id = $e.id))";
+    }
+
+    /**
+     * Condició de visibilitat: esdeveniments d'algun dels equips indicats (propis o compartits)
+     * i els que tenen una llista de jugadores.
      * Un jugador/a només veu els esdeveniments de club amb llista si hi és.
      * @param array<int,int> $teamIds
      * @return array{0:string,1:array<int,mixed>}
@@ -29,27 +46,31 @@ final class EventRepository
         $parts = [];
         $params = [];
         if ($teamIds) {
-            $parts[] = "$alias.team_id IN (" . Database::in($teamIds) . ')';
-            $params = $teamIds;
+            $in = Database::in($teamIds);
+            $parts[] = "$alias.team_id IN ($in)";
+            $parts[] = "EXISTS (SELECT 1 FROM event_teams xt WHERE xt.event_id = $alias.id AND xt.team_id IN ($in))";
+            $params = array_merge($teamIds, $teamIds);
         }
-        $club = "$alias.team_id IS NULL";
+        // Esdeveniments amb llista pròpia (gimnàs): el personal els veu; una jugadora, només si hi és
+        $list = "$alias.team_id IS NULL AND EXISTS (SELECT 1 FROM event_players x WHERE x.event_id = $alias.id)";
         if (Auth::hasRole(Auth::ROLE_PLAYER)) {
             $user = Auth::user();
-            $club .= " AND (NOT EXISTS (SELECT 1 FROM event_players x WHERE x.event_id = $alias.id)
-                          OR EXISTS (SELECT 1 FROM event_players x WHERE x.event_id = $alias.id AND x.player_id = ?))";
+            $list = "$alias.team_id IS NULL AND EXISTS (SELECT 1 FROM event_players x WHERE x.event_id = $alias.id AND x.player_id = ?)";
             $params[] = (int)($user['player_id'] ?? 0);
+        } elseif (!$teamIds) {
+            $list = '1 = 0';
         }
-        $parts[] = "($club)";
+        $parts[] = "($list)";
         return ['(' . implode(' OR ', $parts) . ')', $params];
     }
 
     public static function canAccess(array $event): bool
     {
-        if ($event['team_id'] === null) {
-            [$w, $p] = self::visibility('e', []);
-            return (bool)Database::value("SELECT 1 FROM events e WHERE e.id = ? AND $w", array_merge([$event['id']], $p));
+        if ($event['team_id'] !== null) {
+            return TeamScope::canAccess((int)$event['team_id']);
         }
-        return TeamScope::canAccess((int)$event['team_id']);
+        [$w, $p] = self::visibility('e', TeamScope::ids());
+        return (bool)Database::value("SELECT 1 FROM events e WHERE e.id = ? AND $w", array_merge([$event['id']], $p));
     }
 
     /**
@@ -61,14 +82,14 @@ final class EventRepository
     {
         [$vw, $vp] = self::visibility('e', $teamIds);
         if ($onlyTeam > 0) {
-            // Amb un equip triat: els esdeveniments de club sense llista, o amb alguna jugadora de l'equip
-            $vw .= " AND (e.team_id IS NOT NULL OR NOT EXISTS (SELECT 1 FROM event_players y WHERE y.event_id = e.id)
+            // Amb un equip triat: els seus, els compartits amb ell i els gimnasos amb alguna jugadora seva
+            $vw .= " AND (e.team_id = ? OR EXISTS (SELECT 1 FROM event_teams y WHERE y.event_id = e.id AND y.team_id = ?)
                           OR EXISTS (SELECT 1 FROM event_players y JOIN team_players tp ON tp.player_id = y.player_id AND tp.team_id = ? AND tp.left_at IS NULL WHERE y.event_id = e.id))";
-            $vp[] = $onlyTeam;
+            array_push($vp, $onlyTeam, $onlyTeam, $onlyTeam);
         }
         $events = Database::all(
             "SELECT e.id, e.type AS kind, e.title, e.starts_at, e.ends_at, e.location, e.team_id,
-                    COALESCE(t.name, 'Tot el club') AS team_name, COALESCE(t.color, '#64748b') AS color,
+                    " . self::labelSql() . " AS team_name, COALESCE(t.color, '#64748b') AS color,
                     (SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.id) AS attendance_count,
                     (SELECT COUNT(*) FROM event_players ep WHERE ep.event_id = e.id) AS participants
              FROM events e LEFT JOIN teams t ON t.id = e.team_id
@@ -96,7 +117,7 @@ final class EventRepository
     public static function find(int $id): ?array
     {
         $e = Database::first(
-            "SELECT e.*, COALESCE(t.name, 'Tot el club') AS team_name, COALESCE(t.color, '#64748b') AS color, u.name AS created_by_name,
+            "SELECT e.*, " . self::labelSql() . " AS team_name, COALESCE(t.color, '#64748b') AS color, u.name AS created_by_name,
                     (SELECT COUNT(*) FROM events s WHERE e.series_id IS NOT NULL AND s.series_id = e.series_id AND s.starts_at > e.starts_at) AS later_in_series
              FROM events e LEFT JOIN teams t ON t.id = e.team_id
              LEFT JOIN users u ON u.id = e.created_by
@@ -104,6 +125,7 @@ final class EventRepository
             [$id]
         );
         if ($e) {
+            $e['teams'] = Database::all('SELECT t.id, t.name, t.color FROM event_teams et JOIN teams t ON t.id = et.team_id WHERE et.event_id = ? ORDER BY t.name', [$id]);
             $e['participants'] = Database::all(
                 'SELECT p.id, p.first_name, p.last_name, p.position FROM event_players ep JOIN players p ON p.id = ep.player_id
                  WHERE ep.event_id = ? ORDER BY p.last_name, p.first_name',
@@ -126,7 +148,7 @@ final class EventRepository
         }
         return Database::all(
             "SELECT e.id, e.type, e.title, e.starts_at, e.ends_at, e.location, e.team_id,
-                    COALESCE(t.name, 'Tot el club') AS team_name, COALESCE(t.color, '#64748b') AS color,
+                    " . self::labelSql() . " AS team_name, COALESCE(t.color, '#64748b') AS color,
                     (SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.id) AS marked,
                     (SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.id AND a.status IN ('present','retard')) AS attended
              FROM events e LEFT JOIN teams t ON t.id = e.team_id
@@ -141,7 +163,7 @@ final class EventRepository
      * @param array<string,mixed> $d
      * @param array<int,int> $participants
      */
-    public static function create(array $d, ?string $repeatUntil, array $participants = []): int
+    public static function create(array $d, ?string $repeatUntil, array $participants = [], array $teams = []): int
     {
         $start = new \DateTime($d['starts_at']);
         $end = $d['ends_at'] ? new \DateTime($d['ends_at']) : null;
@@ -166,6 +188,9 @@ final class EventRepository
                 foreach ($participants as $pid) {
                     Database::query('INSERT INTO event_players (event_id, player_id) VALUES (?, ?)', [$id, $pid]);
                 }
+                foreach ($teams as $tid) {
+                    Database::query('INSERT INTO event_teams (event_id, team_id) VALUES (?, ?)', [$id, $tid]);
+                }
                 $start->modify('+7 days');
                 if ($end) {
                     $end->modify('+7 days');
@@ -184,7 +209,7 @@ final class EventRepository
      * @param array<string,mixed> $d
      * @param array<int,int> $participants
      */
-    public static function update(int $id, array $d, array $participants): void
+    public static function update(int $id, array $d, array $participants, array $teams = []): void
     {
         Database::query(
             'UPDATE events SET team_id = ?, type = ?, title = ?, starts_at = ?, ends_at = ?, location = ?, notes = ? WHERE id = ?',
@@ -193,6 +218,10 @@ final class EventRepository
         Database::query('DELETE FROM event_players WHERE event_id = ?', [$id]);
         foreach ($participants as $pid) {
             Database::query('INSERT INTO event_players (event_id, player_id) VALUES (?, ?)', [$id, $pid]);
+        }
+        Database::query('DELETE FROM event_teams WHERE event_id = ?', [$id]);
+        foreach ($teams as $tid) {
+            Database::query('INSERT INTO event_teams (event_id, team_id) VALUES (?, ?)', [$id, $tid]);
         }
     }
 
@@ -229,23 +258,40 @@ final class EventRepository
     }
 
     /**
-     * Valida el formulari. Retorna [dades, repetir fins (Y-m-d|null), participants, errors].
-     * team_id 0 = tot el club (només coordinació, admin o si l'usuari té equips).
+     * Valida el formulari. Retorna [dades, repetir fins (Y-m-d|null), participants, equips compartits, errors].
+     *  - who = equips: un equip (team_id) o diversos (event_teams)
+     *  - who = llista: jugadores concretes (event_players), p. ex. un grup de gimnàs
      * @param array<string,mixed> $in
      * @param array<int,int> $allowedTeams
-     * @return array{0:array<string,mixed>,1:?string,2:array<int,int>,3:array<int,string>}
+     * @return array{0:array<string,mixed>,1:?string,2:array<int,int>,3:array<int,int>,4:array<int,string>}
      */
     public static function validate(array $in, array $allowedTeams, bool $allowRepeat): array
     {
         $errors = [];
         $type = (string)($in['type'] ?? 'entrenament');
         $type = isset(self::TYPES[$type]) ? $type : 'entrenament';
-        $scope = (string)($in['team_id'] ?? '');
-        $teamId = $scope === 'club' ? 0 : (int)$scope;
         $date = (string)($in['date'] ?? '');
         $startsAt = parse_datetime($date, (string)($in['start_time'] ?? ''));
         $endTime = trim((string)($in['end_time'] ?? ''));
         $endsAt = $endTime !== '' ? parse_datetime($date, $endTime) : null;
+        $who = ($in['who'] ?? '') === 'llista' ? 'llista' : 'equips';
+
+        $teams = [];
+        $participants = [];
+        if ($who === 'llista') {
+            $valid = array_map('intval', array_column(self::selectablePlayers(), 'id'));
+            $participants = array_values(array_intersect(array_map('intval', (array)($in['participants'] ?? [])), $valid));
+            if (!$participants) {
+                $errors[] = 'Tria com a mínim un jugador/a per a la llista.';
+            }
+        } else {
+            $teams = array_values(array_intersect(array_map('intval', (array)($in['teams'] ?? [])), $allowedTeams));
+            if (!$teams) {
+                $errors[] = 'Tria com a mínim un equip.';
+            }
+        }
+        $teamId = count($teams) === 1 ? $teams[0] : 0;
+        $shared = count($teams) > 1 ? $teams : [];
 
         $d = [
             'team_id'   => $teamId,
@@ -256,17 +302,12 @@ final class EventRepository
             'location'  => mb_substr(trim((string)($in['location'] ?? '')), 0, 150),
             'notes'     => mb_substr(trim((string)($in['notes'] ?? '')), 0, 2000),
         ];
-
-        if ($scope === 'club') {
-            if (!Auth::isManager() && !$allowedTeams) {
-                $errors[] = 'No pots crear esdeveniments per a tot el club.';
-            }
-        } elseif (!in_array($teamId, $allowedTeams, true)) {
-            $errors[] = 'Tria un equip o «Tot el club».';
-        }
         if ($d['title'] === '') {
-            $name = $teamId > 0 ? (string)Database::value('SELECT name FROM teams WHERE id = ?', [$teamId]) : 'club';
-            $d['title'] = $type === 'gimnas' ? 'Gimnàs' : ($type === 'entrenament' ? 'Entrenament ' . $name : '');
+            if ($type === 'gimnas') {
+                $d['title'] = 'GYM';
+            } elseif ($type === 'entrenament') {
+                $d['title'] = $teamId > 0 ? 'Entrenament ' . (string)Database::value('SELECT name FROM teams WHERE id = ?', [$teamId]) : 'Entrenament';
+            }
         }
         if (mb_strlen($d['title']) < 2 || mb_strlen($d['title']) > 120) {
             $errors[] = 'Escriu un títol (2-120 caràcters).';
@@ -280,15 +321,6 @@ final class EventRepository
             $errors[] = 'L\'hora de final ha de ser posterior a la d\'inici.';
         }
 
-        $participants = [];
-        if (($in['who'] ?? '') === 'llista') {
-            $valid = array_map('intval', array_column(self::selectablePlayers(), 'id'));
-            $participants = array_values(array_intersect(array_map('intval', (array)($in['participants'] ?? [])), $valid));
-            if (!$participants) {
-                $errors[] = 'Tria com a mínim un jugador/a per a la llista.';
-            }
-        }
-
         $repeatUntil = null;
         if ($allowRepeat && !empty($in['repeat'])) {
             $repeatUntil = trim((string)($in['repeat_until'] ?? ''));
@@ -300,6 +332,6 @@ final class EventRepository
                 $errors[] = 'Com a màxim es pot repetir durant un any.';
             }
         }
-        return [$d, $repeatUntil, $participants, $errors];
+        return [$d, $repeatUntil, $participants, $shared, $errors];
     }
 }

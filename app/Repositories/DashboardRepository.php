@@ -118,7 +118,7 @@ final class DashboardRepository
         [$vw, $vp] = EventRepository::visibility('e', $this->teamIds);
         $params = array_merge($vp, [$this->now], $this->teamIds, [$this->now], [$limit]);
         return Database::all(
-            "(SELECT e.type AS kind, e.title, e.starts_at, e.location, COALESCE(t.name, 'Tot el club') AS team_name, COALESCE(t.color, '#64748b') AS color
+            "(SELECT e.type AS kind, e.title, e.starts_at, e.location, " . EventRepository::labelSql() . " AS team_name, COALESCE(t.color, '#64748b') AS color
               FROM events e LEFT JOIN teams t ON t.id = e.team_id
               WHERE $vw AND e.starts_at >= ?)
              UNION ALL

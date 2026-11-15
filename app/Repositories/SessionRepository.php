@@ -181,7 +181,7 @@ final class SessionRepository
         }
         [$vw, $vp] = EventRepository::visibility('e', $ids);
         return Database::all(
-            "SELECT e.id, e.title, e.starts_at, e.team_id, COALESCE(t.name, 'Tot el club') AS team_name
+            "SELECT e.id, e.title, e.starts_at, e.team_id, " . EventRepository::labelSql() . " AS team_name
              FROM events e LEFT JOIN teams t ON t.id = e.team_id
              WHERE e.type = 'entrenament' AND $vw AND e.starts_at >= ? AND e.starts_at < ?
              ORDER BY e.starts_at",

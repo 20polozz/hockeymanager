@@ -38,6 +38,7 @@ if ($user) {
   <button type="button" class="icon-btn menu-btn" data-sidebar-open aria-label="Obre el menú" aria-controls="sidebar"><?= icon('menu') ?></button>
   <h1 class="page-title"><?= e($pageTitle) ?></h1>
 
+  <button type="button" class="icon-btn search-toggle" data-search-toggle aria-label="Cerca" aria-controls="global-search"><?= icon('search') ?></button>
   <form class="search" action="<?= e(url('/cerca')) ?>" method="get" role="search">
     <label class="visually-hidden" for="global-search">Cerca</label>
     <?= icon('search', 'icon icon-sm search-icon') ?>

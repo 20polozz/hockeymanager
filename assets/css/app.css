@@ -891,3 +891,75 @@ a.bar-label { color: var(--text); }
 .agenda-item.kind-gimnas { border-left-color: var(--violet); }
 .name-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .name-chips li { padding: 4px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: .86rem; }
+
+/* ==========================================================================
+   Mòbil primer: navegació inferior, cercador plegable, targetes
+   ========================================================================== */
+.bottomnav, .search-toggle, .m-cards, .month-agenda { display: none; }
+@media (max-width: 1023px) {
+  .bottomnav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 32;
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(255,255,255,.97); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border); box-shadow: 0 -6px 20px -12px rgba(15,26,46,.25);
+  }
+  .bottomnav a, .bottomnav button {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    min-height: 52px; border: 0; background: none; border-radius: 12px;
+    color: var(--muted); font-size: .68rem; font-weight: 600; cursor: pointer;
+  }
+  .bottomnav a:hover { text-decoration: none; }
+  .bottomnav .icon { width: 23px; height: 23px; }
+  .bottomnav .is-active { color: var(--primary); }
+  .bottomnav .is-active .icon { stroke-width: 2.4; }
+  .content { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .take-footer { bottom: calc(72px + env(safe-area-inset-bottom)); }
+  .icon-btn.menu-btn { display: none; }
+  .sidebar { z-index: 45; }
+  .sidebar-backdrop { z-index: 40; }
+}
+@media (max-width: 760px) {
+  /* Barra superior compacta: títol + lupa + notificacions + perfil */
+  .topbar { height: 58px; min-height: 58px; flex-wrap: nowrap; padding: 0 12px 0 16px; gap: 4px; }
+  .topbar::after { display: none; }
+  .search-toggle { display: inline-grid; }
+  .search { display: none; }
+  .topbar.search-open { height: auto; flex-wrap: wrap; padding-bottom: 10px; }
+  .topbar.search-open .search { display: block; order: 10; flex: 1 1 100%; }
+  .page-title { font-size: 1.15rem; }
+  .profile-btn { padding: 2px; }
+
+  /* Targetes en lloc de taules */
+  .m-cards { display: grid; gap: 8px; list-style: none; margin: 0; padding: 0; }
+  .m-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 64px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); color: var(--text); }
+  .m-card:hover { text-decoration: none; }
+  .m-card-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .m-card-body .small { display: flex; flex-wrap: wrap; gap: 2px 10px; }
+  .desktop-only { display: none; }
+
+  /* Calendari: llista sota la graella */
+  .month-agenda { display: grid; margin-top: 14px; }
+  .month-agenda .agenda-day { scroll-margin-top: 70px; }
+  .cal-legend { gap: 6px 12px; }
+  .cal-toolbar { gap: 10px; }
+  .cal-actions { width: 100%; justify-content: space-between; }
+  .agenda-item { gap: 10px; padding: 10px; }
+  .agenda-item .pill { display: none; }
+  .agenda-body { min-width: 0; }
+
+  /* Objectius tàctils còmodes */
+  .btn { min-height: 44px; }
+  .btn-sm { min-height: 36px; }
+  .chip { height: 40px; }
+  .filter-chips { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
+  .page-head { gap: 10px; }
+  .page-head > .btn, .head-actions { width: 100%; }
+  .head-actions .btn { flex: 1; }
+  .welcome { margin-bottom: 16px; }
+  .panel-head { flex-wrap: wrap; }
+  .danger-zone .head-actions { flex-direction: column; }
+  .danger-zone .head-actions .btn, .danger-zone form .btn { width: 100%; }
+  .danger-zone form { width: 100%; }
+  .table td, .table th { padding: 10px 12px; }
+}

@@ -26,7 +26,7 @@ final class AttendanceRepository
     /**
      * Llista per passar llista:
      *  - si l'esdeveniment té llista pròpia (p. ex. gimnàs): aquelles jugadores
-     *  - si és de tot el club: totes les jugadores actives dels equips de la temporada
+     *  - si és compartit per diversos equips: les jugadores d'aquests equips
      *  - si és d'un equip: la plantilla de l'equip
      * Sempre s'hi afegeix qui ja tingui assistència marcada en aquest esdeveniment.
      * @return array<int,array<string,mixed>>
@@ -39,9 +39,10 @@ final class AttendanceRepository
             $in = 'EXISTS (SELECT 1 FROM event_players ep WHERE ep.event_id = ? AND ep.player_id = p.id)';
             $params = [$eventId];
         } elseif ($event['team_id'] === null) {
-            $in = 'EXISTS (SELECT 1 FROM team_players tp2 JOIN teams t2 ON t2.id = tp2.team_id JOIN seasons s2 ON s2.id = t2.season_id AND s2.is_current = 1
+            // Entrenament compartit per diversos equips: jugadores de qualsevol d'ells
+            $in = 'EXISTS (SELECT 1 FROM team_players tp2 JOIN event_teams et2 ON et2.team_id = tp2.team_id AND et2.event_id = ?
                            WHERE tp2.player_id = p.id AND tp2.left_at IS NULL)';
-            $params = [];
+            $params = [$eventId];
         } else {
             $in = 'EXISTS (SELECT 1 FROM team_players tp2 WHERE tp2.player_id = p.id AND tp2.team_id = ? AND tp2.left_at IS NULL)';
             $params = [(int)$event['team_id']];

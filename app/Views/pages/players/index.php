@@ -18,7 +18,20 @@ $canManage = App\Core\Gate::allows('players.manage');
   <?php endif; ?>
 </div>
 
-<section class="panel panel-flush">
+<?php if ($players): ?>
+  <ul class="m-cards">
+    <?php foreach ($players as $p): ?>
+      <li><a class="m-card" href="<?= e(url('/jugadors/' . (int)$p['id'])) ?>">
+        <span class="avatar"><?= e(initials($p['first_name'] . ' ' . $p['last_name'])) ?></span>
+        <span class="m-card-body"><strong><?= e($p['first_name'] . ' ' . $p['last_name']) ?></strong>
+          <span class="small muted"><?php foreach ($p['teams'] as $t): ?><span class="team-tag"><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['name']) ?><?= $t['dorsal'] !== null ? ' #' . (int)$t['dorsal'] : '' ?></span> <?php endforeach; ?></span></span>
+        <?php if ($p['position'] === 'porter'): ?><span class="pill pill-orange">P</span><?php endif; ?>
+        <?= icon('chevron-right', 'icon icon-sm muted') ?>
+      </a></li>
+    <?php endforeach; ?>
+  </ul>
+<?php endif; ?>
+<section class="panel panel-flush<?= $players ? ' desktop-only' : '' ?>">
   <?php if ($players): ?>
     <div class="table-wrap">
       <table class="table">

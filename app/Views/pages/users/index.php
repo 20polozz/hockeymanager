@@ -11,7 +11,17 @@ $tones = ['admin' => 'red', 'coordinador' => 'navy', 'entrenador' => 'blue', 'ju
   </nav>
   <a class="btn btn-primary" href="<?= e(url('/usuaris/nou', $role ? ['rol' => $role] : [])) ?>"><?= icon('plus', 'icon icon-sm') ?> Nou usuari</a>
 </div>
-<section class="panel panel-flush">
+<ul class="m-cards">
+  <?php foreach ($users as $u): $canEdit = $u['role'] !== 'admin' || Auth::hasRole(Auth::ROLE_ADMIN); ?>
+    <li><<?= $canEdit ? 'a href="' . e(url('/usuaris/' . (int)$u['id'] . '/editar')) . '"' : 'div' ?> class="m-card<?= (int)$u['active'] ? '' : ' row-off' ?>">
+      <span class="avatar"><?= e(initials((string)$u['name'])) ?></span>
+      <span class="m-card-body"><strong><?= e($u['name']) ?></strong>
+        <span class="small muted"><?= e($u['username'] ?: (string)$u['email']) ?><?= (int)$u['active'] ? '' : ' · desactivat' ?></span></span>
+      <span class="pill pill-<?= $tones[$u['role']] ?? 'muted' ?>"><?= e($labels[$u['role']] ?? $u['role']) ?></span>
+    </<?= $canEdit ? 'a' : 'div' ?>></li>
+  <?php endforeach; ?>
+</ul>
+<section class="panel panel-flush desktop-only">
   <div class="table-wrap">
     <table class="table">
       <thead><tr><th>Nom</th><th>Usuari</th><th>Rol</th><th>Equips / fitxa</th><th>Últim accés</th><th></th></tr></thead>

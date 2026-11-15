@@ -64,11 +64,11 @@ switch ($calView) {
           $items = $byDay[$key] ?? [];
           $out = $d->format('n') !== $date->format('n'); ?>
         <div class="cal-cell<?= $out ? ' is-out' : '' ?><?= $key === $today ? ' is-today' : '' ?>" role="gridcell">
-          <a class="cal-daynum" href="<?= e($link('dia', $d)) ?>" aria-label="<?= e(fdate($key, 'day')) ?>"><?= $d->format('j') ?></a>
+          <a class="cal-daynum" href="<?= e($link('dia', $d)) ?>" aria-label="<?= e(fdate($key, 'day')) ?>" data-day="<?= e($key) ?>"><?= $d->format('j') ?></a>
           <?php foreach (array_slice($items, 0, 3) as $it): ?>
             <a class="cal-item kind-<?= e($it['kind']) ?>" href="<?= e($itemUrl($it)) ?>" title="<?= e($it['team_name'] . ' · ' . $it['title']) ?>">
               <span class="cal-item-time"><?= e(fdate($it['starts_at'], 'time')) ?></span>
-              <span class="cal-item-title"><?= e($team > 0 || $it['kind'] === 'partit' ? $it['title'] : $it['team_name']) ?></span>
+              <span class="cal-item-title"><?= e($team > 0 || $it['kind'] !== 'entrenament' || $it['team_id'] === null ? $it['title'] : $it['team_name']) ?></span>
             </a>
           <?php endforeach; ?>
           <?php if (count($items) > 3): ?>
@@ -81,6 +81,25 @@ switch ($calView) {
       <?php endfor; ?>
     </div>
   </section>
+
+  <?php // Al mòbil, sota la graella: llista dels dies amb activitat (des d'avui si és el mes actual)
+  $listFrom = $date->format('Y-m') === date('Y-m') ? $today : $date->format('Y-m-01'); ?>
+  <div class="agenda month-agenda">
+    <?php foreach ($byDay as $key => $items):
+        if ($key < $listFrom || substr($key, 0, 7) !== $date->format('Y-m')) { continue; } ?>
+      <section class="agenda-day<?= $key === $today ? ' is-today' : '' ?>" id="dia-<?= e($key) ?>">
+        <h3 class="agenda-date"><?= e(ucfirst(fdate($key, 'day'))) ?></h3>
+        <ul class="agenda-list">
+          <?php foreach ($items as $it): ?>
+            <li><a class="agenda-item kind-<?= e($it['kind']) ?>" href="<?= e($itemUrl($it)) ?>">
+              <span class="agenda-time"><?= e(fdate($it['starts_at'], 'time')) ?><?php if ($it['ends_at']): ?><small><?= e(fdate($it['ends_at'], 'time')) ?></small><?php endif; ?></span>
+              <span class="agenda-body"><strong><?= e($it['title']) ?></strong><span class="muted small"><?= $it['kind'] === 'gimnas' ? 'Gimnàs · ' : '' ?><?= e($it['team_name']) ?></span></span>
+            </a></li>
+          <?php endforeach; ?>
+        </ul>
+      </section>
+    <?php endforeach; ?>
+  </div>
 <?php else: ?>
   <?php if ($count === 0): ?>
     <section class="panel"><?= component('empty_state', ['icon' => 'calendar', 'text' => $calView === 'dia' ? 'No hi ha res programat aquest dia.' : 'No hi ha res programat aquesta setmana.']) ?></section>
@@ -102,7 +121,7 @@ switch ($calView) {
                   <span class="agenda-time"><?= e(fdate($it['starts_at'], 'time')) ?><?php if ($it['ends_at']): ?><small><?= e(fdate($it['ends_at'], 'time')) ?></small><?php endif; ?></span>
                   <span class="agenda-body">
                     <strong><?= e($it['title']) ?></strong>
-                    <span class="muted small"><span class="team-dot" style="--team: <?= e($it['color']) ?>"></span><?= (int)$it['participants'] > 0 && $it['team_id'] === null ? (int)$it['participants'] . ' jugadores' : e($it['team_name']) ?><?= $it['location'] ? ' · ' . e($it['location']) : '' ?></span>
+                    <span class="muted small"><span class="team-dot" style="--team: <?= e($it['color']) ?>"></span><?= $it['kind'] === 'gimnas' ? 'Gimnàs · ' : '' ?><?= e($it['team_name']) ?><?= $it['location'] ? ' · ' . e($it['location']) : '' ?></span>
                   </span>
                   <span class="pill pill-<?= ['partit' => 'green', 'especial' => 'orange', 'gimnas' => 'violet'][$it['kind']] ?? 'blue' ?>"><?= e($kinds[$it['kind']] ?? '') ?></span>
                   <?php if (in_array($it['kind'], ['entrenament', 'gimnas'], true) && (int)$it['attendance_count'] > 0): ?>

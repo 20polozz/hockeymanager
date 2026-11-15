@@ -173,11 +173,34 @@
 
   // Esdeveniment: llista de jugadores només si es tria "Només unes jugadores"
   var whoList = document.getElementById('who-list');
+  var whoTeams = document.getElementById('who-teams');
   if (whoList) {
     document.querySelectorAll('input[data-who]').forEach(function (r) {
-      r.addEventListener('change', function () { if (r.checked) whoList.hidden = r.value !== 'llista'; });
+      r.addEventListener('change', function () {
+        if (!r.checked) return;
+        whoList.hidden = r.value !== 'llista';
+        if (whoTeams) whoTeams.hidden = r.value === 'llista';
+      });
     });
   }
+
+  // Mòbil: cercador desplegable
+  var st = document.querySelector('[data-search-toggle]');
+  if (st) st.addEventListener('click', function () {
+    var bar = st.closest('.topbar');
+    bar.classList.toggle('search-open');
+    if (bar.classList.contains('search-open')) { var i = bar.querySelector('.search input'); if (i) i.focus(); }
+  });
+
+  // Mòbil: tocar un dia del mes porta a la seva llista (si n'hi ha) en lloc d'obrir la vista de dia
+  document.querySelectorAll('.cal-daynum[data-day]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      if (window.matchMedia('(max-width: 760px)').matches) {
+        var target = document.getElementById('dia-' + a.getAttribute('data-day'));
+        if (target) { ev.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      }
+    });
+  });
 
   // Els missatges d'èxit desapareixen sols
   setTimeout(function () {

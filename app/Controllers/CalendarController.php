@@ -83,18 +83,18 @@ final class CalendarController extends Controller
         $date = \DateTime::createFromFormat('!Y-m-d', (string)($_GET['data'] ?? '')) ?: new \DateTime('today');
         $this->form(null, [
             'date' => $date->format('Y-m-d'),
-            'team_id' => (string)team_filter(),
+            'teams' => team_filter() ? [team_filter()] : [],
             'type' => isset(EventRepository::TYPES[$_GET['tipus'] ?? '']) ? (string)$_GET['tipus'] : 'entrenament',
         ]);
     }
 
     public function store(): void
     {
-        [$d, $repeat, $participants, $errors] = EventRepository::validate($_POST, TeamScope::ids(), true);
+        [$d, $repeat, $participants, $teams, $errors] = EventRepository::validate($_POST, TeamScope::ids(), true);
         if ($errors) {
             $this->fail($errors, '/calendari/nou');
         }
-        $id = EventRepository::create($d, $repeat, $participants);
+        $id = EventRepository::create($d, $repeat, $participants, $teams);
         ActivityLog::add('event', 'Ha programat «' . $d['title'] . '»' . ($repeat ? ' (cada setmana)' : ''), $d['team_id'] ?: null);
         forget_input();
         flash('success', $repeat ? 'Esdeveniments creats cada setmana fins al ' . date('d/m/Y', strtotime($repeat)) . '.' : 'Esdeveniment creat.');
@@ -105,7 +105,7 @@ final class CalendarController extends Controller
     {
         $event = $this->findOr404($id);
         $this->form($event, [
-            'team_id'    => $event['team_id'] === null ? 'club' : (string)$event['team_id'],
+            'teams'      => $event['team_id'] !== null ? [(int)$event['team_id']] : array_map('intval', array_column($event['teams'], 'id')),
             'who'        => $event['participants'] ? 'llista' : 'tots',
             'date'       => substr((string)$event['starts_at'], 0, 10),
             'start_time' => substr((string)$event['starts_at'], 11, 5),
@@ -116,11 +116,11 @@ final class CalendarController extends Controller
     public function update(int $id): void
     {
         $this->findOr404($id);
-        [$d, , $participants, $errors] = EventRepository::validate($_POST, TeamScope::ids(), false);
+        [$d, , $participants, $teams, $errors] = EventRepository::validate($_POST, TeamScope::ids(), false);
         if ($errors) {
             $this->fail($errors, '/calendari/' . $id . '/editar');
         }
-        EventRepository::update($id, $d, $participants);
+        EventRepository::update($id, $d, $participants, $teams);
         ActivityLog::add('event', 'Ha modificat «' . $d['title'] . '»', $d['team_id'] ?: null);
         forget_input();
         flash('success', 'Esdeveniment actualitzat.');

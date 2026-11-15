@@ -41,6 +41,7 @@ $appName = (string)Config::get('app.name', 'HockeyManager');
     </main>
   </div>
 </div>
+<?= App\Core\View::partial('partials/bottomnav', ['activeNav' => $activeNav ?? '']) ?>
 <script src="<?= e(asset('js/app.js')) ?>" defer></script>
 </body>
 </html>

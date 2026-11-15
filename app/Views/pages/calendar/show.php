@@ -19,11 +19,20 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
       <ul class="meta-list">
         <li><?= icon('calendar', 'icon icon-sm') ?> <?= e(ucfirst(fdate($event['starts_at'], 'day'))) ?></li>
         <li><?= icon('clock', 'icon icon-sm') ?> <?= e(fdate($event['starts_at'], 'time')) ?><?= $event['ends_at'] ? ' – ' . e(fdate($event['ends_at'], 'time')) : '' ?></li>
-        <li><span class="team-dot" style="--team: <?= e($event['color']) ?>"></span><?= $event['participants'] && $event['team_id'] === null ? count($event['participants']) . ' jugadores' : e($event['team_name']) ?></li>
+        <li><span class="team-dot" style="--team: <?= e($event['color']) ?>"></span><?= e($event['team_name']) ?></li>
         <?php if ($event['location']): ?><li><?= icon('pin', 'icon icon-sm') ?> <?= e($event['location']) ?></li><?php endif; ?>
       </ul>
     </div>
   </section>
+
+  <?php if (!empty($event['teams'])): ?>
+    <section class="panel">
+      <?= component('panel_head', ['title' => 'Equips']) ?>
+      <ul class="name-chips">
+        <?php foreach ($event['teams'] as $t): ?><li><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['name']) ?></li><?php endforeach; ?>
+      </ul>
+    </section>
+  <?php endif; ?>
 
   <?php if ($event['participants']): ?>
     <section class="panel">
