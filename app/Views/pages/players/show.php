@@ -1,5 +1,5 @@
 <?php
-/** @var array $player @var array $history @var array $attendance @var array $attHistory @var bool $canManage @var array $absences @var bool $canAbsence */
+/** @var array $player @var array $history @var array $attendance @var array $attHistory @var bool $canManage @var array $absences @var bool $canAbsence @var array $memberships @var array $teams */
 use App\Repositories\AbsenceRepository;
 $isPlayerUser = App\Core\Auth::hasRole(App\Core\Auth::ROLE_PLAYER);
 $currentAbs = array_values(array_filter($absences, static function ($a) { return (int)$a['is_current'] === 1; }));
@@ -10,7 +10,7 @@ $current = array_values(array_filter($history, function ($h) { return $h['left_a
 $totalAtt = array_sum($attendance);
 $attended = $attendance['present'] + $attendance['retard'];
 ?>
-<section class="panel profile-hero">
+<section class="panel profile-hero" id="player-hero">
   <span class="avatar avatar-xl"><?= e(initials($name)) ?></span>
   <div class="profile-hero-body">
     <h2 class="module-title"><?= e($name) ?><?php if ((int)$player['active'] !== 1): ?> <span class="pill pill-red">Baixa</span><?php endif; ?></h2>
@@ -24,12 +24,31 @@ $attended = $attendance['present'] + $attendance['retard'];
       <?php endforeach; ?>
     </div>
   </div>
-  <?php if (!empty($canManage)): ?>
-    <a class="btn hero-action" href="<?= e(url('/jugadors/' . (int)$player['id'] . '/editar')) ?>"><?= icon('wrench', 'icon icon-sm') ?> Edita la fitxa</a>
-  <?php endif; ?>
 </section>
 
 <div class="dash-grid">
+  <?php if (!empty($canManage)): ?>
+    <section class="panel panel-wide" id="fitxa">
+      <?= component('panel_head', ['title' => 'Fitxa']) ?>
+      <form class="form" method="post" action="<?= e(url('/jugadors/' . (int)$player['id'])) ?>" data-live="player-hero,fitxa,historial">
+        <?= csrf_field() ?>
+        <?= App\Core\View::partial('pages/players/_fields', ['player' => $player, 'memberships' => $memberships, 'teams' => $teams]) ?>
+        <?php if ($age !== null): ?><p class="muted small" style="margin:0"><?= $age ?> anys</p><?php endif; ?>
+        <div class="form-actions"><button class="btn btn-primary" type="submit"><?= icon('check', 'icon icon-sm') ?> Desa els canvis</button></div>
+      </form>
+    </section>
+  <?php else: ?>
+    <section class="panel">
+    <?= component('panel_head', ['title' => 'Dades personals']) ?>
+    <dl class="data-list">
+      <div><dt>Data de naixement</dt><dd><?= $player['birth_date'] ? e(date('d/m/Y', strtotime($player['birth_date']))) . ($age !== null ? ' (' . $age . ' anys)' : '') : '—' ?></dd></div>
+      <div><dt>Categoria</dt><dd><?= $current ? e((string)$current[0]['category']) : '—' ?></dd></div>
+      <div><dt>Dorsal</dt><dd><?= $current && $current[0]['dorsal'] !== null ? (int)$current[0]['dorsal'] : '—' ?></dd></div>
+      <div><dt>Temporada</dt><dd><?= $current ? e($current[0]['season']) : '—' ?></dd></div>
+    </dl>
+  </section>
+  <?php endif; ?>
+
   <section class="panel panel-wide" id="absencies">
     <?= component('panel_head', ['title' => 'Absències i baixes temporals']) ?>
     <?php if ($absences): ?>
@@ -62,7 +81,7 @@ $attended = $attendance['present'] + $attendance['retard'];
     <?php endif; ?>
 
     <?php if ($canAbsence): ?>
-      <details class="absence-add"<?= $absences ? '' : ' open' ?>>
+      <details class="absence-add">
         <summary class="btn"><?= icon('plus', 'icon icon-sm') ?> <?= $isPlayerUser ? 'Avisa que no podràs venir' : 'Afegeix una absència' ?></summary>
         <form method="post" action="<?= e(url('/jugadors/' . (int)$player['id'] . '/absencies')) ?>" class="absence-form">
           <?= csrf_field() ?>
@@ -85,15 +104,6 @@ $attended = $attendance['present'] + $attendance['retard'];
     <?php endif; ?>
   </section>
 
-  <section class="panel">
-    <?= component('panel_head', ['title' => 'Dades personals']) ?>
-    <dl class="data-list">
-      <div><dt>Data de naixement</dt><dd><?= $player['birth_date'] ? e(date('d/m/Y', strtotime($player['birth_date']))) . ($age !== null ? ' (' . $age . ' anys)' : '') : '—' ?></dd></div>
-      <div><dt>Categoria</dt><dd><?= $current ? e((string)$current[0]['category']) : '—' ?></dd></div>
-      <div><dt>Dorsal</dt><dd><?= $current && $current[0]['dorsal'] !== null ? (int)$current[0]['dorsal'] : '—' ?></dd></div>
-      <div><dt>Temporada</dt><dd><?= $current ? e($current[0]['season']) : '—' ?></dd></div>
-    </dl>
-  </section>
 
   <section class="panel">
     <?= component('panel_head', ['title' => 'Assistència als entrenaments']) ?>
@@ -121,7 +131,7 @@ $attended = $attendance['present'] + $attendance['retard'];
     <?php endif; ?>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="historial">
     <?= component('panel_head', ['title' => 'Historial d\'equips']) ?>
     <ul class="timeline">
       <?php foreach ($history as $h): ?>
@@ -162,3 +172,16 @@ $attended = $attendance['present'] + $attendance['retard'];
     <?php endif; ?>
   </section>
 </div>
+
+<?php if (!empty($canManage)): ?>
+  <section class="panel danger-zone" style="margin-top:20px">
+    <div>
+      <h2 class="panel-title">Donar de baixa del club</h2>
+      <p class="muted small">Deixarà d'aparèixer a la plantilla, però es conserva el seu historial d'assistència i estadístiques.</p>
+    </div>
+    <form method="post" action="<?= e(url('/jugadors/' . (int)$player['id'] . '/baixa')) ?>" data-confirm="Segur que vols donar de baixa <?= e($name) ?>?">
+      <?= csrf_field() ?>
+      <button class="btn btn-danger" type="submit">Dona de baixa</button>
+    </form>
+  </section>
+<?php endif; ?>

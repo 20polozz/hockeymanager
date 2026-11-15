@@ -894,6 +894,7 @@ a.bar-label { color: var(--text); }
 
 
 /* Absències i baixes temporals */
+#player-hero { margin-bottom: 20px; }
 .absence-list { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
 .absence-item { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); }
 .absence-item.is-current { border-color: #fecaca; background: #fef2f2; }

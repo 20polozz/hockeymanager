@@ -73,14 +73,14 @@ final class PlayerController extends Controller
         $this->findManageable($id);
         [$data, $teams, $errors] = PlayerRepository::validate($_POST, TeamScope::ids());
         if ($errors) {
-            $this->fail($errors, '/jugadors/' . $id . '/editar');
+            $this->fail($errors, '/jugadors/' . $id . '#fitxa');
         }
         PlayerRepository::update($id, $data);
         PlayerRepository::syncTeams($id, $teams);
         ActivityLog::add('player', 'Ha editat la fitxa de ' . $data['first_name'] . ' ' . $data['last_name'], (int)array_key_first($teams));
         forget_input();
-        flash('success', 'Fitxa actualitzada.');
-        redirect('/jugadors/' . $id);
+        flash('success', 'Fitxa desada.');
+        redirect('/jugadors/' . $id . '#fitxa');
     }
 
     public function deactivate(int $id): void
@@ -160,6 +160,9 @@ final class PlayerController extends Controller
             'canManage'  => Gate::allows('players.manage') && (int)$player['active'] === 1,
             'absences'   => \App\Repositories\AbsenceRepository::forPlayer($id),
             'canAbsence' => (int)$player['active'] === 1 && AbsenceController::canManage($id),
+            'memberships' => PlayerRepository::currentMemberships($id),
+            'teams'      => TeamScope::teams(),
         ]);
+        forget_input();
     }
 }

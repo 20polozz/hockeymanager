@@ -69,12 +69,13 @@
   });
 
   // Ressalta la fila d'equip marcada al formulari de jugador/a
-  document.querySelectorAll('input[data-toggle-row]').forEach(function (cb) {
-    cb.addEventListener('change', function () {
-      var row = cb.closest('.team-check');
-      if (row) row.classList.toggle('is-on', cb.checked);
-      if (cb.checked && row) { var d = row.querySelector('.team-check-dorsal input'); if (d && !d.value) d.focus(); }
-    });
+  // (delegat: també funciona en contingut substituït en directe)
+  document.addEventListener('change', function (ev) {
+    var cb = ev.target;
+    if (!cb.matches || !cb.matches('input[data-toggle-row]')) return;
+    var row = cb.closest('.team-check');
+    if (row) row.classList.toggle('is-on', cb.checked);
+    if (cb.checked && row) { var d = row.querySelector('.team-check-dorsal input'); if (d && !d.value) d.focus(); }
   });
 
   // Amaga un camp quan es marca una casella (data-hide="id")
@@ -200,7 +201,8 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
       .then(function (html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
-        LIVE_IDS.forEach(function (id) {
+        var ids = form.getAttribute('data-live') ? form.getAttribute('data-live').split(',') : LIVE_IDS;
+        ids.forEach(function (id) {
           var cur = document.getElementById(id), next = doc.getElementById(id);
           if (cur && next) cur.replaceWith(next);
         });
