@@ -58,7 +58,7 @@ final class CallupRepository
              WHERE p.active = 1 AND t.season_id = ?
                AND (tp.team_id = ? OR (? IS NOT NULL AND c.sort_order IS NOT NULL AND c.sort_order <= ?))
              GROUP BY p.id, p.first_name, p.last_name, p.position
-             ORDER BY own DESC, p.position = 'porter' DESC, p.last_name, p.first_name",
+             ORDER BY own DESC, MAX(c.sort_order) DESC, p.position = 'porter' DESC, p.last_name, p.first_name",
             [$match['team_id'], $match['team_id'], $match['team_id'], $match['season_id'], $match['team_id'], $sort, $sort]
         );
         return $rows;

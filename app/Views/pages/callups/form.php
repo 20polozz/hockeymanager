@@ -31,7 +31,7 @@ $row = function (array $p) use ($selected): string {
     </section>
     <?php if ($others): ?>
       <section class="panel">
-        <div class="panel-head"><h2 class="panel-title">Altres equips del club <small class="muted">(pugen de categoria)</small></h2></div>
+        <div class="panel-head"><h2 class="panel-title">Pugen de categoria <small class="muted">(categories inferiors)</small></h2></div>
         <div class="pick-list"><?php foreach ($others as $p) { echo $row($p); } ?></div>
       </section>
     <?php endif; ?>

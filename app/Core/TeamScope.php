@@ -34,17 +34,17 @@ final class TeamScope
         switch ($user['role']) {
             case Auth::ROLE_ADMIN:
             case Auth::ROLE_COORDINATOR:
-                $rows = Database::all($base . ' ORDER BY c.sort_order, t.name');
+                $rows = Database::all($base . ' ORDER BY c.sort_order DESC, t.id');
                 break;
             case Auth::ROLE_COACH:
                 $rows = Database::all(
-                    $base . ' JOIN team_staff ts ON ts.team_id = t.id AND ts.user_id = ? ORDER BY c.sort_order, t.name',
+                    $base . ' JOIN team_staff ts ON ts.team_id = t.id AND ts.user_id = ? ORDER BY c.sort_order DESC, t.id',
                     [$user['id']]
                 );
                 break;
             default:
                 $rows = Database::all(
-                    $base . ' JOIN team_players tp ON tp.team_id = t.id AND tp.player_id = ? AND tp.left_at IS NULL ORDER BY c.sort_order, t.name',
+                    $base . ' JOIN team_players tp ON tp.team_id = t.id AND tp.player_id = ? AND tp.left_at IS NULL ORDER BY c.sort_order DESC, t.id',
                     [(int)$user['player_id']]
                 );
         }

@@ -26,7 +26,7 @@ final class TeamRepository
              JOIN seasons s ON s.id = t.season_id
              LEFT JOIN categories c ON c.id = t.category_id
              WHERE t.id IN (' . Database::in($teamIds) . ')
-             ORDER BY c.sort_order, t.name',
+             ORDER BY c.sort_order DESC, t.id',
             $teamIds
         );
         $staff = Database::all(

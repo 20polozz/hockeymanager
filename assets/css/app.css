@@ -963,3 +963,4 @@ a.bar-label { color: var(--text); }
   .danger-zone form { width: 100%; }
   .table td, .table th { padding: 10px 12px; }
 }
+.cat-title { display: flex; align-items: baseline; gap: 8px; } .team-grid + .cat-title { margin-top: 26px; }

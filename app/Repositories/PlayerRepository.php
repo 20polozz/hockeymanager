@@ -32,7 +32,7 @@ final class PlayerRepository
              JOIN teams t ON t.id = tp.team_id
              LEFT JOIN categories c ON c.id = t.category_id
              WHERE tp.left_at IS NULL AND tp.team_id IN (' . Database::in($teamIds) . ')' . $where . '
-             ORDER BY c.sort_order, t.name, tp.dorsal IS NULL, tp.dorsal, p.last_name, p.first_name',
+             ORDER BY c.sort_order DESC, t.id, tp.dorsal IS NULL, tp.dorsal, p.last_name, p.first_name',
             $params
         );
         $players = [];

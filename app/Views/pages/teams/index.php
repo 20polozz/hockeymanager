@@ -14,15 +14,20 @@ $canManage = Gate::allows('teams.manage');
   <section class="panel">
     <?= component('empty_state', ['icon' => 'shield', 'text' => 'Encara no hi ha equips a la temporada actual.']) ?>
   </section>
-<?php else: ?>
+<?php else:
+  // Agrupats per categoria (de més gran a més jove): Sènior → Nacional, 1a Catalana...
+  $groups = [];
+  foreach ($teams as $t) { $groups[(string)($t['category'] ?? 'Sense categoria')][] = $t; } ?>
+  <?php foreach ($groups as $catName => $list): ?>
+  <h2 class="section-title cat-title"><?= e($catName) ?> <span class="muted small"><?= count($list) ?> <?= count($list) === 1 ? 'equip' : 'equips' ?></span></h2>
   <div class="team-grid">
-    <?php foreach ($teams as $t): ?>
+    <?php foreach ($list as $t): ?>
       <article class="team-card" style="--team: <?= e($t['color']) ?>">
         <div class="team-card-head">
           <span class="team-badge"><?= icon('shield') ?></span>
           <div>
             <h2 class="team-name"><?= e($t['name']) ?></h2>
-            <span class="muted small"><?= e((string)$t['category']) ?> · <?= e($t['season']) ?></span>
+            <span class="muted small">Temporada <?= e($t['season']) ?></span>
           </div>
         </div>
         <div class="team-figures">
@@ -46,4 +51,5 @@ $canManage = Gate::allows('teams.manage');
       </article>
     <?php endforeach; ?>
   </div>
+  <?php endforeach; ?>
 <?php endif; ?>
