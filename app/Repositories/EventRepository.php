@@ -57,6 +57,8 @@ final class EventRepository
             $user = Auth::user();
             $list = "$alias.team_id IS NULL AND EXISTS (SELECT 1 FROM event_players x WHERE x.event_id = $alias.id AND x.player_id = ?)";
             $params[] = (int)($user['player_id'] ?? 0);
+            $parts[] = "EXISTS (SELECT 1 FROM event_roster_changes xr WHERE xr.event_id = $alias.id AND xr.`change` = 'afegida' AND xr.player_id = ?)";
+            $params[] = (int)($user['player_id'] ?? 0);
         } elseif (!$teamIds) {
             $list = '1 = 0';
         }

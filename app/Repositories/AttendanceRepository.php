@@ -47,6 +47,10 @@ final class AttendanceRepository
             $in = 'EXISTS (SELECT 1 FROM team_players tp2 WHERE tp2.player_id = p.id AND tp2.team_id = ? AND tp2.left_at IS NULL)';
             $params = [(int)$event['team_id']];
         }
+        // Canvis puntuals d'aquest esdeveniment: tretes i afegides
+        $in = "(($in) AND NOT EXISTS (SELECT 1 FROM event_roster_changes rc WHERE rc.event_id = ? AND rc.player_id = p.id AND rc.`change` = 'treta'))
+                OR EXISTS (SELECT 1 FROM event_roster_changes rc2 WHERE rc2.event_id = ? AND rc2.player_id = p.id AND rc2.`change` = 'afegida')";
+        $params = array_merge($params, [$eventId, $eventId]);
         return Database::all(
             "SELECT p.id, p.first_name, p.last_name, p.position,
                     (SELECT tp.dorsal FROM team_players tp WHERE tp.player_id = p.id AND tp.team_id = ? AND tp.left_at IS NULL LIMIT 1) AS dorsal,
@@ -56,6 +60,25 @@ final class AttendanceRepository
              WHERE (p.active = 1 AND $in) OR a.id IS NOT NULL
              ORDER BY guest, p.position = 'porter' DESC, p.last_name, p.first_name",
             array_merge([(int)($event['team_id'] ?? 0)], $params, [$eventId], $params)
+        );
+    }
+
+    /** Jugadores tretes d'aquest esdeveniment concret. */
+    public static function removed(int $eventId): array
+    {
+        return Database::all(
+            "SELECT p.id, p.first_name, p.last_name FROM event_roster_changes rc JOIN players p ON p.id = rc.player_id
+             WHERE rc.event_id = ? AND rc.`change` = 'treta' ORDER BY p.last_name, p.first_name",
+            [$eventId]
+        );
+    }
+
+    /** Afegeix o treu una jugadora d'un esdeveniment concret. */
+    public static function setRosterChange(int $eventId, int $playerId, string $change): void
+    {
+        Database::query(
+            'REPLACE INTO event_roster_changes (event_id, player_id, `change`, created_at) VALUES (?, ?, ?, NOW())',
+            [$eventId, $playerId, $change === 'treta' ? 'treta' : 'afegida']
         );
     }
 

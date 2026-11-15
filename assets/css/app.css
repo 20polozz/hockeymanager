@@ -985,6 +985,22 @@ a.absence-main { color: inherit; text-decoration: none; }
   .wl-check { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 13px; background: var(--green-bg); color: var(--green); flex-shrink: 0; }
 }
 
+
+/* Treure / afegir jugadores d'un entreno */
+.name-chips li.chip-edit { display: inline-flex; align-items: center; gap: 4px; padding-right: 4px; }
+.chip-x { display: grid; place-items: center; width: 26px; height: 26px; margin: -3px 0; border: 0; border-radius: 13px; background: transparent; color: var(--muted); cursor: pointer; }
+.chip-x:hover { background: var(--red-bg, #fee2e2); color: var(--red); }
+.chip-undo:hover { background: var(--green-bg); color: var(--green); }
+.chip-removed { opacity: .65; border-style: dashed !important; }
+.roster-sub { margin: 14px 0 6px; }
+.roster-add { margin-top: 14px; }
+.roster-add > summary { list-style: none; cursor: pointer; display: inline-flex; }
+.roster-add > summary::-webkit-details-marker { display: none; }
+.roster-add[open] > summary { margin-bottom: 12px; }
+.roster-add .form-actions { margin-top: 12px; }
+.roster-hint { margin: 12px 0 0; }
+.pick input[type=checkbox] { flex-shrink: 0; }
+
 /* ==========================================================================
    Mòbil primer: navegació inferior, cercador plegable, targetes
    ========================================================================== */

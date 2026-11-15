@@ -1,5 +1,5 @@
 <?php
-/** @var array $event @var bool $canManage @var bool $canAttend @var array $attendance @var array $sessions @var array $roster @var bool $showStatus @var array $away */
+/** @var array $event @var bool $canManage @var bool $canAttend @var array $attendance @var array $sessions @var array $roster @var bool $showStatus @var array $away @var array $removed @var array $pickable */
 $isTraining = in_array($event['type'], ['entrenament', 'gimnas'], true);
 $typeLabel = App\Repositories\EventRepository::TYPES[$event['type']] ?? '';
 $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orange'][$event['type']] ?? 'muted';
@@ -41,35 +41,74 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
   $guests = array_values(array_filter($roster, static function ($p) { return $p['guest']; }));
   $dotTone = ['present' => 'green', 'retard' => 'blue', 'justificat' => 'orange', 'absent' => 'red'];
   $statusLabels = App\Repositories\AttendanceRepository::STATUSES;
-  $chip = static function (array $p) use ($showStatus, $dotTone, $statusLabels): string {
+  $editRoster = $canManage;
+  $chip = static function (array $p, string $extra = '') use ($showStatus, $dotTone, $statusLabels, $editRoster): string {
       $st = $showStatus && $p['status'] ? $p['status'] : null;
-      return '<li' . ($st ? ' title="' . e($statusLabels[$st] ?? '') . '"' : '') . '>'
+      return '<li class="' . ($editRoster ? 'chip-edit' : '') . $extra . '"' . ($st ? ' title="' . e($statusLabels[$st] ?? '') . '"' : '') . '>'
           . ($st ? '<i class="dot dot-' . ($dotTone[$st] ?? 'muted') . '"></i>' : '')
-          . e($p['first_name'] . ' ' . $p['last_name'])
-          . ($p['position'] === 'porter' ? ' <span class="muted small">(P)</span>' : '') . '</li>';
+          . '<span>' . e($p['first_name'] . ' ' . $p['last_name'])
+          . ($p['position'] === 'porter' ? ' <span class="muted small">(P)</span>' : '') . '</span>'
+          . ($editRoster ? '<button class="chip-x" type="submit" name="players[]" value="' . (int)$p['id'] . '" aria-label="Treu ' . e($p['first_name']) . ' d\'aquest entreno" title="Treu d\'aquest entreno">' . icon('x', 'icon icon-xs') . '</button>' : '')
+          . '</li>';
   };
+  $inRoster = array_map('intval', array_column($roster, 'id'));
+  $removedIds = array_map('intval', array_column($removed, 'id'));
+  $toAdd = array_values(array_filter($pickable, static function ($p) use ($inRoster, $removedIds) {
+      return !in_array((int)$p['id'], $inRoster, true) && !in_array((int)$p['id'], $removedIds, true);
+  }));
   ?>
-  <section class="panel">
+  <section class="panel" id="convocades">
     <?= component('panel_head', ['title' => 'Jugadores convocades (' . count($called) . ')']) ?>
+    <?php if ($editRoster): ?><form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/jugadores')) ?>"><?= csrf_field() ?><input type="hidden" name="action" value="treure"><?php endif; ?>
     <?php if ($called): ?>
       <ul class="name-chips">
         <?php foreach ($called as $p) { echo $chip($p); } ?>
       </ul>
     <?php else: ?>
-      <p class="muted">Cap jugadora assignada. Afegeix-les a l'equip o edita l'esdeveniment.</p>
+      <p class="muted">Cap jugadora convocada.</p>
     <?php endif; ?>
     <?php if ($awayList): ?>
-      <p class="muted small" style="margin:12px 0 6px"><?= icon('alert', 'icon icon-xs') ?> No disponibles (<?= count($awayList) ?>)</p>
+      <p class="muted small roster-sub"><?= icon('alert', 'icon icon-xs') ?> No disponibles (<?= count($awayList) ?>)</p>
       <ul class="name-chips">
         <?php foreach ($awayList as $p): $a = $away[(int)$p['id']]; ?>
-          <li class="chip-off"<?= $isStaff ? ' title="' . e(App\Repositories\AbsenceRepository::label($a) . ' · ' . App\Repositories\AbsenceRepository::period($a)) . '"' : '' ?>><?= e($p['first_name'] . ' ' . $p['last_name']) ?><?php if ($isStaff): ?> <span class="muted small">(<?= e(App\Repositories\AbsenceRepository::label($a)) ?>)</span><?php endif; ?></li>
+          <li class="chip-off<?= $editRoster ? ' chip-edit' : '' ?>"<?= $isStaff ? ' title="' . e(App\Repositories\AbsenceRepository::label($a) . ' · ' . App\Repositories\AbsenceRepository::period($a)) . '"' : '' ?>><span><?= e($p['first_name'] . ' ' . $p['last_name']) ?><?php if ($isStaff): ?> <span class="muted small">(<?= e(App\Repositories\AbsenceRepository::label($a)) ?>)</span><?php endif; ?></span><?php if ($editRoster): ?><button class="chip-x" type="submit" name="players[]" value="<?= (int)$p['id'] ?>" aria-label="Treu <?= e($p['first_name']) ?>"><?= icon('x', 'icon icon-xs') ?></button><?php endif; ?></li>
         <?php endforeach; ?>
       </ul>
     <?php endif; ?>
     <?php if ($guests): ?>
-      <p class="muted small" style="margin:12px 0 6px">També hi han vingut (<?= count($guests) ?>)</p>
+      <p class="muted small roster-sub">També hi han vingut (<?= count($guests) ?>)</p>
       <ul class="name-chips"><?php foreach ($guests as $p) { echo $chip($p); } ?></ul>
     <?php endif; ?>
+    <?php if ($editRoster): ?></form><?php endif; ?>
+
+    <?php if ($editRoster && $removed): ?>
+      <form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/jugadores')) ?>">
+        <?= csrf_field() ?><input type="hidden" name="action" value="afegir">
+        <p class="muted small roster-sub">Tretes d'aquest entreno (<?= count($removed) ?>)</p>
+        <ul class="name-chips">
+          <?php foreach ($removed as $p): ?>
+            <li class="chip-edit chip-removed"><span><?= e($p['first_name'] . ' ' . $p['last_name']) ?></span><button class="chip-x chip-undo" type="submit" name="players[]" value="<?= (int)$p['id'] ?>" aria-label="Torna a afegir <?= e($p['first_name']) ?>" title="Torna-la a afegir"><?= icon('plus', 'icon icon-xs') ?></button></li>
+          <?php endforeach; ?>
+        </ul>
+      </form>
+    <?php endif; ?>
+
+    <?php if ($editRoster && $toAdd): ?>
+      <details class="roster-add">
+        <summary class="btn"><?= icon('plus', 'icon icon-sm') ?> Afegeix jugadores</summary>
+        <form method="post" action="<?= e(url('/calendari/' . (int)$event['id'] . '/jugadores')) ?>">
+          <?= csrf_field() ?><input type="hidden" name="action" value="afegir">
+          <div class="pick-list">
+            <?php foreach ($toAdd as $p): ?>
+              <label class="pick"><input type="checkbox" name="players[]" value="<?= (int)$p['id'] ?>" data-pick>
+                <span class="pick-name"><?= e($p['first_name'] . ' ' . $p['last_name']) ?> <small class="muted"><?= e((string)$p['teams']) ?></small></span></label>
+            <?php endforeach; ?>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" type="submit"><?= icon('check', 'icon icon-sm') ?> Afegeix a aquest entreno</button></div>
+        </form>
+      </details>
+    <?php endif; ?>
+    <?php if ($editRoster): ?><p class="muted small roster-hint">Els canvis només afecten aquest dia, no la resta de la sèrie ni l'equip.</p><?php endif; ?>
   </section>
 
   <?php if ($event['notes']): ?>

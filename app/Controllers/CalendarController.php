@@ -77,6 +77,8 @@ final class CalendarController extends Controller
             'roster'     => $roster = \App\Repositories\AttendanceRepository::sheet($event),
             'away'       => \App\Repositories\AbsenceRepository::onDate(substr((string)$event['starts_at'], 0, 10), array_column($roster, 'id')),
             'showStatus' => Gate::allows('attendance.manage'),
+            'removed'    => \App\Repositories\AttendanceRepository::removed($id),
+            'pickable'   => Gate::allows('calendar.manage') ? EventRepository::selectablePlayers() : [],
             'sessions'   => class_exists(\App\Repositories\SessionRepository::class) ? \App\Repositories\SessionRepository::forEvent($id) : [],
         ]);
     }
@@ -160,6 +162,28 @@ final class CalendarController extends Controller
     /**
      * @return array<string,mixed>
      */
+    /** Afegeix o treu jugadores d'aquest esdeveniment concret (no de la sèrie ni de l'equip). */
+    public function roster(int $id): void
+    {
+        $event = $this->findOr404($id);
+        $action = (string)($_POST['action'] ?? '');
+        $ids = array_values(array_unique(array_filter(array_map('intval', (array)($_POST['players'] ?? [])))));
+        $allowed = array_map('intval', array_column(EventRepository::selectablePlayers(), 'id'));
+        $ids = array_values(array_intersect($ids, $allowed));
+        if (!$ids || !in_array($action, ['afegir', 'treure'], true)) {
+            flash('error', 'Tria alguna jugadora.');
+            redirect('/calendari/' . $id . '#convocades');
+        }
+        foreach ($ids as $pid) {
+            \App\Repositories\AttendanceRepository::setRosterChange($id, $pid, $action === 'treure' ? 'treta' : 'afegida');
+        }
+        $n = count($ids);
+        flash('success', $action === 'treure'
+            ? ($n === 1 ? 'Jugadora treta d\'aquest entreno.' : $n . ' jugadores tretes d\'aquest entreno.')
+            : ($n === 1 ? 'Jugadora afegida.' : $n . ' jugadores afegides.'));
+        redirect('/calendari/' . $id . '#convocades');
+    }
+
     private function findOr404(int $id): array
     {
         $event = EventRepository::find($id);

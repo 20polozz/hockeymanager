@@ -50,6 +50,7 @@ $router->post('/calendari', 'CalendarController@store', ['can' => 'calendar.mana
 $router->get('/calendari/{id}', 'CalendarController@show', ['can' => 'calendar.view']);
 $router->get('/calendari/{id}/editar', 'CalendarController@edit', ['can' => 'calendar.manage']);
 $router->post('/calendari/{id}', 'CalendarController@update', ['can' => 'calendar.manage']);
+$router->post('/calendari/{id}/jugadores', 'CalendarController@roster', ['can' => 'calendar.manage']);
 $router->post('/calendari/{id}/eliminar', 'CalendarController@destroy', ['can' => 'calendar.manage']);
 
 // Assistència
