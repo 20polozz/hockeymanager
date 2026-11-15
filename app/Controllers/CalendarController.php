@@ -74,6 +74,8 @@ final class CalendarController extends Controller
             'canManage'  => Gate::allows('calendar.manage'),
             'canAttend'  => Gate::allows('attendance.manage') && in_array($event['type'], EventRepository::TRAINING_TYPES, true),
             'attendance' => \App\Repositories\AttendanceRepository::summaryForEvent($id),
+            'roster'     => \App\Repositories\AttendanceRepository::sheet($event),
+            'showStatus' => Gate::allows('attendance.manage'),
             'sessions'   => class_exists(\App\Repositories\SessionRepository::class) ? \App\Repositories\SessionRepository::forEvent($id) : [],
         ]);
     }

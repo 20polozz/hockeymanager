@@ -1,5 +1,5 @@
 <?php
-/** @var array $event @var bool $canManage @var bool $canAttend @var array $attendance @var array $sessions */
+/** @var array $event @var bool $canManage @var bool $canAttend @var array $attendance @var array $sessions @var array $roster @var bool $showStatus */
 $isTraining = in_array($event['type'], ['entrenament', 'gimnas'], true);
 $typeLabel = App\Repositories\EventRepository::TYPES[$event['type']] ?? '';
 $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orange'][$event['type']] ?? 'muted';
@@ -34,14 +34,33 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
     </section>
   <?php endif; ?>
 
-  <?php if ($event['participants']): ?>
-    <section class="panel">
-      <?= component('panel_head', ['title' => 'Llista de jugadores (' . count($event['participants']) . ')']) ?>
+  <?php
+  $called = array_values(array_filter($roster, static function ($p) { return !$p['guest']; }));
+  $guests = array_values(array_filter($roster, static function ($p) { return $p['guest']; }));
+  $dotTone = ['present' => 'green', 'retard' => 'blue', 'justificat' => 'orange', 'absent' => 'red'];
+  $statusLabels = App\Repositories\AttendanceRepository::STATUSES;
+  $chip = static function (array $p) use ($showStatus, $dotTone, $statusLabels): string {
+      $st = $showStatus && $p['status'] ? $p['status'] : null;
+      return '<li' . ($st ? ' title="' . e($statusLabels[$st] ?? '') . '"' : '') . '>'
+          . ($st ? '<i class="dot dot-' . ($dotTone[$st] ?? 'muted') . '"></i>' : '')
+          . e($p['first_name'] . ' ' . $p['last_name'])
+          . ($p['position'] === 'porter' ? ' <span class="muted small">(P)</span>' : '') . '</li>';
+  };
+  ?>
+  <section class="panel">
+    <?= component('panel_head', ['title' => 'Jugadores convocades (' . count($called) . ')']) ?>
+    <?php if ($called): ?>
       <ul class="name-chips">
-        <?php foreach ($event['participants'] as $p): ?><li><?= e($p['first_name'] . ' ' . $p['last_name']) ?></li><?php endforeach; ?>
+        <?php foreach ($called as $p) { echo $chip($p); } ?>
       </ul>
-    </section>
-  <?php endif; ?>
+    <?php else: ?>
+      <p class="muted">Cap jugadora assignada. Afegeix-les a l'equip o edita l'esdeveniment.</p>
+    <?php endif; ?>
+    <?php if ($guests): ?>
+      <p class="muted small" style="margin:12px 0 6px">També hi han vingut (<?= count($guests) ?>)</p>
+      <ul class="name-chips"><?php foreach ($guests as $p) { echo $chip($p); } ?></ul>
+    <?php endif; ?>
+  </section>
 
   <?php if ($event['notes']): ?>
     <section class="panel">
