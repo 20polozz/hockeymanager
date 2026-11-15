@@ -847,3 +847,20 @@ a.match-body:hover { text-decoration: none; }
   .gk-grid .num-field input { width: 96px; }
 }
 .form-page .dash-grid > .panel, .dash-grid > .panel + .panel { margin-top: 0; }
+
+/* ---------- Estadístiques ---------- */
+.table-compact th, .table-compact td { padding: 9px 10px; }
+.form-strip { display: inline-flex; gap: 3px; }
+.form-strip i, .evo-res { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 5px; font-style: normal; font-size: .7rem; font-weight: 800; color: #fff; }
+.f-V { background: var(--green); } .f-E { background: #94a3b8; } .f-D { background: var(--red); }
+.evo { display: flex; gap: 6px; align-items: flex-end; height: 200px; overflow-x: auto; padding-bottom: 2px; }
+.evo-col { flex: 1; min-width: 34px; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+.evo-bars { flex: 1; width: 100%; display: flex; gap: 3px; align-items: flex-end; justify-content: center; }
+.evo-bars span { position: relative; width: 12px; min-height: 3px; border-radius: 4px 4px 0 0; }
+.evo-bars b { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: .66rem; color: var(--text-2); }
+.evo-gf { background: var(--green); } .evo-ga { background: var(--red); opacity: .75; }
+.evo-label { font-size: .68rem; color: var(--muted); }
+.bar-fill.bar-blue { background: linear-gradient(90deg, #60a5fa, var(--blue)); }
+.bar-fill.bar-violet { background: linear-gradient(90deg, #a78bfa, var(--violet)); }
+a.bar-label { color: var(--text); }
+.panel-hint { margin: 0; border-radius: 0; }

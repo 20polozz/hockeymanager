@@ -93,4 +93,4 @@ $router->get('/configuracio', 'SettingsController@index', ['can' => 'settings.vi
 $router->post('/configuracio/contrasenya', 'SettingsController@updatePassword', ['can' => 'settings.view']);
 
 // Mòduls de les properes fases (pàgina pròpia amb l'estat i el que inclourà)
-$router->get('/estadistiques', 'ModuleController@stats', ['can' => 'stats.view']);
+$router->get('/estadistiques', 'StatsController@index', ['can' => 'stats.view']);
