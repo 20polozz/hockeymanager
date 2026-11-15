@@ -8,7 +8,8 @@ use App\Core\Gate;
     <?= component('panel_head', ['title' => 'El meu compte']) ?>
     <dl class="data-list">
       <div><dt>Nom</dt><dd><?= e($user['name']) ?></dd></div>
-      <div><dt>Correu</dt><dd><?= e($user['email']) ?></dd></div>
+      <?php if (!empty($user['username'])): ?><div><dt>Usuari</dt><dd><?= e($user['username']) ?></dd></div><?php endif; ?>
+      <div><dt>Correu</dt><dd><?= e($user['email'] ?: '—') ?></dd></div>
       <div><dt>Rol</dt><dd><?= e(Auth::roleLabels()[$user['role']] ?? '') ?></dd></div>
     </dl>
   </section>

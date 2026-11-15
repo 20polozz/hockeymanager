@@ -28,7 +28,7 @@ final class Auth
             $id = (int)($_SESSION['hm_user_id'] ?? 0);
             if ($id > 0) {
                 $row = Database::first(
-                    'SELECT id, name, email, role, player_id, active FROM users WHERE id = ?',
+                    'SELECT id, name, username, email, role, player_id, active FROM users WHERE id = ?',
                     [$id]
                 );
                 if ($row && (int)$row['active'] === 1) {
@@ -64,11 +64,12 @@ final class Auth
     }
 
     /**
-     * Intenta iniciar sessió. Retorna un missatge d'error o null si tot va bé.
+     * Intenta iniciar sessió amb nom d'usuari o correu.
+     * Retorna un missatge d'error o null si tot va bé.
      */
-    public static function attempt(string $email, string $password): ?string
+    public static function attempt(string $login, string $password): ?string
     {
-        $email = mb_strtolower(trim($email));
+        $email = mb_strtolower(trim($login));
         $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
         $since = date('Y-m-d H:i:s', time() - self::LOCK_MINUTES * 60);
 
@@ -80,13 +81,13 @@ final class Auth
             return 'Massa intents fallits. Torna-ho a provar d\'aquí a ' . self::LOCK_MINUTES . ' minuts.';
         }
 
-        $user = Database::first('SELECT id, password_hash, active FROM users WHERE email = ?', [$email]);
+        $user = Database::first('SELECT id, password_hash, active FROM users WHERE email = ? OR username = ? LIMIT 1', [$email, $email]);
         if (!$user || !password_verify($password, (string)$user['password_hash'])) {
             Database::query(
                 'INSERT INTO login_attempts (ip, email, attempted_at) VALUES (?, ?, ?)',
                 [$ip, $email, date('Y-m-d H:i:s')]
             );
-            return 'Correu o contrasenya incorrectes.';
+            return 'Usuari o contrasenya incorrectes.';
         }
         if ((int)$user['active'] !== 1) {
             return 'Aquest compte està desactivat. Parla amb el coordinador del club.';

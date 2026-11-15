@@ -96,7 +96,7 @@ if ($user) {
         <div class="dropdown-menu">
           <div class="dropdown-head">
             <strong><?= e($user['name']) ?></strong>
-            <small><?= e($user['email']) ?></small>
+            <small><?= e($user['email'] ?: '@' . $user['username']) ?></small>
           </div>
           <?php if (Gate::allows('players.own')): ?>
             <a class="dropdown-item" href="<?= e(url('/perfil')) ?>"><?= icon('user', 'icon icon-sm') ?> El meu perfil</a>

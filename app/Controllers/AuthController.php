@@ -20,18 +20,18 @@ final class AuthController extends Controller
 
     public function login(): void
     {
-        $email = trim((string)($_POST['email'] ?? ''));
+        $login = trim((string)($_POST['login'] ?? ''));
         $password = (string)($_POST['password'] ?? '');
 
-        if ($email === '' || $password === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            remember_input(['email' => $email]);
-            flash('error', 'Escriu un correu vàlid i la contrasenya.');
+        if ($login === '' || $password === '' || mb_strlen($login) > 190) {
+            remember_input(['login' => $login]);
+            flash('error', 'Escriu l\'usuari (o el correu) i la contrasenya.');
             redirect('/login');
         }
 
-        $error = Auth::attempt($email, $password);
+        $error = Auth::attempt($login, $password);
         if ($error !== null) {
-            remember_input(['email' => $email]);
+            remember_input(['login' => $login]);
             flash('error', $error);
             redirect('/login');
         }
