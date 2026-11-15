@@ -23,17 +23,27 @@ final class PlayerRepository
             $where = " AND CONCAT(p.first_name, ' ', p.last_name) LIKE ?";
             $params[] = '%' . addcslashes($search, '%_\\') . '%';
         }
-        return Database::all(
+        // Una fila per jugador encara que estigui en diversos equips
+        $rows = Database::all(
             'SELECT p.id, p.first_name, p.last_name, p.birth_date, p.position,
-                    tp.dorsal, t.id AS team_id, t.name AS team_name, t.color, c.name AS category
+                    tp.dorsal, t.id AS team_id, t.name AS team_name, t.color, c.sort_order
              FROM team_players tp
              JOIN players p ON p.id = tp.player_id AND p.active = 1
              JOIN teams t ON t.id = tp.team_id
              LEFT JOIN categories c ON c.id = t.category_id
              WHERE tp.left_at IS NULL AND tp.team_id IN (' . Database::in($teamIds) . ')' . $where . '
-             ORDER BY c.sort_order, t.name, tp.dorsal IS NULL, tp.dorsal, p.last_name',
+             ORDER BY c.sort_order, t.name, tp.dorsal IS NULL, tp.dorsal, p.last_name, p.first_name',
             $params
         );
+        $players = [];
+        foreach ($rows as $r) {
+            $id = (int)$r['id'];
+            if (!isset($players[$id])) {
+                $players[$id] = $r + ['teams' => []];
+            }
+            $players[$id]['teams'][] = ['id' => (int)$r['team_id'], 'name' => $r['team_name'], 'color' => $r['color'], 'dorsal' => $r['dorsal']];
+        }
+        return array_values($players);
     }
 
     /**

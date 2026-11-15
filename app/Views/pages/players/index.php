@@ -14,10 +14,9 @@
   <?php if ($players): ?>
     <div class="table-wrap">
       <table class="table">
-        <thead><tr><th scope="col">Dorsal</th><th scope="col">Jugador</th><th scope="col">Posició</th><th scope="col">Equip</th><th scope="col">Edat</th></tr></thead>
+        <thead><tr><th scope="col">Dorsal</th><th scope="col">Jugador</th><th scope="col">Posició</th><th scope="col">Equip</th></tr></thead>
         <tbody>
-          <?php foreach ($players as $p):
-              $age = $p['birth_date'] ? (int)date_diff(date_create($p['birth_date']), date_create('today'))->y : null; ?>
+          <?php foreach ($players as $p): ?>
             <tr>
               <td><span class="dorsal"><?= $p['dorsal'] !== null ? (int)$p['dorsal'] : '–' ?></span></td>
               <td>
@@ -27,8 +26,13 @@
                 </a>
               </td>
               <td><span class="pill <?= $p['position'] === 'porter' ? 'pill-orange' : 'pill-blue' ?>"><?= $p['position'] === 'porter' ? 'Porter' : 'Jugador' ?></span></td>
-              <td><span class="team-dot" style="--team: <?= e($p['color']) ?>"></span><?= e($p['team_name']) ?></td>
-              <td><?= $age !== null ? $age . ' anys' : '—' ?></td>
+              <td>
+                <span class="team-list">
+                  <?php foreach ($p['teams'] as $t): ?>
+                    <span class="team-tag"><span class="team-dot" style="--team: <?= e($t['color']) ?>"></span><?= e($t['name']) ?></span>
+                  <?php endforeach; ?>
+                </span>
+              </td>
             </tr>
           <?php endforeach; ?>
         </tbody>
