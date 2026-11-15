@@ -501,3 +501,51 @@ a.person:hover { color: var(--blue); text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
 }
+
+/* ---------- Formularis de gestió ---------- */
+fieldset.field { border: 0; padding: 0; margin: 0; min-width: 0; }
+fieldset.field legend { padding: 0; margin-bottom: 6px; }
+.field select { height: 44px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: 10px; background: #fff; font-weight: 400; }
+.form-page { max-width: 760px; }
+.form-page .panel + .panel { margin-top: 20px; }
+.back-link { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 14px; font-weight: 600; font-size: .9rem; color: var(--muted); }
+.back-link:hover { color: var(--text); text-decoration: none; }
+.flip { transform: rotate(180deg); }
+.form-actions { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 6px; }
+.page-head-end { justify-content: flex-end; }
+.card-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.hero-action { margin-left: auto; align-self: flex-start; }
+.btn-danger { background: #fff; border-color: #fca5a5; color: var(--red); }
+.btn-danger:hover { background: var(--red-bg); }
+.danger-zone { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-color: #fecaca; }
+.danger-zone p { margin: 4px 0 0; }
+
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch { position: relative; cursor: pointer; }
+.swatch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.swatch span[aria-hidden] { display: block; width: 34px; height: 34px; border-radius: 10px; background: var(--sw); box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); transition: transform .12s; }
+.swatch input:checked + span { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--sw); }
+.swatch input:focus-visible + span { outline: 3px solid rgba(37,99,235,.45); outline-offset: 4px; }
+.swatch:hover span[aria-hidden] { transform: scale(1.06); }
+
+.segmented { display: flex; gap: 6px; padding: 4px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface-2); }
+.segmented label { flex: 1; position: relative; }
+.segmented input { position: absolute; opacity: 0; }
+.segmented span { display: block; text-align: center; padding: 8px 10px; border-radius: 9px; font-weight: 600; font-size: .88rem; color: var(--text-2); cursor: pointer; white-space: nowrap; }
+.segmented input:checked + span { background: #fff; color: var(--primary); box-shadow: var(--shadow-sm); }
+.segmented input:focus-visible + span { outline: 3px solid rgba(37,99,235,.45); }
+
+.team-checks { display: grid; gap: 8px; }
+.team-check { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 12px; background: #fff; transition: border-color .15s, background .15s; }
+.team-check.is-on { border-color: #93c5fd; background: #f5f9ff; }
+.team-check-main { display: flex; align-items: center; gap: 10px; flex: 1; font-weight: 600; color: var(--text); cursor: pointer; }
+.team-check-main input { width: 18px; height: 18px; accent-color: var(--primary); }
+.team-check-dorsal { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--muted); font-weight: 500; }
+.team-check-dorsal input { width: 56px; height: 36px; text-align: center; border: 1px solid var(--border-strong); border-radius: 8px; font-weight: 700; }
+.team-check:not(.is-on) .team-check-dorsal { opacity: .45; }
+
+@media (max-width: 760px) {
+  .danger-zone { flex-direction: column; align-items: flex-start; }
+  .hero-action { margin-left: 0; }
+  .segmented span { white-space: normal; }
+}

@@ -97,4 +97,119 @@ final class PlayerRepository
             'team_id'
         ));
     }
+
+    /**
+     * Equips actuals amb el dorsal: [team_id => dorsal|null].
+     * @return array<int,int|null>
+     */
+    public static function currentMemberships(int $playerId): array
+    {
+        $out = [];
+        foreach (Database::all('SELECT team_id, dorsal FROM team_players WHERE player_id = ? AND left_at IS NULL', [$playerId]) as $r) {
+            $out[(int)$r['team_id']] = $r['dorsal'] === null ? null : (int)$r['dorsal'];
+        }
+        return $out;
+    }
+
+    /**
+     * @param array<string,mixed> $d  first_name, last_name, birth_date, position
+     */
+    public static function create(array $d): int
+    {
+        Database::query(
+            'INSERT INTO players (first_name, last_name, birth_date, position, created_at) VALUES (?, ?, ?, ?, ?)',
+            [$d['first_name'], $d['last_name'], $d['birth_date'] ?: null, $d['position'], date('Y-m-d H:i:s')]
+        );
+        return (int)Database::pdo()->lastInsertId();
+    }
+
+    /**
+     * @param array<string,mixed> $d
+     */
+    public static function update(int $id, array $d): void
+    {
+        Database::query(
+            'UPDATE players SET first_name = ?, last_name = ?, birth_date = ?, position = ? WHERE id = ?',
+            [$d['first_name'], $d['last_name'], $d['birth_date'] ?: null, $d['position'], $id]
+        );
+    }
+
+    /**
+     * Desa els equips actuals. Els equips que es treuen queden a l'historial
+     * (left_at = avui) en lloc d'esborrar-se.
+     * @param array<int,int|null> $teams  [team_id => dorsal|null]
+     */
+    public static function syncTeams(int $playerId, array $teams): void
+    {
+        $today = date('Y-m-d');
+        $current = self::currentMemberships($playerId);
+        foreach ($teams as $teamId => $dorsal) {
+            if (array_key_exists($teamId, $current)) {
+                Database::query('UPDATE team_players SET dorsal = ? WHERE player_id = ? AND team_id = ? AND left_at IS NULL', [$dorsal, $playerId, $teamId]);
+            } else {
+                Database::query('INSERT INTO team_players (team_id, player_id, dorsal, joined_on) VALUES (?, ?, ?, ?)', [$teamId, $playerId, $dorsal, $today]);
+            }
+        }
+        foreach (array_diff(array_keys($current), array_keys($teams)) as $teamId) {
+            Database::query('UPDATE team_players SET left_at = ? WHERE player_id = ? AND team_id = ? AND left_at IS NULL', [$today, $playerId, $teamId]);
+        }
+    }
+
+    /** Baixa del club: deixa d'aparèixer però es conserva l'historial. */
+    public static function deactivate(int $playerId): void
+    {
+        Database::query('UPDATE players SET active = 0 WHERE id = ?', [$playerId]);
+        Database::query('UPDATE team_players SET left_at = ? WHERE player_id = ? AND left_at IS NULL', [date('Y-m-d'), $playerId]);
+    }
+
+    /**
+     * Valida el formulari. Retorna [dades, equips, errors].
+     * @param array<string,mixed> $in
+     * @param array<int,int> $allowedTeams
+     * @return array{0:array<string,mixed>,1:array<int,int|null>,2:array<int,string>}
+     */
+    public static function validate(array $in, array $allowedTeams): array
+    {
+        $d = [
+            'first_name' => trim((string)($in['first_name'] ?? '')),
+            'last_name'  => trim((string)($in['last_name'] ?? '')),
+            'birth_date' => trim((string)($in['birth_date'] ?? '')),
+            'position'   => (string)($in['position'] ?? 'jugador') === 'porter' ? 'porter' : 'jugador',
+        ];
+        $errors = [];
+        if (mb_strlen($d['first_name']) < 1 || mb_strlen($d['first_name']) > 60) {
+            $errors[] = 'Escriu el nom (màxim 60 caràcters).';
+        }
+        if (mb_strlen($d['last_name']) < 1 || mb_strlen($d['last_name']) > 100) {
+            $errors[] = 'Escriu els cognoms (màxim 100 caràcters).';
+        }
+        if ($d['birth_date'] !== '') {
+            $dt = \DateTime::createFromFormat('!Y-m-d', $d['birth_date']);
+            if (!$dt || $dt->format('Y-m-d') !== $d['birth_date'] || $dt > new \DateTime('today') || (int)$dt->format('Y') < 1940) {
+                $errors[] = 'La data de naixement no és vàlida.';
+            }
+        }
+
+        $teams = [];
+        $dorsals = is_array($in['dorsal'] ?? null) ? $in['dorsal'] : [];
+        foreach ((array)($in['teams'] ?? []) as $tid) {
+            $tid = (int)$tid;
+            if (!in_array($tid, $allowedTeams, true)) {
+                continue;
+            }
+            $raw = trim((string)($dorsals[$tid] ?? ''));
+            if ($raw === '') {
+                $teams[$tid] = null;
+            } elseif (ctype_digit($raw) && (int)$raw <= 99) {
+                $teams[$tid] = (int)$raw;
+            } else {
+                $errors[] = 'Els dorsals han de ser números del 0 al 99.';
+                $teams[$tid] = null;
+            }
+        }
+        if (!$teams) {
+            $errors[] = 'Tria com a mínim un equip.';
+        }
+        return [$d, $teams, array_values(array_unique($errors))];
+    }
 }

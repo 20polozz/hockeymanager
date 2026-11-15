@@ -41,7 +41,7 @@ final class DashboardController extends Controller
             'quickCards'      => $this->quickCards($repo),
             'upcoming'        => $repo->upcomingEvents(6),
             'results'         => $repo->lastResults(5),
-            'activity'        => $isPlayer ? [] : ActivityLog::recent(TeamScope::ids(), Auth::hasRole(Auth::ROLE_COORDINATOR), 6),
+            'activity'        => $isPlayer ? [] : ActivityLog::recent(TeamScope::ids(), Auth::isManager(), 6),
             'attendanceTeams' => $isPlayer ? [] : $repo->attendanceByTeam(30),
             'pendingCallups'  => $pendingCallups,
         ]);

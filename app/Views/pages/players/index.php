@@ -1,6 +1,7 @@
 <?php
 /** @var array $players @var string $search @var array $teams @var int $activeTeam */
 $q = $search !== '' ? ['q' => $search] : [];
+$canManage = App\Core\Gate::allows('players.manage');
 ?>
 <?php if (count($teams) > 1): ?>
   <nav class="filter-chips" aria-label="Filtra per equip">
@@ -19,6 +20,9 @@ $q = $search !== '' ? ['q' => $search] : [];
     <input id="player-search" type="search" name="q" value="<?= e($search) ?>" placeholder="Filtra per nom…" maxlength="80">
     <button class="btn" type="submit"><?= icon('search', 'icon icon-sm') ?> Filtra</button>
   </form>
+  <?php if ($canManage): ?>
+    <a class="btn btn-primary" href="<?= e(url('/jugadors/nou', $activeTeam > 0 ? ['equip' => $activeTeam] : [])) ?>"><?= icon('plus', 'icon icon-sm') ?> Nou jugador/a</a>
+  <?php endif; ?>
 </div>
 
 <section class="panel panel-flush">

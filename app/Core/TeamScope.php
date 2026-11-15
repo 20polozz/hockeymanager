@@ -32,6 +32,7 @@ final class TeamScope
                  JOIN seasons s ON s.id = t.season_id AND s.is_current = 1';
 
         switch ($user['role']) {
+            case Auth::ROLE_ADMIN:
             case Auth::ROLE_COORDINATOR:
                 $rows = Database::all($base . ' ORDER BY c.sort_order, t.name');
                 break;

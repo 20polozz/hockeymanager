@@ -15,8 +15,8 @@ use App\Repositories\Settings;
 
 /**
  * Instal·lació inicial i actualització de l'esquema de la BD.
- *  - Sense usuaris: cal la install_key de config.php per crear el coordinador.
- *  - Amb usuaris: només un coordinador pot aplicar migracions pendents.
+ *  - Sense usuaris: cal la install_key de config.php per crear l'administrador.
+ *  - Amb usuaris: només un administrador pot aplicar migracions pendents.
  */
 final class InstallController extends Controller
 {
@@ -91,7 +91,7 @@ final class InstallController extends Controller
 
         Database::query(
             'INSERT INTO users (name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?)',
-            [$in['name'], $in['email'], password_hash($password, PASSWORD_DEFAULT), Auth::ROLE_COORDINATOR, date('Y-m-d H:i:s')]
+            [$in['name'], $in['email'], password_hash($password, PASSWORD_DEFAULT), Auth::ROLE_ADMIN, date('Y-m-d H:i:s')]
         );
         $userId = (int)Database::pdo()->lastInsertId();
         Settings::set('club_name', $in['club_name']);

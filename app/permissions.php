@@ -2,10 +2,13 @@
 /**
  * Matriu de permisos: permís => rols que el tenen.
  * El router (opció 'can') i els controladors la fan servir a través de Gate.
+ *  - admin: administrador de l'aplicació (tot, incloent-hi el manteniment de la BD)
+ *  - coordinador: gestió completa del club
  */
-$all   = ['coordinador', 'entrenador', 'jugador'];
-$staff = ['coordinador', 'entrenador'];
-$coord = ['coordinador'];
+$all     = ['admin', 'coordinador', 'entrenador', 'jugador'];
+$staff   = ['admin', 'coordinador', 'entrenador'];
+$coord   = ['admin', 'coordinador'];
+$admin   = ['admin'];
 
 return [
     'dashboard.view'    => $all,
@@ -40,5 +43,5 @@ return [
 
     'users.manage'      => $coord,
     'settings.view'     => $all,
-    'system.install'    => $coord,
+    'system.install'    => $admin,
 ];

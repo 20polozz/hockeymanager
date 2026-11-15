@@ -63,7 +63,18 @@ function take_flashes(): array
 /** Valor antic d'un formulari després d'un error de validació. */
 function old(string $key, string $default = ''): string
 {
-    return (string)($_SESSION['hm_old'][$key] ?? $default);
+    $v = $_SESSION['hm_old'][$key] ?? $default;
+    return is_array($v) ? $default : (string)$v;
+}
+
+/** Valor antic d'un camp de tipus llista (checkboxes) o null si no n'hi ha. */
+function old_array(string $key): ?array
+{
+    if (!isset($_SESSION['hm_old']) || !is_array($_SESSION['hm_old'])) {
+        return null;
+    }
+    $v = $_SESSION['hm_old'][$key] ?? [];
+    return is_array($v) ? $v : [];
 }
 
 function remember_input(array $data): void

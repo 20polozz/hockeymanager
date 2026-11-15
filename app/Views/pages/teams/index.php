@@ -1,6 +1,14 @@
 <?php
 /** @var array $teams */
+use App\Core\Gate;
+
+$canManage = Gate::allows('teams.manage');
 ?>
+<?php if ($canManage): ?>
+  <div class="page-head page-head-end">
+    <a class="btn btn-primary" href="<?= e(url('/equips/nou')) ?>"><?= icon('plus', 'icon icon-sm') ?> Nou equip</a>
+  </div>
+<?php endif; ?>
 <?php if (!$teams): ?>
   <section class="panel">
     <?= component('empty_state', ['icon' => 'shield', 'text' => 'Encara no hi ha equips a la temporada actual.']) ?>
@@ -28,7 +36,12 @@
             <span class="muted small">Sense entrenador assignat</span>
           <?php endif; ?>
         </div>
-        <a class="btn btn-block" href="<?= e(url('/jugadors', ['equip' => (int)$t['id']])) ?>">Veure jugadors/es <?= icon('arrow-right', 'icon icon-sm') ?></a>
+        <div class="card-actions">
+          <a class="btn" href="<?= e(url('/jugadors', ['equip' => (int)$t['id']])) ?>">Veure jugadors/es <?= icon('arrow-right', 'icon icon-sm') ?></a>
+          <?php if ($canManage): ?>
+            <a class="btn" href="<?= e(url('/equips/' . (int)$t['id'] . '/editar')) ?>">Edita</a>
+          <?php endif; ?>
+        </div>
       </article>
     <?php endforeach; ?>
   </div>

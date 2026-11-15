@@ -17,11 +17,23 @@ $router->post('/logout', 'AuthController@logout');
 $router->get('/', 'DashboardController@index', ['can' => 'dashboard.view']);
 $router->get('/cerca', 'SearchController@index', ['can' => 'dashboard.view']);
 
-// Jugadors i equips
+// Jugadors/es
 $router->get('/jugadors', 'PlayerController@index', ['can' => 'players.view']);
+$router->get('/jugadors/nou', 'PlayerController@create', ['can' => 'players.manage']);
+$router->post('/jugadors', 'PlayerController@store', ['can' => 'players.manage']);
 $router->get('/jugadors/{id}', 'PlayerController@show', ['can' => 'players.view']);
+$router->get('/jugadors/{id}/editar', 'PlayerController@edit', ['can' => 'players.manage']);
+$router->post('/jugadors/{id}', 'PlayerController@update', ['can' => 'players.manage']);
+$router->post('/jugadors/{id}/baixa', 'PlayerController@deactivate', ['can' => 'players.manage']);
 $router->get('/perfil', 'PlayerController@own', ['can' => 'players.own']);
+
+// Equips
 $router->get('/equips', 'TeamController@index', ['can' => 'teams.view']);
+$router->get('/equips/nou', 'TeamController@create', ['can' => 'teams.manage']);
+$router->post('/equips', 'TeamController@store', ['can' => 'teams.manage']);
+$router->get('/equips/{id}/editar', 'TeamController@edit', ['can' => 'teams.manage']);
+$router->post('/equips/{id}', 'TeamController@update', ['can' => 'teams.manage']);
+$router->post('/equips/{id}/eliminar', 'TeamController@destroy', ['can' => 'teams.manage']);
 
 // Configuració del compte
 $router->get('/configuracio', 'SettingsController@index', ['can' => 'settings.view']);

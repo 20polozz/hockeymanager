@@ -23,7 +23,7 @@ $activityIcons = ['attendance' => ['checklist', 'green'], 'callup' => ['clipboar
   <div class="panel">
     <?= component('empty_state', [
         'icon' => 'shield',
-        'text' => Auth::hasRole(Auth::ROLE_COORDINATOR)
+        'text' => Auth::isManager()
             ? 'Encara no hi ha cap equip a la temporada actual. Quan es creïn equips (mòdul Equips), aquí veuràs el resum del club.'
             : 'Encara no tens cap equip assignat. Parla amb el coordinador del club.',
     ]) ?>

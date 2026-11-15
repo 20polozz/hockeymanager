@@ -61,6 +61,22 @@
     sel.addEventListener('change', function () { if (sel.form) sel.form.submit(); });
   });
 
+  // Confirmació abans d'accions destructives
+  document.querySelectorAll('form[data-confirm]').forEach(function (f) {
+    f.addEventListener('submit', function (ev) {
+      if (!window.confirm(f.getAttribute('data-confirm'))) ev.preventDefault();
+    });
+  });
+
+  // Ressalta la fila d'equip marcada al formulari de jugador/a
+  document.querySelectorAll('input[data-toggle-row]').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      var row = cb.closest('.team-check');
+      if (row) row.classList.toggle('is-on', cb.checked);
+      if (cb.checked && row) { var d = row.querySelector('.team-check-dorsal input'); if (d && !d.value) d.focus(); }
+    });
+  });
+
   // Els missatges d'èxit desapareixen sols
   setTimeout(function () {
     document.querySelectorAll('.alert-success').forEach(function (a) { a.remove(); });

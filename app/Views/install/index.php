@@ -19,7 +19,7 @@
 
 <?php elseif ($mode === 'install'): ?>
   <h1 class="auth-title">Instal·la HockeyManager</h1>
-  <p class="muted">Es crearan les taules i el compte del primer coordinador.</p>
+  <p class="muted">Es crearan les taules i el compte del primer administrador.</p>
   <?php if (!$keyConfigured): ?>
     <div class="alert alert-error"><?= icon('alert', 'icon icon-sm') ?><span>Abans de continuar, posa una <code>install_key</code> a <code>config.php</code>.</span></div>
   <?php else: ?>

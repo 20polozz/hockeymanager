@@ -8,6 +8,7 @@ namespace App\Core;
  */
 final class Auth
 {
+    public const ROLE_ADMIN = 'admin';
     public const ROLE_COORDINATOR = 'coordinador';
     public const ROLE_COACH = 'entrenador';
     public const ROLE_PLAYER = 'jugador';
@@ -56,6 +57,12 @@ final class Auth
     {
         $u = self::user();
         return $u ? (string)$u['role'] : '';
+    }
+
+    /** Administrador o coordinador: veu i gestiona tot el club. */
+    public static function isManager(): bool
+    {
+        return self::hasRole(self::ROLE_ADMIN, self::ROLE_COORDINATOR);
     }
 
     public static function hasRole(string ...$roles): bool
@@ -126,6 +133,7 @@ final class Auth
     public static function roleLabels(): array
     {
         return [
+            self::ROLE_ADMIN       => 'Administrador',
             self::ROLE_COORDINATOR => 'Coordinador',
             self::ROLE_COACH       => 'Entrenador',
             self::ROLE_PLAYER      => 'Jugador/a',

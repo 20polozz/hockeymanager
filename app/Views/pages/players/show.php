@@ -1,5 +1,5 @@
 <?php
-/** @var array $player @var array $history @var array $attendance */
+/** @var array $player @var array $history @var array $attendance @var bool $canManage */
 $name = $player['first_name'] . ' ' . $player['last_name'];
 $age = $player['birth_date'] ? (int)date_diff(date_create($player['birth_date']), date_create('today'))->y : null;
 $current = array_values(array_filter($history, function ($h) { return $h['left_at'] === null; }));
@@ -9,7 +9,7 @@ $attended = $attendance['present'] + $attendance['retard'];
 <section class="panel profile-hero">
   <span class="avatar avatar-xl"><?= e(initials($name)) ?></span>
   <div class="profile-hero-body">
-    <h2 class="module-title"><?= e($name) ?></h2>
+    <h2 class="module-title"><?= e($name) ?><?php if ((int)$player['active'] !== 1): ?> <span class="pill pill-red">Baixa</span><?php endif; ?></h2>
     <div class="chips">
       <span class="pill <?= $player['position'] === 'porter' ? 'pill-orange' : 'pill-blue' ?>"><?= $player['position'] === 'porter' ? 'Porter/a' : 'Jugador/a de camp' ?></span>
       <?php foreach ($current as $c): ?>
@@ -17,6 +17,9 @@ $attended = $attendance['present'] + $attendance['retard'];
       <?php endforeach; ?>
     </div>
   </div>
+  <?php if (!empty($canManage)): ?>
+    <a class="btn hero-action" href="<?= e(url('/jugadors/' . (int)$player['id'] . '/editar')) ?>"><?= icon('wrench', 'icon icon-sm') ?> Edita la fitxa</a>
+  <?php endif; ?>
 </section>
 
 <div class="dash-grid">
