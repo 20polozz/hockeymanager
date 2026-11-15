@@ -30,10 +30,13 @@ final class TeamController extends Controller
         if ($errors) {
             $this->fail($data, $errors, '/equips/nou');
         }
-        $id = TeamRepository::create($data['name'], $data['category_id'] ?: null, $data['color']);
-        ActivityLog::add('team', 'Ha creat l\'equip ' . $data['name'], $id);
+        $id = TeamRepository::create($data['name'], $data['category_id'] ?: null, $data['color'], $data['kind']);
+        if ($data['kind'] === 'grup') {
+            TeamRepository::syncMembers($id, $this->members());
+        }
+        ActivityLog::add('team', 'Ha creat ' . ($data['kind'] === 'grup' ? 'el grup ' : 'l\'equip ') . $data['name'], $id);
         forget_input();
-        flash('success', 'Equip «' . $data['name'] . '» creat.');
+        flash('success', ($data['kind'] === 'grup' ? 'Grup' : 'Equip') . ' «' . $data['name'] . '» creat.');
         redirect('/equips');
     }
 
@@ -49,7 +52,10 @@ final class TeamController extends Controller
         if ($errors) {
             $this->fail($data, $errors, '/equips/' . $id . '/editar');
         }
-        TeamRepository::update($id, $data['name'], $data['category_id'] ?: null, $data['color']);
+        TeamRepository::update($id, $data['name'], $data['category_id'] ?: null, $data['color'], $data['kind']);
+        if ($data['kind'] === 'grup') {
+            TeamRepository::syncMembers($id, $this->members());
+        }
         ActivityLog::add('team', 'Ha editat l\'equip ' . $data['name'], $id);
         forget_input();
         flash('success', 'Equip actualitzat.');
@@ -71,15 +77,29 @@ final class TeamController extends Controller
     }
 
     /**
+     * Membres triats al formulari d'un grup.
+     * @return array<int,int>
+     */
+    private function members(): array
+    {
+        $valid = array_map('intval', array_column(TeamRepository::allPlayers(), 'id'));
+        return array_values(array_intersect(array_map('intval', (array)($_POST['members'] ?? [])), $valid));
+    }
+
+    /**
      * @param array<string,mixed>|null $team
      */
     private function form(?array $team): void
     {
+        $kind = $team['kind'] ?? (($_GET['tipus'] ?? '') === 'grup' ? 'grup' : 'equip');
         $this->view('pages/teams/form', [
-            'pageTitle'  => $team ? 'Edita l\'equip' : 'Nou equip',
+            'pageTitle'  => $team ? ($kind === 'grup' ? 'Edita el grup' : 'Edita l\'equip') : ($kind === 'grup' ? 'Nou grup d\'entrenament' : 'Nou equip'),
             'activeNav'  => 'teams',
             'team'       => $team,
+            'kind'       => $kind,
             'categories' => TeamRepository::categories(),
+            'players'    => TeamRepository::allPlayers(),
+            'members'    => $team ? TeamRepository::memberIds((int)$team['id']) : [],
         ]);
         forget_input();
     }

@@ -885,3 +885,8 @@ a.bar-label { color: var(--text); }
 .preview-table td.err { color: var(--red); }
 .settings-links { display: flex; flex-wrap: wrap; gap: 8px; }
 .pill-navy { background: var(--navy-bg); color: var(--navy); } .pill-violet { background: var(--violet-bg); color: var(--violet); }
+.kind-gimnas.cal-item { background: var(--violet-bg); border-color: var(--violet); }
+.cal-dots i.kind-gimnas { background: var(--violet); }
+.agenda-item.kind-gimnas { border-left-color: var(--violet); }
+.section-gap { margin-top: 8px; }
+.team-grid + .section-title { margin-top: 28px; }

@@ -51,14 +51,14 @@ $back = $isEdit ? '/jugadors/' . (int)$player['id'] : '/jugadors';
           <p class="muted small">Primer cal crear algun equip.</p>
         <?php endif; ?>
         <div class="team-checks">
-          <?php foreach ($teams as $t): $tid = (int)$t['id']; $on = in_array($tid, $checked, true); ?>
+          <?php foreach ($teams as $t): $tid = (int)$t['id']; $on = in_array($tid, $checked, true); $grp = ($t['kind'] ?? 'equip') === 'grup'; ?>
             <div class="team-check<?= $on ? ' is-on' : '' ?>">
               <label class="team-check-main">
                 <input type="checkbox" name="teams[]" value="<?= $tid ?>"<?= $on ? ' checked' : '' ?> data-toggle-row>
                 <span class="team-dot" style="--team: <?= e($t['color']) ?>"></span>
-                <span><?= e($t['name']) ?></span>
+                <span><?= e($t['name']) ?><?= $grp ? ' <small class="muted">· grup</small>' : '' ?></span>
               </label>
-              <label class="team-check-dorsal">
+              <label class="team-check-dorsal"<?= $grp ? ' hidden' : '' ?>>
                 <span>Dorsal</span>
                 <input type="text" name="dorsal[<?= $tid ?>]" value="<?= e($dorsalOf($tid)) ?>" inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2" placeholder="–">
               </label>
