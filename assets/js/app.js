@@ -126,6 +126,42 @@
     });
   }
 
+  // Formulari de partit: mostra el resultat només si està disputat
+  var scoreBox = document.getElementById('score-box');
+  if (scoreBox) {
+    document.querySelectorAll('input[data-status]').forEach(function (r) {
+      r.addEventListener('change', function () { scoreBox.hidden = !(r.checked && r.value === 'jugat'); });
+    });
+  }
+
+  // Acta: desplega les estadístiques de qui ha jugat
+  var sheetCount = document.querySelector('[data-sheet-count]');
+  var updateSheet = function () {
+    var n = document.querySelectorAll('input[data-played]:checked').length;
+    if (sheetCount) sheetCount.textContent = n + ' han jugat';
+  };
+  document.querySelectorAll('input[data-played]').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      var li = cb.closest('.sheet-item');
+      li.classList.toggle('st-present', cb.checked);
+      var st = li.querySelector('.sheet-stats');
+      if (st) st.hidden = !cb.checked;
+      updateSheet();
+    });
+  });
+  updateSheet();
+
+  // Convocatòria: comptador de seleccionades
+  var pickCount = document.querySelector('[data-pick-count]');
+  var updatePick = function () {
+    var n = document.querySelectorAll('input[data-pick]:checked').length;
+    if (pickCount) pickCount.textContent = n + ' convocades';
+  };
+  document.querySelectorAll('input[data-pick]').forEach(function (cb) {
+    cb.addEventListener('change', function () { cb.closest('.pick').classList.toggle('is-on', cb.checked); updatePick(); });
+  });
+  updatePick();
+
   // Els missatges d'èxit desapareixen sols
   setTimeout(function () {
     document.querySelectorAll('.alert-success').forEach(function (a) { a.remove(); });

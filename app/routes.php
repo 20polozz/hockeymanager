@@ -70,11 +70,27 @@ $router->post('/entrenaments/{id}', 'SessionController@update', ['can' => 'train
 $router->post('/entrenaments/{id}/eliminar', 'SessionController@destroy', ['can' => 'trainings.manage']);
 $router->post('/entrenaments/{id}/exercicis', 'SessionController@items', ['can' => 'trainings.manage']);
 
+// Partits i acta
+$router->get('/partits', 'MatchController@index', ['can' => 'matches.view']);
+$router->get('/partits/nou', 'MatchController@create', ['can' => 'matches.manage']);
+$router->post('/partits', 'MatchController@store', ['can' => 'matches.manage']);
+$router->get('/partits/{id}', 'MatchController@show', ['can' => 'matches.view']);
+$router->get('/partits/{id}/editar', 'MatchController@edit', ['can' => 'matches.manage']);
+$router->post('/partits/{id}', 'MatchController@update', ['can' => 'matches.manage']);
+$router->post('/partits/{id}/eliminar', 'MatchController@destroy', ['can' => 'matches.manage']);
+$router->get('/partits/{id}/acta', 'MatchController@sheet', ['can' => 'matches.manage']);
+$router->post('/partits/{id}/acta', 'MatchController@saveSheet', ['can' => 'matches.manage']);
+
+// Convocatòries
+$router->get('/convocatories', 'CallupController@index', ['can' => 'callups.view']);
+$router->get('/partits/{id}/convocatoria', 'CallupController@edit', ['can' => 'callups.manage']);
+$router->post('/partits/{id}/convocatoria', 'CallupController@save', ['can' => 'callups.manage']);
+$router->post('/partits/{id}/convocatoria/eliminar', 'CallupController@destroy', ['can' => 'callups.manage']);
+$router->post('/convocatories/{id}/resposta', 'CallupController@respond', ['can' => 'callups.respond']);
+
 // Configuració del compte
 $router->get('/configuracio', 'SettingsController@index', ['can' => 'settings.view']);
 $router->post('/configuracio/contrasenya', 'SettingsController@updatePassword', ['can' => 'settings.view']);
 
 // Mòduls de les properes fases (pàgina pròpia amb l'estat i el que inclourà)
-$router->get('/partits', 'ModuleController@matches', ['can' => 'matches.view']);
-$router->get('/convocatories', 'ModuleController@callups', ['can' => 'callups.view']);
 $router->get('/estadistiques', 'ModuleController@stats', ['can' => 'stats.view']);

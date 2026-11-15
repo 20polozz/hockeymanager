@@ -10,25 +10,6 @@ namespace App\Controllers;
  */
 final class ModuleController extends Controller
 {
-    public function matches(): void
-    {
-        $this->show('matches', 'Partits', 'trophy', 4, 'Calendari de competició, resultats i historial per temporada.', [
-            'Rival, competició, data, hora, pista i local/visitant',
-            'Resultat i estat del partit',
-            'Partits futurs, disputats i historial per temporada',
-        ]);
-    }
-
-    public function callups(): void
-    {
-        $this->show('callups', 'Convocatòries', 'clipboard', 4, 'L\'entrenador convoca i els jugadors/es confirmen des del mòbil.', [
-            'Seleccionar partit i jugadors/es convocats',
-            'Confirmar o rebutjar la convocatòria (jugador)',
-            'Seguiment de confirmats, rebutjats i pendents',
-            'Separació entre la resposta a la convocatòria i l\'assistència real al partit',
-        ]);
-    }
-
     public function stats(): void
     {
         $this->show('stats', 'Estadístiques', 'chart', 5, 'Rendiment individual i col·lectiu amb gràfics, només amb dades reals registrades.', [

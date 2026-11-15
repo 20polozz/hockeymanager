@@ -1,7 +1,8 @@
 <?php
 /** @var int $code @var string|null $detail */
-$titles = [403 => 'No tens permís', 404 => 'Pàgina no trobada', 405 => 'Mètode no permès', 419 => 'Sessió caducada', 500 => 'Alguna cosa ha fallat'];
+$titles = [400 => 'Petició no vàlida', 403 => 'No tens permís', 404 => 'Pàgina no trobada', 405 => 'Mètode no permès', 419 => 'Sessió caducada', 500 => 'Alguna cosa ha fallat'];
 $texts = [
+    400 => 'No s\'ha pogut processar la petició.',
     403 => 'El teu rol no té accés a aquesta secció.',
     404 => 'La pàgina que busques no existeix o no hi tens accés.',
     405 => 'Aquesta adreça no accepta aquest tipus de petició.',
