@@ -13,5 +13,4 @@ return [
     ['key' => 'profile',    'label' => 'El meu perfil',  'path' => '/perfil',        'icon' => 'user',      'can' => 'players.own'],
     ['key' => 'teams',      'label' => 'Equips',         'path' => '/equips',        'icon' => 'shield',    'can' => 'teams.view'],
     ['key' => 'users',      'label' => 'Usuaris',        'path' => '/usuaris',       'icon' => 'lock',      'can' => 'users.manage'],
-    ['key' => 'settings',   'label' => 'Configuració',   'path' => '/configuracio',  'icon' => 'settings',  'can' => 'settings.view'],
 ];

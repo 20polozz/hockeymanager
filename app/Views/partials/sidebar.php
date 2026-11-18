@@ -42,13 +42,14 @@ $club = Settings::get('club_name', (string)App\Core\Config::get('app.club_name',
 
   <div class="sidebar-foot">
     <?php if ($user): ?>
-      <div class="sidebar-user">
+      <a class="sidebar-user<?= ($activeNav ?? '') === 'settings' ? ' is-active' : '' ?>" href="<?= e(url('/configuracio')) ?>" title="El meu compte i configuració">
         <span class="avatar avatar-sm"><?= e(initials((string)$user['name'])) ?></span>
         <span class="sidebar-user-text">
           <span class="sidebar-user-name"><?= e($user['name']) ?></span>
           <span class="sidebar-user-role"><?= e(Auth::roleLabels()[$user['role']] ?? '') ?></span>
         </span>
-      </div>
+        <?= icon('settings', 'icon icon-sm sidebar-user-cog') ?>
+      </a>
     <?php endif; ?>
     <button type="button" class="nav-link collapse-btn" data-sidebar-collapse aria-label="Replega el menú" data-tooltip="Desplega el menú">
       <?= icon('chevrons-left') ?>
