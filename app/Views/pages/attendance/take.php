@@ -1,7 +1,7 @@
 <?php
 /** @var array $event @var array $sheet @var array $away */
 use App\Repositories\AttendanceRepository;
-$labels = ['present' => ['P', 'Present'], 'retard' => ['R', 'Retard'], 'justificat' => ['J', 'Justificada'], 'absent' => ['A', 'Absent']];
+$labels = ['present' => ['check', 'Present'], 'retard' => ['clock', 'Retard'], 'justificat' => ['clipboard', 'Justificada'], 'absent' => ['x', 'Absent']];
 ?>
 <div class="take-page">
   <a class="back-link" href="<?= e(url('/assistencia')) ?>"><?= icon('chevron-right', 'icon icon-sm flip') ?> Assistència</a>
@@ -38,7 +38,7 @@ $labels = ['present' => ['P', 'Present'], 'retard' => ['R', 'Retard'], 'justific
               <?php foreach ($labels as $key => [$short, $long]): ?>
                 <label class="opt opt-<?= $key ?>">
                   <input type="radio" name="status[<?= $pid ?>]" value="<?= $key ?>"<?= $st === $key ? ' checked' : '' ?>>
-                  <span><b><?= $short ?></b><em><?= $long ?></em></span>
+                  <span><?= icon($short, 'icon icon-sm') ?><em><?= $long ?></em></span>
                 </label>
               <?php endforeach; ?>
               <label class="opt opt-clear" title="Sense marcar">
