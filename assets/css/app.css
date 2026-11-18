@@ -383,7 +383,9 @@ a.stat-card:hover { text-decoration: none; transform: translateY(-2px); box-shad
 .activity-item { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; font-size: .9rem; }
 
 /* ---------- Pàgines ---------- */
-.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: thin; }
+.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 6px; margin-bottom: 14px; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chips .chip { flex-shrink: 0; scroll-snap-align: start; }
 .chip { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); font-weight: 600; font-size: .86rem; white-space: nowrap; }
 .chip:hover { background: var(--surface-2); text-decoration: none; }
 .chip.is-active { background: var(--primary); border-color: var(--primary); color: #fff; }
@@ -1102,7 +1104,9 @@ form[data-live] button:disabled { opacity: .4; }
   .btn { min-height: 44px; }
   .btn-sm { min-height: 36px; }
   .chip { height: 40px; }
-  .filter-chips { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
+  .filter-chips { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; scroll-padding-left: 14px; margin-top: 4px; }
+  .filter-chips::after { content: ""; flex: 0 0 24px; }
+  .filter-chips { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
   .page-head { gap: 10px; }
   .page-head > .btn, .head-actions { width: 100%; }
   .head-actions .btn { flex: 1; }
