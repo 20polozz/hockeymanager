@@ -103,6 +103,19 @@ final class UserRepository
         self::syncStaff($id, $d['role'] === 'entrenador' ? $staff : []);
     }
 
+    /** Elimina el compte (la fitxa de jugador/a no s'esborra; el que va crear queda sense autor). */
+    public static function delete(int $id): void
+    {
+        Database::query('UPDATE player_absences SET created_by = NULL WHERE created_by = ?', [$id]);
+        Database::query('DELETE FROM users WHERE id = ?', [$id]);
+    }
+
+    /** Administradors actius sense comptar $exceptId. */
+    public static function countActiveAdmins(int $exceptId): int
+    {
+        return (int)Database::value("SELECT COUNT(*) FROM users WHERE role = 'admin' AND active = 1 AND id <> ?", [$exceptId]);
+    }
+
     public static function setActive(int $id, bool $active): void
     {
         Database::query('UPDATE users SET active = ? WHERE id = ?', [$active ? 1 : 0, $id]);

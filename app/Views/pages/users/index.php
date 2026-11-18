@@ -47,6 +47,9 @@ $tones = ['admin' => 'red', 'coordinador' => 'navy', 'entrenador' => 'blue', 'ju
                   <form method="post" action="<?= e(url('/usuaris/' . (int)$u['id'] . '/estat')) ?>" data-confirm="<?= (int)$u['active'] ? 'Segur que vols desactivar el compte de ' . e($u['name']) . '?' : 'Reactivar el compte de ' . e($u['name']) . '?' ?>">
                     <?= csrf_field() ?><button class="btn btn-sm<?= (int)$u['active'] ? ' btn-danger' : '' ?>" type="submit"><?= (int)$u['active'] ? 'Desactiva' : 'Reactiva' ?></button>
                   </form>
+                  <form method="post" action="<?= e(url('/usuaris/' . (int)$u['id'] . '/eliminar')) ?>" data-confirm="Segur que vols eliminar definitivament el compte de <?= e($u['name']) ?>? No es pot desfer. (La fitxa de jugador/a i l'historial es conserven.)">
+                    <?= csrf_field() ?><button class="icon-btn" type="submit" aria-label="Elimina el compte de <?= e($u['name']) ?>" title="Elimina"><?= icon('x', 'icon icon-sm') ?></button>
+                  </form>
                 <?php endif; ?>
               <?php endif; ?>
             </td>

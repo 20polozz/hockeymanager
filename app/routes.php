@@ -102,6 +102,7 @@ $router->get('/usuaris/nou', 'UserController@create', ['can' => 'users.manage'])
 $router->post('/usuaris', 'UserController@store', ['can' => 'users.manage']);
 $router->get('/usuaris/{id}/editar', 'UserController@edit', ['can' => 'users.manage']);
 $router->post('/usuaris/{id}', 'UserController@update', ['can' => 'users.manage']);
+$router->post('/usuaris/{id}/eliminar', 'UserController@destroy', ['can' => 'users.manage']);
 $router->post('/usuaris/{id}/estat', 'UserController@toggle', ['can' => 'users.manage']);
 
 

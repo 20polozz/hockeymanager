@@ -65,6 +65,23 @@ final class UserController extends Controller
         redirect('/usuaris');
     }
 
+    public function destroy(int $id): void
+    {
+        $user = $this->editable($id);
+        if ($id === Auth::id()) {
+            flash('error', 'No pots eliminar el teu propi compte.');
+            redirect('/usuaris');
+        }
+        if ($user['role'] === Auth::ROLE_ADMIN && UserRepository::countActiveAdmins($id) === 0) {
+            flash('error', 'Ha de quedar almenys un administrador.');
+            redirect('/usuaris');
+        }
+        UserRepository::delete($id);
+        ActivityLog::add('system', 'Ha eliminat el compte de ' . $user['name']);
+        flash('success', 'Compte de ' . $user['name'] . ' eliminat.');
+        redirect('/usuaris');
+    }
+
     public function toggle(int $id): void
     {
         $user = $this->editable($id);
