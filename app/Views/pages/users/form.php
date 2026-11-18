@@ -68,4 +68,15 @@ $descs = ['admin' => 'Tot, inclòs el manteniment de la base de dades', 'coordin
       </div>
     </form>
   </section>
+  <?php if ($isEdit && (int)$user['id'] !== App\Core\Auth::id()): ?>
+    <section class="panel danger-zone">
+      <div>
+        <h2 class="panel-title">Eliminar el compte</h2>
+        <p class="muted small">No es pot desfer. La fitxa de jugador/a i l'historial es conserven. Si pot tornar, millor desactiva'l.</p>
+      </div>
+      <form method="post" action="<?= e(url('/usuaris/' . (int)$user['id'] . '/eliminar')) ?>" data-confirm="Segur que vols eliminar definitivament el compte de <?= e($user['name']) ?>?">
+        <?= csrf_field() ?><button class="btn btn-danger" type="submit"><?= icon('trash', 'icon icon-sm') ?> Elimina el compte</button>
+      </form>
+    </section>
+  <?php endif; ?>
 </div>

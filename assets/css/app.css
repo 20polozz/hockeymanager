@@ -876,7 +876,12 @@ a.bar-label { color: var(--text); }
 .role-card input:disabled + span { opacity: .45; cursor: not-allowed; }
 .select-xs { height: 34px; padding: 0 8px; border: 1px solid var(--border-strong); border-radius: 8px; background: #fff; font-size: .84rem; }
 .row-off td { opacity: .55; }
-.row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.row-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+td.row-actions { display: table-cell; white-space: nowrap; text-align: right; }
+td.row-actions > * { display: inline-flex; vertical-align: middle; margin: 0 0 0 6px; }
+td.row-actions > form > * { margin: 0; }
+td.row-actions-start { text-align: left; }
+td.row-actions-start > *:first-child { margin-left: 0; }
 .table td.wrap { white-space: normal; }
 .connector { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; border-top: 1px solid var(--border); }
 .connector:first-of-type { border-top: 0; }
@@ -892,6 +897,12 @@ a.bar-label { color: var(--text); }
 .name-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .name-chips li { padding: 4px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: .86rem; }
 
+
+/* Botó paperera */
+.btn-trash { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #fecaca; background: #fff; color: var(--red); cursor: pointer; transition: background .15s, color .15s, transform .1s; }
+.btn-trash:hover { background: var(--red); border-color: var(--red); color: #fff; }
+.btn-trash:active { transform: scale(.94); }
+.btn-trash:disabled { opacity: .35; cursor: not-allowed; background: #fff; color: var(--red); border-color: #fecaca; }
 
 /* Absències i baixes temporals */
 #player-hero { margin-bottom: 20px; }

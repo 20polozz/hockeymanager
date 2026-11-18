@@ -28,6 +28,7 @@ return [
     'plus'        => '<path d="M5 12h14"/><path d="M12 5v14"/>',
     'activity'    => '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
     'percent'     => '<line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+    'trash'       => '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>',
     'x'           => '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     'check'       => '<path d="M20 6 9 17l-5-5"/>',
     'alert'       => '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',

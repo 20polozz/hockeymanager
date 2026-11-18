@@ -31,7 +31,7 @@ $n = count($categories);
                 <td class="row-actions">
                   <a class="btn btn-sm" href="<?= e(url('/equips/categories', ['editar' => (int)$c['id']])) ?>#form">Edita</a>
                   <form method="post" action="<?= e(url('/equips/categories/' . (int)$c['id'] . '/eliminar')) ?>" data-confirm="Segur que vols eliminar la categoria «<?= e($c['name']) ?>»?">
-                    <?= csrf_field() ?><button class="btn btn-sm btn-danger" type="submit"<?= (int)$c['teams'] ? ' disabled title="Té equips assignats"' : '' ?>>Elimina</button>
+                    <?= csrf_field() ?><button class="btn-trash" type="submit" aria-label="Elimina la categoria <?= e($c['name']) ?>" title="<?= (int)$c['teams'] ? 'Té equips assignats' : 'Elimina' ?>"<?= (int)$c['teams'] ? ' disabled' : '' ?>><?= icon('trash', 'icon icon-sm') ?></button>
                   </form>
                 </td>
               </tr>
