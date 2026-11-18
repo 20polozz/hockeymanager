@@ -101,63 +101,43 @@
     });
   });
 
-  // Passar llista: tothom present per defecte; tocar una fila obre el selector d'estat
+  // Passar llista
   var roll = document.querySelector('form[data-attendance]');
-  var sheet = document.querySelector('[data-roll-sheet]');
-  if (roll && sheet) {
-    var LABELS = { present: 'Present', retard: 'Retard', justificat: 'Justificada', absent: 'Absent', '': 'Sense marcar' };
-    var rows = Array.prototype.slice.call(roll.querySelectorAll('[data-roll]'));
+  if (roll) {
+    var items = roll.querySelectorAll('.roll-item');
     var counter = roll.querySelector('[data-count]');
-    var current = null;
-    var paint = function (btn) {
-      var li = btn.parentNode, v = li.querySelector('[data-status-input]').value;
-      btn.className = 'roll2-item st-' + (v || 'none');
-      btn.querySelector('[data-status-text]').textContent = LABELS[v];
-      var n = li.querySelector('[data-note-input]').value;
-      var nt = btn.querySelector('[data-note-text]'); nt.textContent = n; nt.hidden = !n;
-    };
     var refresh = function () {
-      var c = { present: 0, retard: 0, justificat: 0, absent: 0 };
-      rows.forEach(function (b) { var v = b.parentNode.querySelector('[data-status-input]').value; if (c[v] !== undefined) c[v]++; paint(b); });
-      var parts = [c.present + ' presents'];
-      if (c.retard) parts.push(c.retard + ' retard' + (c.retard > 1 ? 's' : ''));
-      if (c.justificat) parts.push(c.justificat + ' justif.');
-      if (c.absent) parts.push(c.absent + ' absent' + (c.absent > 1 ? 's' : ''));
-      if (counter) counter.textContent = parts.join(' · ');
+      var marked = 0, present = 0;
+      items.forEach(function (li) {
+        var c = li.querySelector('input[type=radio]:checked');
+        var v = c ? c.value : '';
+        li.className = 'roll-item' + (v ? ' st-' + v : '');
+        if (v) marked++;
+        if (v === 'present' || v === 'retard') present++;
+      });
+      if (counter) counter.textContent = marked + '/' + items.length + ' marcats · ' + present + ' presents';
     };
-    var noteInput = sheet.querySelector('[data-sheet-note]');
-    var open = function (btn) {
-      current = btn;
-      var li = btn.parentNode, v = li.querySelector('[data-status-input]').value;
-      sheet.querySelector('[data-sheet-name]').textContent = btn.querySelector('strong').textContent;
-      sheet.querySelectorAll('.roll-opt').forEach(function (o) { o.classList.toggle('is-on', o.getAttribute('data-set') === v); o.setAttribute('aria-pressed', o.getAttribute('data-set') === v ? 'true' : 'false'); });
-      noteInput.value = li.querySelector('[data-note-input]').value;
-      sheet.hidden = false;
-      document.body.classList.add('sheet-open');
-      requestAnimationFrame(function () { sheet.classList.add('is-open'); });
-      var on = sheet.querySelector('.roll-opt.is-on') || sheet.querySelector('.roll-opt'); on.focus();
-    };
-    var close = function () {
-      if (!current) return;
-      current.parentNode.querySelector('[data-note-input]').value = noteInput.value.trim();
-      sheet.classList.remove('is-open');
-      document.body.classList.remove('sheet-open');
-      var back = current; current = null;
-      setTimeout(function () { sheet.hidden = true; }, 180);
-      refresh(); back.focus({ preventScroll: true });
-    };
-    rows.forEach(function (b) { b.addEventListener('click', function () { open(b); }); });
-    sheet.querySelectorAll('[data-set]').forEach(function (o) {
-      o.addEventListener('click', function () {
-        if (!current) return;
-        current.parentNode.querySelector('[data-status-input]').value = o.getAttribute('data-set');
-        close();
+    roll.addEventListener('change', refresh);
+    refresh();
+    var all = document.querySelector('[data-all-present]');
+    if (all) all.addEventListener('click', function () {
+      items.forEach(function (li) {
+        if (li.hasAttribute('data-away')) return; // de baixa: ja ve marcada com a justificada
+        var checked = li.querySelector('input[type=radio]:checked');
+        if (!checked || checked.value === '') {
+          var p = li.querySelector('input[value=present]');
+          if (p) p.checked = true;
+        }
+      });
+      refresh();
+    });
+    roll.querySelectorAll('[data-note-toggle]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var note = b.closest('.roll-item').querySelector('.roll-note');
+        note.hidden = !note.hidden;
+        if (!note.hidden) note.focus();
       });
     });
-    sheet.querySelectorAll('[data-sheet-close]').forEach(function (x) { x.addEventListener('click', close); });
-    noteInput.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); close(); } });
-    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && current) close(); });
-    refresh();
   }
 
   // Formulari de partit: mostra el resultat només si està disputat
