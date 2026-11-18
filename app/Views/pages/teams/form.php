@@ -55,7 +55,7 @@ $color = $val('color', '#1e3a8a');
     <section class="panel danger-zone">
       <div>
         <h2 class="panel-title">Eliminar l'equip</h2>
-        <p class="muted small">Només es pot eliminar un equip sense jugadors/es, partits ni entrenaments.</p>
+        <p class="muted small">Només es pot eliminar un equip sense jugadors/es ni entrenaments.</p>
       </div>
       <form method="post" action="<?= e(url('/equips/' . (int)$team['id'] . '/eliminar')) ?>" data-confirm="Segur que vols eliminar l'equip «<?= e($team['name']) ?>»?">
         <?= csrf_field() ?>

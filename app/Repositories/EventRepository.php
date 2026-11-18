@@ -76,7 +76,7 @@ final class EventRepository
     }
 
     /**
-     * Tots els elements del calendari entre dues dates (inclou els partits).
+     * Tots els elements del calendari entre dues dates .
      * @param array<int,int> $teamIds
      * @return array<int,array<string,mixed>>
      */
@@ -98,15 +98,7 @@ final class EventRepository
              WHERE $vw AND e.starts_at >= ? AND e.starts_at < ?",
             array_merge($vp, [$from, $to])
         );
-        $matches = $teamIds ? Database::all(
-            "SELECT m.id, 'partit' AS kind, CONCAT(IF(m.is_home, 'vs ', '@ '), m.opponent) AS title,
-                    m.starts_at, NULL AS ends_at, m.location, m.team_id, t.name AS team_name, t.color,
-                    0 AS attendance_count, 0 AS participants
-             FROM matches m JOIN teams t ON t.id = m.team_id
-             WHERE m.team_id IN (" . Database::in($teamIds) . ") AND m.starts_at >= ? AND m.starts_at < ? AND m.status <> 'cancel·lat'",
-            array_merge($teamIds, [$from, $to])
-        ) : [];
-        $items = array_merge($events, $matches);
+        $items = $events;
         usort($items, function (array $a, array $b): int {
             return [$a['starts_at'], $a['team_name']] <=> [$b['starts_at'], $b['team_name']];
         });

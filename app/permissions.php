@@ -25,12 +25,7 @@ return [
     'trainings.view'    => $staff,
     'trainings.manage'  => $staff,
 
-    'matches.view'      => $all,
-    'matches.manage'    => $staff,
 
-    'callups.view'      => $all,
-    'callups.manage'    => $staff,
-    'callups.respond'   => ['jugador'],
 
     'players.view'      => $staff,
     'players.manage'    => $coord,
@@ -39,7 +34,6 @@ return [
     'teams.view'        => $staff,
     'teams.manage'      => $coord,
 
-    'stats.view'        => $all,
 
     'users.manage'      => $coord,
     'settings.view'     => $all,

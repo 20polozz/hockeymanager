@@ -144,33 +144,6 @@ $attended = $attendance['present'] + $attendance['retard'];
     </ul>
   </section>
 
-  <section class="panel">
-    <?= component('panel_head', ['title' => 'Estadístiques esportives']) ?>
-    <?php if (empty($stats)): ?>
-      <?= component('empty_state', ['icon' => 'chart', 'text' => 'Encara no consta en cap acta de partit.']) ?>
-    <?php else: ?>
-      <div class="table-wrap">
-        <table class="table table-compact">
-          <thead><tr><th>Temporada</th><th class="num">PJ</th>
-            <?php if ($player['position'] === 'porter'): ?><th class="num">Aturades</th><th class="num">GE</th><th class="num">% at.</th><?php else: ?><th class="num">Gols</th><th class="num">Assist.</th><?php endif; ?>
-            <th class="num" title="Targetes blaves / vermelles">T. B/V</th></tr></thead>
-          <tbody>
-            <?php foreach ($stats as $st): $den = (int)$st['pct_saves'] + (int)$st['pct_ga']; ?>
-              <tr><td><?= e($st['season']) ?></td><td class="num"><?= (int)$st['played'] ?></td>
-                <?php if ($player['position'] === 'porter'): ?>
-                  <td class="num"><?= $st['saves'] === null ? '—' : (int)$st['saves'] ?></td>
-                  <td class="num"><?= $st['goals_against'] === null ? '—' : (int)$st['goals_against'] ?></td>
-                  <td class="num"><?= ($st['pct_saves'] !== null && $den > 0) ? round((int)$st['pct_saves'] / $den * 100) . '%' : '—' ?></td>
-                <?php else: ?>
-                  <td class="num"><strong><?= (int)$st['goals'] ?></strong></td><td class="num"><?= (int)$st['assists'] ?></td>
-                <?php endif; ?>
-                <td class="num"><?= (int)$st['blue_cards'] ?>/<?= (int)$st['red_cards'] ?></td></tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      </div>
-    <?php endif; ?>
-  </section>
 </div>
 
 <?php if (!empty($canManage)): ?>

@@ -90,24 +90,7 @@ final class DashboardRepository
     }
 
     /**
-     * @return array<string,mixed>|null
-     */
-    public function nextMatch(): ?array
-    {
-        if ($this->isEmpty()) {
-            return null;
-        }
-        return Database::first(
-            "SELECT m.id, m.opponent, m.competition, m.starts_at, m.location, m.is_home, t.name AS team_name, t.color
-             FROM matches m JOIN teams t ON t.id = m.team_id
-             WHERE m.status = 'programat' AND m.team_id IN ($this->in) AND m.starts_at >= ?
-             ORDER BY m.starts_at LIMIT 1",
-            array_merge($this->teamIds, [$this->now])
-        );
-    }
-
-    /**
-     * Pròxims esdeveniments (entrenaments, especials i partits) barrejats per data.
+     * Pròxims esdeveniments per data.
      * @return array<int,array<string,mixed>>
      */
     public function upcomingEvents(int $limit = 6): array
@@ -116,37 +99,13 @@ final class DashboardRepository
             return [];
         }
         [$vw, $vp] = EventRepository::visibility('e', $this->teamIds);
-        $params = array_merge($vp, [$this->now], $this->teamIds, [$this->now], [$limit]);
+        $params = array_merge($vp, [$this->now], [$limit]);
         return Database::all(
             "(SELECT e.type AS kind, e.title, e.starts_at, e.location, " . EventRepository::labelSql() . " AS team_name, COALESCE(t.color, '#64748b') AS color
               FROM events e LEFT JOIN teams t ON t.id = e.team_id
               WHERE $vw AND e.starts_at >= ?)
-             UNION ALL
-             (SELECT 'partit' AS kind,
-                     CONCAT(IF(m.is_home, 'vs ', '@ '), m.opponent) AS title,
-                     m.starts_at, m.location, t.name AS team_name, t.color
-              FROM matches m JOIN teams t ON t.id = m.team_id
-              WHERE m.status = 'programat' AND m.team_id IN ($this->in) AND m.starts_at >= ?)
              ORDER BY starts_at LIMIT ?",
             $params
-        );
-    }
-
-    /**
-     * @return array<int,array<string,mixed>>
-     */
-    public function lastResults(int $limit = 5): array
-    {
-        if ($this->isEmpty()) {
-            return [];
-        }
-        return Database::all(
-            "SELECT m.opponent, m.competition, m.starts_at, m.is_home, m.goals_for, m.goals_against,
-                    t.name AS team_name, t.color
-             FROM matches m JOIN teams t ON t.id = m.team_id
-             WHERE m.status = 'jugat' AND m.team_id IN ($this->in)
-             ORDER BY m.starts_at DESC LIMIT ?",
-            array_merge($this->teamIds, [$limit])
         );
     }
 
@@ -192,51 +151,6 @@ final class DashboardRepository
             $r['percent'] = (int)$r['total'] > 0 ? (int)round((int)$r['attended'] / (int)$r['total'] * 100) : null;
         }
         return $rows;
-    }
-
-    /**
-     * Convocatòries enviades de partits futurs amb respostes pendents.
-     * @return array<int,array<string,mixed>>
-     */
-    public function pendingCallups(): array
-    {
-        if ($this->isEmpty()) {
-            return [];
-        }
-        return Database::all(
-            "SELECT c.id, m.opponent, m.starts_at, m.is_home, t.name AS team_name, t.color,
-                    SUM(cp.response = 'confirmat') AS confirmed,
-                    SUM(cp.response = 'rebutjat') AS declined,
-                    SUM(cp.response = 'pendent') AS pending,
-                    COUNT(cp.player_id) AS total
-             FROM callups c
-             JOIN matches m ON m.id = c.match_id
-             JOIN teams t ON t.id = m.team_id
-             JOIN callup_players cp ON cp.callup_id = c.id
-             WHERE c.sent_at IS NOT NULL AND m.starts_at >= ? AND m.team_id IN ($this->in)
-             GROUP BY c.id, m.opponent, m.starts_at, m.is_home, t.name, t.color
-             HAVING pending > 0
-             ORDER BY m.starts_at",
-            array_merge([$this->now], $this->teamIds)
-        );
-    }
-
-    /**
-     * Convocatòries pendents de resposta d'un jugador concret.
-     * @return array<int,array<string,mixed>>
-     */
-    public static function pendingCallupsForPlayer(int $playerId): array
-    {
-        return Database::all(
-            "SELECT c.id, m.opponent, m.starts_at, m.is_home, m.location, c.meeting_at, t.name AS team_name, t.color
-             FROM callup_players cp
-             JOIN callups c ON c.id = cp.callup_id AND c.sent_at IS NOT NULL
-             JOIN matches m ON m.id = c.match_id
-             JOIN teams t ON t.id = m.team_id
-             WHERE cp.player_id = ? AND cp.response = 'pendent' AND m.starts_at >= ?
-             ORDER BY m.starts_at",
-            [$playerId, date('Y-m-d H:i:s')]
-        );
     }
 
     /**

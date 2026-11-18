@@ -9,11 +9,9 @@ return [
     ['key' => 'calendar',   'label' => 'Calendari',      'path' => '/calendari',     'icon' => 'calendar',  'can' => 'calendar.view'],
     ['key' => 'exercises',  'label' => 'Exercicis',      'path' => '/exercicis',     'icon' => 'cone',      'can' => 'exercises.view'],
     ['key' => 'trainings',  'label' => 'Entrenaments',   'path' => '/entrenaments',  'icon' => 'dumbbell',  'can' => 'trainings.view'],
-    ['key' => 'matches',    'label' => 'Partits',        'path' => '/partits',       'icon' => 'trophy',    'can' => 'matches.view'],
     ['key' => 'players',    'label' => 'Jugadors/es',       'path' => '/jugadors',      'icon' => 'users',     'can' => 'players.view'],
     ['key' => 'profile',    'label' => 'El meu perfil',  'path' => '/perfil',        'icon' => 'user',      'can' => 'players.own'],
     ['key' => 'teams',      'label' => 'Equips',         'path' => '/equips',        'icon' => 'shield',    'can' => 'teams.view'],
-    ['key' => 'stats',      'label' => 'Estadístiques',  'path' => '/estadistiques', 'icon' => 'chart',     'can' => 'stats.view'],
     ['key' => 'users',      'label' => 'Usuaris',        'path' => '/usuaris',       'icon' => 'lock',      'can' => 'users.manage'],
     ['key' => 'settings',   'label' => 'Configuració',   'path' => '/configuracio',  'icon' => 'settings',  'can' => 'settings.view'],
 ];

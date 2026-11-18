@@ -8,7 +8,7 @@ $oldTeams = old_array('teams');
 $oldRoles = old_array('staff_role');
 $staff = $user['staff'] ?? [];
 $checked = $oldTeams !== null ? array_map('intval', $oldTeams) : array_keys($staff);
-$descs = ['admin' => 'Tot, inclòs el manteniment de la base de dades', 'coordinador' => 'Gestiona tot el club: equips, jugadors/es, usuaris', 'entrenador' => 'Els seus equips: llista, partits, convocatòries, exercicis', 'jugador' => 'El seu perfil, calendari, convocatòries i estadístiques'];
+$descs = ['admin' => 'Tot, inclòs el manteniment de la base de dades', 'coordinador' => 'Gestiona tot el club: equips, jugadors/es, usuaris', 'entrenador' => 'Els seus equips: llista, calendari, exercicis', 'jugador' => 'El seu perfil i el calendari'];
 ?>
 <div class="form-page">
   <a class="back-link" href="<?= e(url('/usuaris')) ?>"><?= icon('chevron-right', 'icon icon-sm flip') ?> Usuaris</a>

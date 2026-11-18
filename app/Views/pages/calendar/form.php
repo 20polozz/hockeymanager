@@ -19,7 +19,6 @@ $back = $isEdit ? '/calendari/' . (int)$event['id'] : '/calendari';
           <label><input type="radio" name="type" value="gimnas"<?= $type === 'gimnas' ? ' checked' : '' ?>><span>Gimnàs</span></label>
           <label><input type="radio" name="type" value="especial"<?= $type === 'especial' ? ' checked' : '' ?>><span>Especial</span></label>
         </div>
-        <small class="muted">Els partits es creen des de l'apartat Partits.</small>
       </fieldset>
 
       <?php $who = $v('who') ?: 'equips';

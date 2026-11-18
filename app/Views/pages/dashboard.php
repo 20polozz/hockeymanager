@@ -1,8 +1,8 @@
 <?php
 /**
  * @var bool $isPlayer @var bool $hasTeams @var int $totalPlayers
- * @var array $attendance @var array|null $nextTraining @var array|null $nextMatch
- * @var array $quickCards @var array $upcoming @var array $results @var array $activity
+ * @var array $attendance @var array|null $nextTraining
+ * @var array $quickCards @var array $upcoming @var array $activity
  * @var array $attendanceTeams @var array $unavailable
  */
 use App\Core\Auth;
@@ -52,13 +52,6 @@ $activityIcons = ['attendance' => ['checklist', 'green'], 'callup' => ['clipboar
       'hint' => $nextTraining ? fdate($nextTraining['starts_at'], 'time') . ' · ' . $nextTraining['team_name'] : 'Cap entrenament programat',
       'href' => url('/calendari'),
   ]) ?>
-  <?= component('stat_card', [
-      'icon' => 'trophy', 'tone' => 'orange',
-      'label' => 'Pròxim partit',
-      'value' => $nextMatch ? ($nextMatch['is_home'] ? 'vs ' : '@ ') . $nextMatch['opponent'] : '—',
-      'hint' => $nextMatch ? ucfirst(fdate($nextMatch['starts_at'], 'short')) . ' ' . fdate($nextMatch['starts_at'], 'time') . ' · ' . $nextMatch['team_name'] : 'Cap partit programat',
-      'href' => url('/partits'),
-  ]) ?>
 </section>
 
 <section aria-labelledby="quick-title">
@@ -82,28 +75,6 @@ $activityIcons = ['attendance' => ['checklist', 'green'], 'callup' => ['clipboar
     <?php endif; ?>
   </section>
 
-  <section class="panel">
-    <?= component('panel_head', ['title' => 'Últims resultats', 'href' => url('/partits'), 'linkText' => 'Partits']) ?>
-    <?php if ($results): ?>
-      <ul class="result-list">
-        <?php foreach ($results as $r):
-            $gf = (int)$r['goals_for'];
-            $ga = (int)$r['goals_against'];
-            [$label, $tone] = $gf > $ga ? ['V', 'green'] : ($gf < $ga ? ['D', 'red'] : ['E', 'muted']); ?>
-          <li class="result-item">
-            <span class="result-badge tone-<?= $tone ?>" title="<?= $gf > $ga ? 'Victòria' : ($gf < $ga ? 'Derrota' : 'Empat') ?>"><?= $label ?></span>
-            <span class="result-body">
-              <span class="result-title"><?= $r['is_home'] ? 'vs' : '@' ?> <?= e($r['opponent']) ?></span>
-              <span class="result-meta"><span class="team-dot" style="--team: <?= e($r['color']) ?>"></span><?= e($r['team_name']) ?> · <?= e(fdate($r['starts_at'], 'short')) ?></span>
-            </span>
-            <span class="result-score"><?= $gf ?> – <?= $ga ?></span>
-          </li>
-        <?php endforeach; ?>
-      </ul>
-    <?php else: ?>
-      <?= component('empty_state', ['icon' => 'trophy', 'text' => 'Encara no hi ha partits disputats.']) ?>
-    <?php endif; ?>
-  </section>
 
   <?php if (!$isPlayer): ?>
     <section class="panel">

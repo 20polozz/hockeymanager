@@ -156,7 +156,6 @@ final class PlayerController extends Controller
             'history'    => PlayerRepository::teamHistory($id),
             'attendance' => PlayerRepository::attendanceSummary($id),
             'attHistory' => \App\Repositories\AttendanceRepository::playerHistory($id, 10),
-            'stats'      => \App\Repositories\StatsRepository::playerBySeason($id),
             'canManage'  => Gate::allows('players.manage') && (int)$player['active'] === 1,
             'absences'   => \App\Repositories\AbsenceRepository::forPlayer($id),
             'canAbsence' => (int)$player['active'] === 1 && AbsenceController::canManage($id),

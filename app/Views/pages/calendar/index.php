@@ -11,9 +11,9 @@ $link = function (string $v, DateTime $d) use ($base): string {
     return url('/calendari', $base + ['vista' => $v, 'data' => $d->format('Y-m-d')]);
 };
 $today = date('Y-m-d');
-$kinds = ['entrenament' => 'Entrenament', 'partit' => 'Partit', 'especial' => 'Especial', 'gimnas' => 'Gimnàs'];
+$kinds = ['entrenament' => 'Entrenament', 'especial' => 'Especial', 'gimnas' => 'Gimnàs'];
 $itemUrl = function (array $it): string {
-    return $it['kind'] === 'partit' ? url('/partits/' . (int)$it['id']) : url('/calendari/' . (int)$it['id']);
+    return url('/calendari/' . (int)$it['id']);
 };
 switch ($calView) {
     case 'dia':
@@ -50,7 +50,6 @@ switch ($calView) {
 
 <div class="cal-legend">
   <span><i class="dot dot-blue"></i>Entrenament</span>
-  <span><i class="dot dot-green"></i>Partit</span>
   <span><i class="dot dot-violet"></i>Gimnàs</span>
   <span><i class="dot dot-orange"></i>Esdeveniment especial</span>
 </div>
@@ -110,7 +109,7 @@ switch ($calView) {
       $evs = [];
       foreach ($byDay[$key] ?? [] as $it) {
           $s0 = $toMin((string)$it['starts_at']);
-          $e0 = $it['ends_at'] && substr((string)$it['ends_at'], 0, 10) === $key ? $toMin((string)$it['ends_at']) : $s0 + ($it['kind'] === 'partit' ? 90 : 60);
+          $e0 = $it['ends_at'] && substr((string)$it['ends_at'], 0, 10) === $key ? $toMin((string)$it['ends_at']) : $s0 + 60;
           $e0 = max($e0, $s0 + 30);
           $startH = min($startH, intdiv($s0, 60)); $endH = max($endH, (int)ceil($e0 / 60));
           $evs[] = ['it' => $it, 's' => $s0, 'e' => $e0];

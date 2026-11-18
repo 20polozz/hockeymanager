@@ -3,7 +3,7 @@
  * Element de llista d'esdeveniment (data + títol + equip).
  * @var array $event  kind, title, starts_at, location, team_name, color
  */
-$kinds = ['entrenament' => ['Entrenament', 'blue'], 'partit' => ['Partit', 'green'], 'especial' => ['Especial', 'orange']];
+$kinds = ['entrenament' => ['Entrenament', 'blue'], 'especial' => ['Especial', 'orange'], 'gimnas' => ['Gimnàs', 'violet']];
 [$kindLabel, $kindTone] = $kinds[$event['kind']] ?? ['Esdeveniment', 'muted'];
 ?>
 <li class="event-item">
