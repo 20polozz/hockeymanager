@@ -28,8 +28,8 @@ $back = $isEdit ? '/calendari/' . (int)$event['id'] : '/calendari';
       <fieldset class="field">
         <legend>Per a</legend>
         <div class="segmented">
-          <label><input type="radio" name="who" value="equips"<?= $who !== 'llista' ? ' checked' : '' ?> data-who><span>Un o diversos equips</span></label>
-          <label><input type="radio" name="who" value="llista"<?= $who === 'llista' ? ' checked' : '' ?> data-who><span>Unes jugadores concretes</span></label>
+          <label><input type="radio" name="who" value="equips"<?= $who !== 'llista' ? ' checked' : '' ?> data-who><span>Equip/s</span></label>
+          <label><input type="radio" name="who" value="llista"<?= $who === 'llista' ? ' checked' : '' ?> data-who><span>Jugadores</span></label>
         </div>
       </fieldset>
       <fieldset class="field" id="who-teams"<?= $who === 'llista' ? ' hidden' : '' ?>>
