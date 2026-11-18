@@ -10,6 +10,7 @@ $current = array_values(array_filter($history, function ($h) { return $h['left_a
 $totalAtt = array_sum($attendance);
 $attended = $attendance['present'] + $attendance['retard'];
 ?>
+<?php if (($activeNav ?? '') === 'players'): ?><a class="back-link" href="<?= e(url('/jugadors')) ?>"><?= icon('chevron-right', 'icon icon-sm flip') ?> Jugadors/es</a><?php endif; ?>
 <section class="panel profile-hero" id="player-hero">
   <span class="avatar avatar-xl"><?= e(initials($name)) ?></span>
   <div class="profile-hero-body">

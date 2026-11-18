@@ -219,6 +219,25 @@
     if (cb.matches && cb.matches('input[data-pick]') && cb.closest('.pick')) cb.closest('.pick').classList.toggle('is-on', cb.checked);
   });
 
+
+  // Al mòbil, no obris el teclat sol en entrar a un formulari
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+    var af = document.querySelector('[autofocus]');
+    if (af && document.activeElement === af) af.blur();
+  }
+
+  // Botó d'enrere a la capçalera: agafa l'enllaç «‹ …» de la pàgina (al mòbil substitueix l'enllaç de dins)
+  var backLink = document.querySelector('main .back-link, .main .back-link');
+  var topBack = document.querySelector('[data-topbar-back]');
+  if (backLink && topBack) {
+    topBack.href = backLink.getAttribute('href');
+    var lbl = backLink.textContent.trim();
+    topBack.setAttribute('aria-label', 'Torna a ' + lbl);
+    topBack.title = 'Torna a ' + lbl;
+    topBack.hidden = false;
+    document.body.classList.add('has-topbar-back');
+  }
+
   // Formulari d'usuari: camps segons el rol
   var rolePanels = document.querySelectorAll('[data-role-panel]');
   document.querySelectorAll('input[data-role]').forEach(function (r) {

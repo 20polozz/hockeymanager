@@ -12,6 +12,7 @@ $notifications = [];
 ?>
 <header class="topbar">
   <button type="button" class="icon-btn menu-btn" data-sidebar-open aria-label="Obre el menú" aria-controls="sidebar"><?= icon('menu') ?></button>
+  <a class="icon-btn topbar-back" href="#" hidden data-topbar-back aria-label="Enrere"><?= icon('chevron-right', 'icon flip') ?></a>
   <h1 class="page-title"><?= e($pageTitle) ?></h1>
 
 

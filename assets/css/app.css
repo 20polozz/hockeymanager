@@ -907,6 +907,19 @@ a.sidebar-user:hover .sidebar-user-cog { opacity: 1; }
 .sidebar-collapsed .sidebar-user-cog { display: none; }
 a.sidebar-user .sidebar-user-cog { color: #8ea0c2; }
 
+
+/* Botó d'enrere a la capçalera (mòbil) */
+.topbar-back { display: none; }
+@media (max-width: 1023px) {
+  .has-topbar-back .topbar-back:not([hidden]) { display: inline-grid; margin-left: -10px; margin-right: -4px; width: 44px; height: 44px; }
+  .has-topbar-back .main .back-link, .has-topbar-back main .back-link { display: none; }
+  /* objectius tàctils més grans */
+  .name-chips .chip-x { width: 34px; height: 34px; margin: -6px -2px -6px 0; }
+  .panel-link { padding: 10px 4px; margin: -10px -4px; }
+  .btn-trash { width: 40px; height: 40px; }
+  .absence-actions .icon-btn, .roll-note-btn { min-width: 40px; min-height: 40px; }
+}
+
 /* Botó paperera */
 .btn-trash { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #fecaca; background: #fff; color: var(--red); cursor: pointer; transition: background .15s, color .15s, transform .1s; }
 .btn-trash:hover { background: var(--red); border-color: var(--red); color: #fff; }
