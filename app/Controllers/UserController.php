@@ -41,7 +41,7 @@ final class UserController extends Controller
         ActivityLog::add('system', 'Ha creat el compte de ' . $d['name'] . ' (' . Auth::roleLabels()[$d['role']] . ')');
         forget_input();
         flash('success', 'Compte creat. Usuari: ' . $d['username'] . '. Comunica-li la contrasenya i recomana-li que la canviï a Configuració.');
-        redirect('/usuaris/' . $id . '/editar');
+        redirect('/usuaris');
     }
 
     public function edit(int $id): void
