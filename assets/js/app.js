@@ -307,9 +307,30 @@
       whoList.hidden = false; if (whoTeams) whoTeams.hidden = true;
       whoList.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+    // Sincronia equips ↔ jugadores: un equip queda marcat si totes les seves jugadores ho estan
+    var teamBoxes = whoTeams ? Array.prototype.slice.call(whoTeams.querySelectorAll('input[name="teams[]"]')) : [];
+    var syncing = false;
+    var playersOf = function (tid) { return picks.filter(function (cb) { return (cb.getAttribute('data-teams') || '').split(',').indexOf(tid) !== -1; }); };
+    var syncTeams = function () {
+      teamBoxes.forEach(function (tb) {
+        var ps = playersOf(tb.value);
+        var on = ps.length > 0 && ps.every(function (c) { return c.checked; });
+        if (tb.checked !== on) { tb.checked = on; var row = tb.closest('.team-check'); if (row) row.classList.toggle('is-on', on); }
+      });
+    };
+    picks.forEach(function (cb) { cb.addEventListener('change', function () { if (!syncing) syncTeams(); }); });
+    teamBoxes.forEach(function (tb) {
+      tb.addEventListener('change', function () {
+        // Si ja s'està treballant amb la llista, marcar/desmarcar un equip hi afegeix o en treu les seves jugadores
+        if (!picks.some(function (c) { return c.checked; }) && tb.checked) return;
+        syncing = true;
+        playersOf(tb.value).forEach(function (c) { setPick(c, tb.checked); });
+        syncing = false; syncTeams();
+      });
+    });
     var pa = document.querySelector('[data-pick-all]'), pn = document.querySelector('[data-pick-none]');
-    if (pa) pa.addEventListener('click', function () { picks.forEach(function (c) { setPick(c, true); }); });
-    if (pn) pn.addEventListener('click', function () { picks.forEach(function (c) { setPick(c, false); }); });
+    if (pa) pa.addEventListener('click', function () { syncing = true; picks.forEach(function (c) { setPick(c, true); }); syncing = false; syncTeams(); });
+    if (pn) pn.addEventListener('click', function () { syncing = true; picks.forEach(function (c) { setPick(c, false); }); syncing = false; syncTeams(); });
   }
 
   // Mòbil: cercador desplegable
