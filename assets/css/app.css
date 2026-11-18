@@ -928,6 +928,63 @@ a.sidebar-user .sidebar-user-cog { color: #8ea0c2; }
 .inline-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
 .inline-search input[data-filter] { padding-left: 36px; }
 
+
+/* Passar llista (versió fàcil) */
+.take-help { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: var(--blue-bg); color: #1e3a8a; font-size: .9rem; }
+.take-help .icon { flex-shrink: 0; margin-top: 2px; }
+.roll2 { list-style: none; margin: 0 0 90px; padding: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.roll2 li + li { border-top: 1px solid var(--border); }
+.roll2-item { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 10px 14px; border: 0; background: transparent; text-align: left; font: inherit; color: var(--text); cursor: pointer; }
+.roll2-item:hover { background: var(--surface-2); }
+.roll2-item:focus-visible { outline: 3px solid rgba(59,130,246,.35); outline-offset: -3px; }
+.roll2-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; font-weight: 800; font-size: 1rem; color: #fff; }
+.roll2-icon::before { content: '—'; }
+.st-present .roll2-icon { background: var(--green); } .st-present .roll2-icon::before { content: '✓'; }
+.st-retard .roll2-icon { background: var(--blue); } .st-retard .roll2-icon::before { content: '⏱'; font-size: .95rem; }
+.st-justificat .roll2-icon { background: var(--orange); } .st-justificat .roll2-icon::before { content: 'J'; }
+.st-absent .roll2-icon { background: var(--red); } .st-absent .roll2-icon::before { content: '✕'; }
+.st-none .roll2-icon { background: #cbd5e1; }
+.roll2-body { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.roll2-body strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.roll2-tags { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
+.roll2-tags:empty { display: none; }
+.roll2-note { font-size: .8rem; color: var(--muted); font-style: italic; }
+.roll2-note[hidden], .roll2-note:empty { display: none; }
+.roll2-status { font-weight: 700; font-size: .86rem; flex-shrink: 0; }
+.st-present .roll2-status { color: var(--green); } .st-retard .roll2-status { color: var(--blue); }
+.st-justificat .roll2-status { color: var(--orange); } .st-absent .roll2-status { color: var(--red); } .st-none .roll2-status { color: var(--muted); }
+.roll2-chev { color: var(--muted); flex-shrink: 0; }
+.take-form .take-count { font-size: .86rem; line-height: 1.3; }
+.roll2-item.st-justificat { background: #fffaf5; }
+.roll2-item.st-absent { background: #fef2f2; }
+
+.roll-sheet { position: fixed; inset: 0; z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
+.roll-sheet-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,.45); opacity: 0; transition: opacity .18s; }
+.roll-sheet-panel { position: relative; width: 100%; max-width: 520px; max-height: 92vh; overflow: auto; background: var(--surface); border-radius: 20px 20px 0 0; padding: 10px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(15,23,42,.2); transform: translateY(100%); transition: transform .2s ease-out; display: grid; gap: 14px; }
+.roll-sheet.is-open .roll-sheet-backdrop { opacity: 1; }
+.roll-sheet.is-open .roll-sheet-panel { transform: translateY(0); }
+.roll-sheet-grip { width: 40px; height: 5px; border-radius: 3px; background: #d6dce6; margin: 0 auto; }
+.roll-sheet-title { font-size: 1.1rem; font-weight: 800; margin: 0; text-align: center; }
+.roll-sheet-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.roll-opt { display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 10px 12px; border: 2px solid var(--border); border-radius: 14px; background: #fff; text-align: left; font: inherit; color: var(--text); cursor: pointer; }
+.roll-opt strong { display: block; font-size: .98rem; }
+.roll-opt small { display: block; color: var(--muted); font-size: .76rem; line-height: 1.25; }
+.roll-opt-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; color: #fff; }
+.roll-opt.st-present .roll-opt-icon { background: var(--green); } .roll-opt.st-retard .roll-opt-icon { background: var(--blue); }
+.roll-opt.st-justificat .roll-opt-icon { background: var(--orange); } .roll-opt.st-absent .roll-opt-icon { background: var(--red); }
+.roll-opt.is-on.st-present { border-color: var(--green); background: var(--green-bg); }
+.roll-opt.is-on.st-retard { border-color: var(--blue); background: var(--blue-bg); }
+.roll-opt.is-on.st-justificat { border-color: var(--orange); background: var(--orange-bg); }
+.roll-opt.is-on.st-absent { border-color: var(--red); background: #fee2e2; }
+.roll-sheet-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--muted); }
+body.sheet-open { overflow: hidden; }
+@media (min-width: 700px) {
+  .roll-sheet { align-items: center; }
+  .roll-sheet-panel { border-radius: 20px; transform: translateY(20px) scale(.98); opacity: 0; transition: transform .18s, opacity .18s; }
+  .roll-sheet.is-open .roll-sheet-panel { transform: none; opacity: 1; }
+}
+
 /* Botó paperera */
 .btn-trash { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #fecaca; background: #fff; color: var(--red); cursor: pointer; transition: background .15s, color .15s, transform .1s; }
 .btn-trash:hover { background: var(--red); border-color: var(--red); color: #fff; }
