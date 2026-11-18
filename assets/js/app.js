@@ -1,5 +1,6 @@
 /* HockeyManager — interaccions de la interfície (sense dependències). */
 (function () {
+  var alertMsg = function (m) { var t = document.createElement('div'); t.className = 'live-toast live-toast-error is-on'; t.textContent = m; document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2200); };
   'use strict';
   var root = document.documentElement;
 
@@ -278,13 +279,37 @@
   var whoList = document.getElementById('who-list');
   var whoTeams = document.getElementById('who-teams');
   if (whoList) {
+    var picks = Array.prototype.slice.call(whoList.querySelectorAll('input[data-pick]'));
+    var setPick = function (cb, on) { if (cb.checked !== on) { cb.checked = on; cb.dispatchEvent(new Event('change', { bubbles: true })); } };
+    // Passa dels equips marcats a la llista de les seves jugadores (per poder-ne treure alguna)
+    var fillFromTeams = function () {
+      var teamIds = whoTeams ? Array.prototype.slice.call(whoTeams.querySelectorAll('input[name="teams[]"]:checked')).map(function (c) { return c.value; }) : [];
+      if (!teamIds.length) return false;
+      picks.forEach(function (cb) {
+        var mine = (cb.getAttribute('data-teams') || '').split(',');
+        setPick(cb, teamIds.some(function (t) { return mine.indexOf(t) !== -1; }));
+      });
+      return true;
+    };
     document.querySelectorAll('input[data-who]').forEach(function (r) {
       r.addEventListener('change', function () {
         if (!r.checked) return;
         whoList.hidden = r.value !== 'llista';
         if (whoTeams) whoTeams.hidden = r.value === 'llista';
+        if (r.value === 'llista' && !picks.some(function (c) { return c.checked; })) fillFromTeams();
       });
     });
+    var custom = document.querySelector('[data-who-custom]');
+    if (custom) custom.addEventListener('click', function () {
+      var radio = document.querySelector('input[data-who][value="llista"]');
+      if (!fillFromTeams()) { alertMsg('Primer marca algun equip.'); return; }
+      radio.checked = true;
+      whoList.hidden = false; if (whoTeams) whoTeams.hidden = true;
+      whoList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    var pa = document.querySelector('[data-pick-all]'), pn = document.querySelector('[data-pick-none]');
+    if (pa) pa.addEventListener('click', function () { picks.forEach(function (c) { setPick(c, true); }); });
+    if (pn) pn.addEventListener('click', function () { picks.forEach(function (c) { setPick(c, false); }); });
   }
 
   // Mòbil: cercador desplegable

@@ -41,12 +41,18 @@ $back = $isEdit ? '/calendari/' . (int)$event['id'] : '/calendari';
             </div>
           <?php endforeach; ?>
         </div>
+        <button type="button" class="btn btn-sm who-custom" data-who-custom><?= icon('users', 'icon icon-sm') ?> Tria les jugadores d'aquests equips</button>
+        <small class="muted">Per treure'n alguna: marca l'equip i després tria les jugadores.</small>
       </fieldset>
       <fieldset class="field" id="who-list"<?= $who === 'llista' ? '' : ' hidden' ?>>
         <legend>Jugadores <small class="muted" data-pick-count data-pick-label="seleccionades"></small></legend>
+        <div class="who-list-tools">
+          <button type="button" class="btn btn-sm" data-pick-all>Marca-les totes</button>
+          <button type="button" class="btn btn-sm" data-pick-none>Desmarca-les</button>
+        </div>
         <div class="pick-list">
           <?php foreach ($players as $p): $on = in_array((int)$p['id'], $checkedP, true); ?>
-            <label class="pick<?= $on ? ' is-on' : '' ?>"><input type="checkbox" name="participants[]" value="<?= (int)$p['id'] ?>"<?= $on ? ' checked' : '' ?> data-pick>
+            <label class="pick<?= $on ? ' is-on' : '' ?>"><input type="checkbox" name="participants[]" value="<?= (int)$p['id'] ?>"<?= $on ? ' checked' : '' ?> data-pick data-teams="<?= e((string)($p['team_ids'] ?? '')) ?>">
               <span class="pick-name"><?= e($p['first_name'] . ' ' . $p['last_name']) ?> <small class="muted"><?= e((string)$p['teams']) ?></small></span></label>
           <?php endforeach; ?>
         </div>

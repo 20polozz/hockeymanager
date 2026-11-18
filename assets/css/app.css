@@ -932,6 +932,11 @@ a.sidebar-user .sidebar-user-cog { color: #8ea0c2; }
 .inline-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
 .inline-search input[data-filter] { padding-left: 36px; }
 
+/* Formulari d'esdeveniment: d'equips a jugadores */
+.who-custom { margin-top: 10px; justify-self: start; }
+#who-teams > small { display: block; margin-top: 6px; font-weight: 400; }
+.who-list-tools { display: flex; gap: 8px; margin: 4px 0 10px; }
+
 /* Botó paperera */
 .btn-trash { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #fecaca; background: #fff; color: var(--red); cursor: pointer; transition: background .15s, color .15s, transform .1s; }
 .btn-trash:hover { background: var(--red); border-color: var(--red); color: #fff; }

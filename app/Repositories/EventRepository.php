@@ -279,7 +279,8 @@ final class EventRepository
             return [];
         }
         return Database::all(
-            "SELECT p.id, p.first_name, p.last_name, GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ', ') AS teams
+            "SELECT p.id, p.first_name, p.last_name, GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ', ') AS teams,
+                    GROUP_CONCAT(DISTINCT t.id) AS team_ids
              FROM players p JOIN team_players tp ON tp.player_id = p.id AND tp.left_at IS NULL
              JOIN teams t ON t.id = tp.team_id
              WHERE p.active = 1 AND tp.team_id IN (" . Database::in($ids) . ")
