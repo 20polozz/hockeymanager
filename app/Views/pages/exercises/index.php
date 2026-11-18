@@ -9,8 +9,7 @@ $self = url('/exercicis', array_filter(['q' => $q, 'categoria' => $cat, 'preferi
     <?php if ($cat): ?><input type="hidden" name="categoria" value="<?= e($cat) ?>"><?php endif; ?>
     <?php if ($fav): ?><input type="hidden" name="preferits" value="1"><?php endif; ?>
     <label class="visually-hidden" for="ex-search">Cerca exercicis</label>
-    <input id="ex-search" type="search" name="q" value="<?= e($q) ?>" placeholder="Cerca per nom o objectiu…" maxlength="80">
-    <button class="btn" type="submit"><?= icon('search', 'icon icon-sm') ?> Cerca</button>
+    <?= icon('search', 'icon icon-sm inline-search-icon') ?><input id="ex-search" type="search" name="q" data-filter=".ex-card" autocomplete="off" value="<?= e($q) ?>" placeholder="Cerca per nom o objectiu…" maxlength="80">
   </form>
   <div class="head-actions">
     <a class="btn<?= $fav ? ' btn-on' : '' ?>" href="<?= e(url('/exercicis', array_filter(['q' => $q, 'categoria' => $cat, 'preferits' => $fav ? '' : '1']))) ?>" aria-pressed="<?= $fav ? 'true' : 'false' ?>"><?= icon('star', 'icon icon-sm') ?> Preferits</a>

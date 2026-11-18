@@ -238,6 +238,33 @@
     document.body.classList.add('has-topbar-back');
   }
 
+
+  // Filtre en directe mentre s'escriu (input[data-filter="selector dels elements"])
+  var norm = function (t) { return (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); };
+  document.querySelectorAll('input[data-filter]').forEach(function (inp) {
+    var items = Array.prototype.slice.call(document.querySelectorAll(inp.getAttribute('data-filter')));
+    var countEl = inp.getAttribute('data-filter-count') ? document.querySelector(inp.getAttribute('data-filter-count')) : null;
+    var word = inp.getAttribute('data-filter-word') || '';
+    var countItems = inp.getAttribute('data-filter-items') ? Array.prototype.slice.call(document.querySelectorAll(inp.getAttribute('data-filter-items'))) : items;
+    var form = inp.form;
+    if (form) form.addEventListener('submit', function (ev) { ev.preventDefault(); inp.blur(); });
+    var run = function () {
+      var q = norm(inp.value.trim());
+      var shown = 0;
+      items.forEach(function (el) {
+        var ok = !q || norm(el.textContent).indexOf(q) !== -1;
+        el.hidden = !ok; if (ok) shown++;
+      });
+      if (countEl && word) {
+        var base = countItems.length;
+        var vis = countItems.filter(function (el) { return !el.hidden; }).length;
+        countEl.textContent = (q ? vis + ' de ' + base : base) + ' ' + word;
+      }
+    };
+    inp.addEventListener('input', run);
+    if (inp.value) run();
+  });
+
   // Formulari d'usuari: camps segons el rol
   var rolePanels = document.querySelectorAll('[data-role-panel]');
   document.querySelectorAll('input[data-role]').forEach(function (r) {

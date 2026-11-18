@@ -10,12 +10,11 @@ $canManage = App\Core\Gate::allows('players.manage');
 <?= component('team_chips', ['teams' => $teams, 'active' => $activeTeam, 'path' => '/jugadors', 'query' => $q]) ?>
 
 <div class="page-head">
-  <p class="muted"><?= count($players) ?> jugadors/es<?= $search !== '' ? ' per a «' . e($search) . '»' : '' ?></p>
+  <p class="muted" id="player-count"><?= count($players) ?> jugadors/es<?= $search !== '' ? ' per a «' . e($search) . '»' : '' ?></p>
   <form class="inline-search" method="get" action="<?= e(url('/jugadors')) ?>">
     <?php if ($activeTeam > 0): ?><input type="hidden" name="equip" value="<?= (int)$activeTeam ?>"><?php endif; ?>
     <label class="visually-hidden" for="player-search">Cerca jugadors/es</label>
-    <input id="player-search" type="search" name="q" value="<?= e($search) ?>" placeholder="Filtra per nom…" maxlength="80">
-    <button class="btn" type="submit"><?= icon('search', 'icon icon-sm') ?> Filtra</button>
+    <?= icon('search', 'icon icon-sm inline-search-icon') ?><input id="player-search" type="search" name="q" data-filter=".m-cards > li, .table tbody tr" data-filter-count="#player-count" data-filter-word="jugadors/es" data-filter-items=".table tbody tr" autocomplete="off" value="<?= e($search) ?>" placeholder="Cerca per nom…" maxlength="80">
   </form>
   <?php if ($canManage): ?>
     <a class="btn btn-primary" href="<?= e(url('/jugadors/nou', $activeTeam > 0 ? ['equip' => $activeTeam] : [])) ?>"><?= icon('plus', 'icon icon-sm') ?> Nou jugador/a</a>
