@@ -28,12 +28,11 @@ return [
 
 
     'players.view'      => $staff,
-    'players.manage'    => $staff,
+    'players.manage'    => $coord,
     'players.own'       => ['jugador'],
 
     'teams.view'        => $staff,
-    'teams.manage'      => $staff,
-    'categories.manage' => $coord,
+    'teams.manage'      => $coord,
 
 
     'users.manage'      => $coord,

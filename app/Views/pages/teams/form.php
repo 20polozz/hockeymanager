@@ -27,7 +27,7 @@ $color = $val('color', '#1e3a8a');
             <option value="<?= (int)$c['id'] ?>"<?= $val('category_id') === (string)$c['id'] ? ' selected' : '' ?>><?= e($c['name']) ?></option>
           <?php endforeach; ?>
         </select>
-        <?php if (App\Core\Gate::allows('categories.manage')): ?><small class="muted">Falta alguna categoria? <a href="<?= e(url('/equips/categories')) ?>">Gestiona les categories</a>.</small><?php endif; ?></label>
+        <small class="muted">Falta alguna categoria? <a href="<?= e(url('/equips/categories')) ?>">Gestiona les categories</a>.</small></label>
 
       <fieldset class="field">
         <legend>Color</legend>

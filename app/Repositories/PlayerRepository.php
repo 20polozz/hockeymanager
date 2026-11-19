@@ -139,14 +139,10 @@ final class PlayerRepository
      * (left_at = avui) en lloc d'esborrar-se.
      * @param array<int,int|null> $teams  [team_id => dorsal|null]
      */
-    public static function syncTeams(int $playerId, array $teams, ?array $onlyTeams = null): void
+    public static function syncTeams(int $playerId, array $teams): void
     {
         $today = date('Y-m-d');
         $current = self::currentMemberships($playerId);
-        // Qui només gestiona alguns equips no pot treure la jugadora dels altres
-        if ($onlyTeams !== null) {
-            $current = array_intersect_key($current, array_flip(array_map('intval', $onlyTeams)));
-        }
         foreach ($teams as $teamId => $dorsal) {
             if (array_key_exists($teamId, $current)) {
                 Database::query('UPDATE team_players SET dorsal = ? WHERE player_id = ? AND team_id = ? AND left_at IS NULL', [$dorsal, $playerId, $teamId]);
