@@ -91,6 +91,10 @@ final class AttendanceRepository
             'REPLACE INTO event_roster_changes (event_id, player_id, `change`, created_at) VALUES (?, ?, ?, NOW())',
             [$eventId, $playerId, $change === 'treta' ? 'treta' : 'afegida']
         );
+        // Si la treus d'aquest entreno, també se n'esborra l'assistència (ja no hi comptava)
+        if ($change === 'treta') {
+            Database::query('DELETE FROM attendance WHERE event_id = ? AND player_id = ?', [$eventId, $playerId]);
+        }
     }
 
     /**
