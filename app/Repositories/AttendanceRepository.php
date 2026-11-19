@@ -156,7 +156,8 @@ final class AttendanceRepository
             array_merge(self::scope($teamIds)[1], [$from, $to])
         );
         foreach ($rows as &$r) {
-            $r['percent'] = (int)$r['total'] > 0 ? (int)round(((int)$r['present'] + (int)$r['retard']) / (int)$r['total'] * 100) : null;
+            $den = (int)$r['total'] - (int)$r['justificat'];
+            $r['percent'] = $den > 0 ? (int)round(((int)$r['present'] + (int)$r['retard']) / $den * 100) : null;
         }
         return $rows;
     }
@@ -175,18 +176,19 @@ final class AttendanceRepository
         foreach ($rows as &$r) {
             [$w, $p] = self::scope([(int)$r['id']]);
             $agg = Database::first(
-                "SELECT COUNT(a.id) AS total, SUM(a.status IN ('present','retard')) AS attended, COUNT(DISTINCT e.id) AS sessions
+                "SELECT COUNT(a.id) AS total, SUM(a.status <> 'justificat') AS counted, SUM(a.status IN ('present','retard')) AS attended, COUNT(DISTINCT e.id) AS sessions
                  FROM attendance a JOIN events e ON e.id = a.event_id
                  WHERE $w AND e.starts_at >= ? AND e.starts_at < ?",
                 array_merge($p, [$from, $to])
             );
             $r['total'] = (int)$agg['total'];
             $r['attended'] = (int)$agg['attended'];
+            $r['counted'] = (int)$agg['counted'];
             $r['sessions'] = (int)$agg['sessions'];
         }
         unset($r);
         foreach ($rows as &$r) {
-            $r['percent'] = (int)$r['total'] > 0 ? (int)round((int)$r['attended'] / (int)$r['total'] * 100) : null;
+            $r['percent'] = (int)$r['counted'] > 0 ? (int)round((int)$r['attended'] / (int)$r['counted'] * 100) : null;
         }
         return $rows;
     }
@@ -203,7 +205,7 @@ final class AttendanceRepository
         $data = [];
         if ($teamIds) {
             foreach (Database::all(
-                "SELECT DATE_FORMAT(e.starts_at, '%Y-%m') AS ym, COUNT(a.id) AS total, SUM(a.status IN ('present','retard')) AS attended
+                "SELECT DATE_FORMAT(e.starts_at, '%Y-%m') AS ym, COUNT(a.id) AS total, SUM(a.status <> 'justificat') AS counted, SUM(a.status IN ('present','retard')) AS attended
                  FROM attendance a JOIN events e ON e.id = a.event_id
                  WHERE " . self::scope($teamIds)[0] . " AND e.starts_at >= ?
                  GROUP BY ym",
@@ -215,9 +217,10 @@ final class AttendanceRepository
         for ($i = 0; $i < $months; $i++) {
             $ym = $start->format('Y-m');
             $total = isset($data[$ym]) ? (int)$data[$ym]['total'] : 0;
+            $counted = isset($data[$ym]) ? (int)$data[$ym]['counted'] : 0;
             $out[] = [
                 'month'   => $ym,
-                'percent' => $total > 0 ? (int)round((int)$data[$ym]['attended'] / $total * 100) : null,
+                'percent' => $counted > 0 ? (int)round((int)$data[$ym]['attended'] / $counted * 100) : null,
                 'total'   => $total,
             ];
             $start->modify('+1 month');

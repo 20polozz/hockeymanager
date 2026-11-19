@@ -47,7 +47,7 @@ final class DashboardRepository
     }
 
     /**
-     * Assistència dels últims $days dies: presents + retards sobre el total registrat.
+     * Assistència dels últims $days dies: presents + retards sobre el total registrat (les absències justificades no compten).
      * @return array{percent:int|null,sessions:int}
      */
     public function attendanceRate(int $days = 30): array
@@ -57,7 +57,7 @@ final class DashboardRepository
         }
         [$w, $p] = AttendanceRepository::scope($this->teamIds);
         $row = Database::first(
-            "SELECT COUNT(*) AS total,
+            "SELECT SUM(a.status <> 'justificat') AS total,
                     SUM(a.status IN ('present','retard')) AS attended,
                     COUNT(DISTINCT a.event_id) AS sessions
              FROM attendance a JOIN events e ON e.id = a.event_id
@@ -148,7 +148,7 @@ final class DashboardRepository
         }
         $rows = AttendanceRepository::byTeam($this->teamIds, date('Y-m-d H:i:s', time() - $days * 86400), $this->now);
         foreach ($rows as &$r) {
-            $r['percent'] = (int)$r['total'] > 0 ? (int)round((int)$r['attended'] / (int)$r['total'] * 100) : null;
+            $r['percent'] = (int)$r['counted'] > 0 ? (int)round((int)$r['attended'] / (int)$r['counted'] * 100) : null;
         }
         return $rows;
     }
@@ -159,7 +159,7 @@ final class DashboardRepository
     public static function playerAttendanceRate(int $playerId, int $days = 30): ?int
     {
         $row = Database::first(
-            "SELECT COUNT(*) AS total, SUM(a.status IN ('present','retard')) AS attended
+            "SELECT SUM(a.status <> 'justificat') AS total, SUM(a.status IN ('present','retard')) AS attended
              FROM attendance a JOIN events e ON e.id = a.event_id
              WHERE a.player_id = ? AND e.starts_at >= ?",
             [$playerId, date('Y-m-d H:i:s', time() - $days * 86400)]

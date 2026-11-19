@@ -9,6 +9,7 @@ $age = $player['birth_date'] ? (int)date_diff(date_create($player['birth_date'])
 $current = array_values(array_filter($history, function ($h) { return $h['left_at'] === null; }));
 $totalAtt = array_sum($attendance);
 $attended = $attendance['present'] + $attendance['retard'];
+$counted = $totalAtt - $attendance['justificat'];
 ?>
 <?php if (($activeNav ?? '') === 'players'): ?><a class="back-link" href="<?= e(url('/jugadors')) ?>"><?= icon('chevron-right', 'icon icon-sm flip') ?> Jugadors/es</a><?php endif; ?>
 <section class="panel profile-hero" id="player-hero">
@@ -109,7 +110,7 @@ $attended = $attendance['present'] + $attendance['retard'];
   <section class="panel">
     <?= component('panel_head', ['title' => 'Assistència als entrenaments']) ?>
     <?php if ($totalAtt > 0): ?>
-      <p class="big-number"><?= (int)round($attended / $totalAtt * 100) ?>%<span class="muted small"> de <?= $totalAtt ?> sessions</span></p>
+      <p class="big-number"><?= $counted > 0 ? (int)round($attended / $counted * 100) . '%' : '—' ?><span class="muted small"> de <?= $totalAtt ?> sessions</span></p>
       <div class="legend legend-col">
         <span><i class="dot dot-green"></i><?= $attendance['present'] ?> presents</span>
         <span><i class="dot dot-blue"></i><?= $attendance['retard'] ?> retards</span>

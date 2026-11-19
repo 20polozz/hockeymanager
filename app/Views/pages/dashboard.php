@@ -82,7 +82,7 @@ $activityIcons = ['attendance' => ['checklist', 'green'], 'callup' => ['clipboar
       <?php
         $withData = array_filter($attendanceTeams, function ($t) { return $t['percent'] !== null; });
         if ($withData): ?>
-        <p class="muted small">Últims 30 dies · presents i retards sobre el total</p>
+        <p class="muted small">Últims 30 dies · les absències justificades no compten</p>
         <ul class="bar-list">
           <?php foreach ($attendanceTeams as $t): ?>
             <li>
