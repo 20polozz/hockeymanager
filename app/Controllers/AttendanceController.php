@@ -50,12 +50,12 @@ final class AttendanceController extends Controller
     public function take(int $eventId): void
     {
         $event = $this->training($eventId);
-        // Les jugadores de baixa aquell dia no surten a la llista (si ja tenien estat desat, sí)
+        // Les jugadores de baixa aquell dia no surten a la llista (només si algú les havia marcat presents, retard o absent)
         $sheet = AttendanceRepository::sheet($event);
         $away = \App\Repositories\AbsenceRepository::onDate(substr((string)$event['starts_at'], 0, 10), array_column($sheet, 'id'));
         $awayList = [];
         foreach ($sheet as $i => $p) {
-            if (isset($away[(int)$p['id']]) && (string)$p['status'] === '') {
+            if (isset($away[(int)$p['id']]) && in_array((string)$p['status'], ['', 'justificat'], true)) {
                 $awayList[] = $p + ['absence' => $away[(int)$p['id']]];
                 unset($sheet[$i]);
             }
