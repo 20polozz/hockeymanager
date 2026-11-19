@@ -937,6 +937,27 @@ a.sidebar-user .sidebar-user-cog { color: #8ea0c2; }
 #who-teams > small { display: block; margin-top: 6px; font-weight: 400; }
 .who-list-tools { display: flex; gap: 8px; margin: 4px 0 10px; }
 
+/* Assistència: entrenaments d'avui */
+.today-block { margin-bottom: 22px; }
+.today-block .section-title { display: flex; align-items: baseline; gap: 10px; }
+.today-block .section-title .small { font-weight: 500; }
+.today-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.today-card { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "time body" "btn btn"; gap: 12px 14px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--blue); border-radius: 14px; box-shadow: var(--shadow); }
+.today-card.is-live { border-left-color: var(--green); box-shadow: 0 0 0 3px rgba(22,163,74,.12), var(--shadow); }
+.today-card.is-done { border-left-color: #94a3b8; }
+.today-time { grid-area: time; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 58px; padding: 6px 8px; border-radius: 10px; background: var(--surface-2); font-variant-numeric: tabular-nums; }
+.today-time strong { font-size: 1.15rem; }
+.today-time span { font-size: .8rem; color: var(--muted); }
+.today-body { grid-area: body; min-width: 0; }
+.today-body h3 { margin: 0 0 2px; font-size: 1.05rem; }
+.today-body p { margin: 0; }
+.today-state { margin-top: 4px !important; font-weight: 600; color: var(--text-2); }
+.is-live .today-state { color: var(--green); }
+.is-done .today-state { color: var(--green); }
+.today-btn { grid-area: btn; justify-content: center; height: 48px; font-size: 1rem; }
+.today-empty { display: flex; align-items: center; gap: 10px; color: var(--text-2); }
+.today-empty .icon { color: var(--muted); flex-shrink: 0; }
+
 /* Botó paperera */
 .btn-trash { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #fecaca; background: #fff; color: var(--red); cursor: pointer; transition: background .15s, color .15s, transform .1s; }
 .btn-trash:hover { background: var(--red); border-color: var(--red); color: #fff; }

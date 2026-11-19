@@ -22,19 +22,25 @@ final class AttendanceController extends Controller
         );
         $upcoming = [];
         $past = [];
+        $today = [];
+        $todayKey = $now->format('Y-m-d');
         foreach ($trainings as $t) {
-            // Avui (o en curs) es considera "per passar llista"
-            if (substr((string)$t['starts_at'], 0, 10) > $now->format('Y-m-d')) {
+            $day = substr((string)$t['starts_at'], 0, 10);
+            if ($day === $todayKey) {
+                $today[] = $t;
+            } elseif ($day > $todayKey) {
                 $upcoming[] = $t;
             } else {
                 $past[] = $t;
             }
         }
+        usort($today, static function ($a, $b) { return strcmp((string)$a['starts_at'], (string)$b['starts_at']); });
         $this->view('pages/attendance/index', [
             'pageTitle' => 'Assistència',
             'activeNav' => 'attendance',
             'teams'     => TeamScope::teams(),
             'team'      => team_filter(),
+            'today'     => $today,
             'upcoming'  => array_reverse($upcoming),
             'past'      => $past,
         ]);

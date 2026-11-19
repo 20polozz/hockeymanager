@@ -1,5 +1,5 @@
 <?php
-/** @var array $teams @var int $team @var array $upcoming @var array $past */
+/** @var array $teams @var int $team @var array $today @var array $upcoming @var array $past */
 $row = function (array $t): string {
     $marked = (int)$t['marked'];
     ob_start(); ?>
@@ -26,6 +26,36 @@ $row = function (array $t): string {
 ?>
 <?= App\Core\View::partial('pages/attendance/_tabs', ['tab' => 'list', 'team' => $team]) ?>
 <?= component('team_chips', ['teams' => $teams, 'active' => $team, 'path' => '/assistencia']) ?>
+
+<section class="today-block" aria-labelledby="today-title">
+  <h2 id="today-title" class="section-title">Avui <span class="muted small"><?= e(ucfirst(fdate(date('Y-m-d'), 'day'))) ?></span></h2>
+  <?php if ($today): ?>
+    <div class="today-grid">
+      <?php foreach ($today as $t):
+          $marked = (int)$t['marked'];
+          $now = time(); $start = strtotime((string)$t['starts_at']); $end = $t['ends_at'] ? strtotime((string)$t['ends_at']) : $start + 3600;
+          $state = $now < $start ? 'Comença a les ' . fdate($t['starts_at'], 'time') : ($now <= $end ? 'Ara en curs' : 'Acabat'); ?>
+        <article class="today-card<?= $marked > 0 ? ' is-done' : '' ?><?= $now >= $start && $now <= $end ? ' is-live' : '' ?>">
+          <div class="today-time">
+            <strong><?= e(fdate($t['starts_at'], 'time')) ?></strong>
+            <?php if ($t['ends_at']): ?><span><?= e(fdate($t['ends_at'], 'time')) ?></span><?php endif; ?>
+          </div>
+          <div class="today-body">
+            <h3><?= e($t['title']) ?></h3>
+            <p class="muted small"><span class="team-dot" style="--team: <?= e($t['type'] === 'gimnas' ? '#7c3aed' : $t['color']) ?>"></span><?= $t['type'] === 'gimnas' ? 'Gimnàs · ' : '' ?><?= e($t['team_name']) ?><?= $t['location'] ? ' · ' . e($t['location']) : '' ?></p>
+            <p class="today-state small"><?= $marked > 0 ? icon('check', 'icon icon-xs') . ' Llista passada · ' . (int)$t['attended'] . '/' . $marked . ' presents' : e($state) ?></p>
+          </div>
+          <a class="btn <?= $marked > 0 ? '' : 'btn-primary' ?> today-btn" href="<?= e(url('/assistencia/' . (int)$t['id'])) ?>"><?= icon('checklist', 'icon icon-sm') ?> <?= $marked > 0 ? 'Revisa la llista' : 'Passa llista' ?></a>
+        </article>
+      <?php endforeach; ?>
+    </div>
+  <?php else: ?>
+    <div class="panel today-empty">
+      <?= icon('calendar', 'icon') ?>
+      <span>Avui no hi ha cap entrenament.<?php if ($upcoming): ?> El pròxim: <strong><?= e($upcoming[0]['title']) ?></strong>, <?= e(fdate($upcoming[0]['starts_at'], 'short')) ?> a les <?= e(fdate($upcoming[0]['starts_at'], 'time')) ?>.<?php endif; ?></span>
+    </div>
+  <?php endif; ?>
+</section>
 
 <div class="dash-grid">
   <section class="panel">
