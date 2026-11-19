@@ -46,7 +46,6 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
 
   <?php
   $called = array_values(array_filter($roster, static function ($p) use ($away) { return !$p['guest'] && !isset($away[(int)$p['id']]); }));
-  $awayList = array_values(array_filter($roster, static function ($p) use ($away) { return !$p['guest'] && isset($away[(int)$p['id']]); }));
   $isStaff = App\Core\Gate::allows('attendance.view');
   $guests = array_values(array_filter($roster, static function ($p) { return $p['guest']; }));
   $dotTone = ['present' => 'green', 'retard' => 'blue', 'justificat' => 'orange', 'absent' => 'red'];
@@ -63,8 +62,8 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
   };
   $inRoster = array_map('intval', array_column($roster, 'id'));
   $removedIds = array_map('intval', array_column($removed, 'id'));
-  $toAdd = array_values(array_filter($pickable, static function ($p) use ($inRoster, $removedIds) {
-      return !in_array((int)$p['id'], $inRoster, true) && !in_array((int)$p['id'], $removedIds, true);
+  $toAdd = array_values(array_filter($pickable, static function ($p) use ($inRoster, $removedIds, $away) {
+      return !in_array((int)$p['id'], $inRoster, true) && !in_array((int)$p['id'], $removedIds, true) && !isset($away[(int)$p['id']]);
   }));
   ?>
   <section class="panel" id="convocades">
@@ -76,14 +75,6 @@ $typeTone = ['entrenament' => 'blue', 'gimnas' => 'violet', 'especial' => 'orang
       </ul>
     <?php else: ?>
       <p class="muted">Cap jugadora convocada.</p>
-    <?php endif; ?>
-    <?php if ($awayList): ?>
-      <p class="muted small roster-sub"><?= icon('alert', 'icon icon-xs') ?> No disponibles (<?= count($awayList) ?>)</p>
-      <ul class="name-chips">
-        <?php foreach ($awayList as $p): $a = $away[(int)$p['id']]; ?>
-          <li class="chip-off<?= $editRoster ? ' chip-edit' : '' ?>"<?= $isStaff ? ' title="' . e(App\Repositories\AbsenceRepository::label($a) . ' · ' . App\Repositories\AbsenceRepository::period($a)) . '"' : '' ?>><span><?= e($p['first_name'] . ' ' . $p['last_name']) ?><?php if ($isStaff): ?> <span class="muted small">(<?= e(App\Repositories\AbsenceRepository::label($a)) ?>)</span><?php endif; ?></span><?php if ($editRoster): ?><button class="chip-x" type="submit" name="players[]" value="<?= (int)$p['id'] ?>" aria-label="Treu <?= e($p['first_name']) ?>"><?= icon('x', 'icon icon-xs') ?></button><?php endif; ?></li>
-        <?php endforeach; ?>
-      </ul>
     <?php endif; ?>
     <?php if ($guests): ?>
       <p class="muted small roster-sub">També hi han vingut (<?= count($guests) ?>)</p>
