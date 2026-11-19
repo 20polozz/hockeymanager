@@ -958,6 +958,9 @@ a.sidebar-user .sidebar-user-cog { color: #8ea0c2; }
 .today-empty { display: flex; align-items: center; gap: 10px; color: var(--text-2); }
 .today-empty .icon { color: var(--muted); flex-shrink: 0; }
 
+.away-note { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca; color: #7f1d1d; font-size: .9rem; }
+.away-note .icon { flex-shrink: 0; margin-top: 2px; color: var(--red); }
+
 /* Botó paperera */
 .btn-trash { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #fecaca; background: #fff; color: var(--red); cursor: pointer; transition: background .15s, color .15s, transform .1s; }
 .btn-trash:hover { background: var(--red); border-color: var(--red); color: #fff; }

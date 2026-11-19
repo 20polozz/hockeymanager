@@ -50,12 +50,24 @@ final class AttendanceController extends Controller
     public function take(int $eventId): void
     {
         $event = $this->training($eventId);
+        // Les jugadores de baixa aquell dia no surten a la llista (si ja tenien estat desat, sí)
+        $sheet = AttendanceRepository::sheet($event);
+        $away = \App\Repositories\AbsenceRepository::onDate(substr((string)$event['starts_at'], 0, 10), array_column($sheet, 'id'));
+        $awayList = [];
+        foreach ($sheet as $i => $p) {
+            if (isset($away[(int)$p['id']]) && (string)$p['status'] === '') {
+                $awayList[] = $p + ['absence' => $away[(int)$p['id']]];
+                unset($sheet[$i]);
+            }
+        }
+        $sheet = array_values($sheet);
         $this->view('pages/attendance/take', [
             'pageTitle' => 'Passar llista',
             'activeNav' => 'attendance',
             'event'     => $event,
-            'sheet'     => $sheet = AttendanceRepository::sheet($event),
-            'away'      => \App\Repositories\AbsenceRepository::onDate(substr((string)$event['starts_at'], 0, 10), array_column($sheet, 'id')),
+            'sheet'     => $sheet,
+            'away'      => $away,
+            'awayList'  => $awayList,
         ]);
     }
 
@@ -70,6 +82,9 @@ final class AttendanceController extends Controller
         $notes = is_array($_POST['observation'] ?? null) ? $_POST['observation'] : [];
         $rows = [];
         foreach ($allowed as $pid) {
+            if (!array_key_exists($pid, $statuses) && !array_key_exists((string)$pid, $statuses)) {
+                continue; // no era a la llista (p. ex. de baixa): no es toca
+            }
             $st = (string)($statuses[$pid] ?? '');
             $rows[$pid] = [
                 'status'      => array_key_exists($st, AttendanceRepository::STATUSES) ? $st : '',
