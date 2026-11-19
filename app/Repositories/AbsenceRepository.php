@@ -109,7 +109,22 @@ final class AbsenceRepository
             'INSERT INTO player_absences (player_id, type, starts_on, ends_on, note, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
             [$playerId, $d['type'], $d['starts_on'], $d['ends_on'], $d['note'], Auth::id()]
         );
-        return (int)Database::pdo()->lastInsertId();
+        $id = (int)Database::pdo()->lastInsertId();
+        self::clearJustified($playerId);
+        return $id;
+    }
+
+    /** Treu les «justificades» dels dies en què la jugadora està de baixa (la baixa ja ho explica). */
+    public static function clearJustified(int $playerId): void
+    {
+        Database::query(
+            "DELETE a FROM attendance a
+             JOIN events e ON e.id = a.event_id
+             JOIN player_absences pa ON pa.player_id = a.player_id
+                  AND pa.starts_on <= DATE(e.starts_at) AND (pa.ends_on IS NULL OR pa.ends_on >= DATE(e.starts_at))
+             WHERE a.status = 'justificat' AND a.player_id = ?",
+            [$playerId]
+        );
     }
 
     public static function update(int $id, array $d): void
