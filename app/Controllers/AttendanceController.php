@@ -73,7 +73,7 @@ final class AttendanceController extends Controller
         $saved = AttendanceRepository::save($eventId, $rows);
         ActivityLog::add('attendance', 'Ha passat llista de «' . $event['title'] . '» (' . date('d/m', strtotime((string)$event['starts_at'])) . ')', $event['team_id'] !== null ? (int)$event['team_id'] : null);
         flash('success', 'Llista desada: ' . $saved . ' jugadors/es marcats.');
-        redirect('/calendari/' . $eventId);
+        redirect('/assistencia');
     }
 
     public function stats(): void
