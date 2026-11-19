@@ -1,8 +1,7 @@
 # HockeyManager
 
 Aplicació web de gestió d'un club d'hoquei patins (coordinadors, entrenadors i jugadors).
-Viu temporalment a `hockeyfantasy.eu/hockeymanager`, però és **totalment independent**:
-base de dades pròpia, sessió pròpia i cap fitxer compartit amb HockeyFantasy.
+Projecte independent: base de dades, sessió i domini propis.
 
 ## Tecnologia
 
@@ -12,7 +11,7 @@ base de dades pròpia, sessió pròpia i cap fitxer compartit amb HockeyFantasy.
 - HTML + CSS + JS propis (sense dependències externes).
 
 ```
-hockeymanager/
+(arrel del repositori = arrel del domini)
 ├── index.php              Front controller (totes les peticions)
 ├── .htaccess              Reescriptura i bloqueig de carpetes internes
 ├── config.example.php     Plantilla → copiar com a config.php (no va a GitHub)
@@ -26,30 +25,34 @@ hockeymanager/
 │   ├── Repositories/      Consultes SQL per mòdul
 │   └── Views/             layouts/, partials/, components/, pages/
 ├── database/
-│   ├── migrations/        001_core.php… (s'apliquen des de /install)
+│   ├── migrations/        001_core.php… (s'apliquen soles)
 │   └── seeds/             DemoSeeder (dades fictícies, opcionals)
 └── assets/                css, js, img
 ```
 
-## Posar-ho en marxa (cdmon)
+## Posar-ho en marxa en un hosting nou
 
-Mentre viu dins de hockeyfantasy.eu **no cal cap config.php propi**: si no n'hi ha,
-l'app agafa el servidor, l'usuari i la contrasenya del `config.php` de HockeyFantasy
-i es connecta a la base de dades **`hockeymanager`** (la seva, no la de HockeyFantasy).
+1. **Base de dades**: crea una BD MySQL/MariaDB i un usuari amb permisos. Si ja tens dades,
+   importa-hi el bolcat (`.sql`) des de phpMyAdmin.
+2. **config.php**: copia `config.example.php` com a `config.php` **al servidor** (per FTP o
+   des del gestor de fitxers) i omple-hi les credencials de la BD i una `install_key` llarga.
+   No es puja mai a GitHub.
+3. **Desplegament automàtic**: a GitHub → *Settings → Secrets and variables → Actions* crea
+   aquests secrets:
 
-1. Panell de cdmon → comprova que la BD `hockeymanager` existeix i que l'usuari de
-   HockeyFantasy hi té permisos.
-2. Fusiona la PR (es desplega sola per FTP).
-3. Obre `https://hockeyfantasy.eu/hockeymanager/install`. La clau d'instal·lació és
-   l'`ADMIN_KEY` del `config.php` de HockeyFantasy. Crea el compte de coordinador i,
-   si vols, carrega les dades de demostració.
+   | Secret | Exemple |
+   |---|---|
+   | `FTP_SERVER` | `ftp.elmeudomini.cat` |
+   | `FTP_USERNAME` | usuari FTP |
+   | `FTP_PASSWORD` | contrasenya FTP |
+   | `FTP_SERVER_DIR` | carpeta pública del domini, amb `/` final (ex.: `/public_html/`) |
 
-Quan arribin noves migracions, un coordinador les aplica des de **Configuració → Base de dades**.
+   Cada `push` a `main` puja només els fitxers canviats (*Actions → Desplegar a producció*).
+4. **Primera instal·lació** (només si la BD és buida): obre `https://elmeudomini/install`
+   amb la `install_key` per crear el primer compte.
 
-## Moure-ho a un domini propi
-
-Copia la carpeta `hockeymanager/` a l'arrel del nou hosting, importa la BD i crea
-`config.php` a partir de `config.example.php` amb les noves credencials. La ruta base es detecta sola (`base_path => null`).
+La ruta base es detecta sola, així que funciona tant a l'arrel d'un domini com dins d'una carpeta.
+El servidor ha de tenir Apache amb `mod_rewrite` (o equivalent) perquè el `.htaccess` funcioni.
 
 ## Seguretat
 
@@ -60,12 +63,11 @@ Copia la carpeta `hockeymanager/` a l'arrel del nou hosting, importa la BD i cre
 
 ## Mòduls
 
-- **Dashboard** amb resum, accés ràpid, esdeveniments, resultats, assistència i activitat
-- **Calendari** (mes/setmana/dia) amb entrenaments recurrents i esdeveniments especials
+- **Dashboard** amb resum, accés ràpid, esdeveniments, assistència, absències i activitat
+- **Calendari** (mes/setmana/dia) amb entrenaments, gimnàs i esdeveniments especials, per equips o per llista de jugadores
 - **Assistència**: passar llista des del mòbil i estadístiques
 - **Exercicis** (biblioteca amb categories, preferits i vídeo) i **Entrenaments** (sessions)
-- **Partits**, **acta** (participació i estadístiques, també de porteria) i **Convocatòries**
-- **Estadístiques** d'equip, jugadors/es i porters/es (només dades registrades)
+- **Absències i baixes temporals** de jugadores (lesió, viatge…)
 - **Jugadors/es** i **Equips** amb historial; **Usuaris** amb rols i equips assignats
 
 ## Actualitzacions de la BD

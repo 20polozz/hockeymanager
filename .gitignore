@@ -1,0 +1,8 @@
+# Configuració amb credencials: es crea a mà al servidor (no va a GitHub)
+config.php
+
+# Fitxers locals
+.DS_Store
+Thumbs.db
+*.log
+*.sql

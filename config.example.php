@@ -3,15 +3,10 @@
  * HockeyManager — configuració.
  *
  * 1. Copia aquest fitxer com a "config.php" a la mateixa carpeta.
- * 2. Omple les dades de la base de dades PRÒPIA de HockeyManager
- *    (no la de HockeyFantasy: són independents perquè l'app es pugui
- *    moure a un altre hosting/domini sense tocar res més).
- * 3. Posa una "install_key" llarga i obre /hockeymanager/install.
+ * 2. Omple les dades de la base de dades de HockeyManager.
+ * 3. Posa una "install_key" llarga (només cal per a la primera instal·lació, /install).
  *
- * config.php NO es puja a GitHub (.gitignore): s'ha de pujar a mà per FTP.
- *
- * Mentre l'app és dins de hockeyfantasy.eu no cal: sense config.php s'agafen
- * les credencials del config.php de HockeyFantasy amb la BD "hockeymanager".
+ * config.php NO es puja a GitHub (.gitignore): s'ha de crear a mà al servidor.
  */
 return [
     'db' => [
@@ -29,7 +24,7 @@ return [
         // 'production' amaga els errors; 'development' els mostra
         'env'       => 'production',
         'timezone'  => 'Europe/Madrid',
-        // null = es detecta sol (/hockeymanager ara, "" en un domini propi)
+        // null = es detecta sol ("" a l'arrel del domini, "/carpeta" dins d'una carpeta)
         'base_path' => null,
     ],
 
