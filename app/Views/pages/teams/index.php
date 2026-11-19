@@ -6,7 +6,7 @@ $canManage = Gate::allows('teams.manage');
 ?>
 <?php if ($canManage): ?>
   <div class="page-head page-head-end">
-    <a class="btn" href="<?= e(url('/equips/categories')) ?>"><?= icon('settings', 'icon icon-sm') ?> Categories</a>
+    <?php if (App\Core\Gate::allows('categories.manage')): ?><a class="btn" href="<?= e(url('/equips/categories')) ?>"><?= icon('settings', 'icon icon-sm') ?> Categories</a><?php endif; ?>
     <a class="btn btn-primary" href="<?= e(url('/equips/nou')) ?>"><?= icon('plus', 'icon icon-sm') ?> Nou equip</a>
   </div>
 <?php endif; ?>

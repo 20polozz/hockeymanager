@@ -31,6 +31,10 @@ final class TeamController extends Controller
             $this->fail($data, $errors, '/equips/nou');
         }
         $id = TeamRepository::create($data['name'], $data['category_id'] ?: null, $data['color']);
+        if (!\App\Core\Auth::isManager()) {
+            // L'entrenador que el crea en queda com a responsable (si no, no el veuria)
+            \App\Core\Database::query('INSERT IGNORE INTO team_staff (team_id, user_id, staff_role) VALUES (?, ?, ?)', [$id, \App\Core\Auth::id(), 'principal']);
+        }
         ActivityLog::add('team', 'Ha creat l\'equip ' . $data['name'], $id);
         forget_input();
         flash('success', 'Equip «' . $data['name'] . '» creat.');

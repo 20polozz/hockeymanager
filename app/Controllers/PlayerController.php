@@ -76,7 +76,7 @@ final class PlayerController extends Controller
             $this->fail($errors, '/jugadors/' . $id . '#fitxa');
         }
         PlayerRepository::update($id, $data);
-        PlayerRepository::syncTeams($id, $teams);
+        PlayerRepository::syncTeams($id, $teams, Auth::isManager() ? null : TeamScope::ids());
         ActivityLog::add('player', 'Ha editat la fitxa de ' . $data['first_name'] . ' ' . $data['last_name'], (int)array_key_first($teams));
         forget_input();
         flash('success', 'Fitxa desada.');
@@ -117,6 +117,10 @@ final class PlayerController extends Controller
         if (!$player || (int)$player['active'] !== 1) {
             throw new HttpException(404);
         }
+        // Un entrenador només gestiona les jugadores dels seus equips
+        if (!Auth::isManager() && !array_intersect(PlayerRepository::currentTeamIds($id), TeamScope::ids())) {
+            throw new HttpException(403, 'Només pots editar les jugadores dels teus equips.');
+        }
         return $player;
     }
 
@@ -156,7 +160,8 @@ final class PlayerController extends Controller
             'history'    => PlayerRepository::teamHistory($id),
             'attendance' => PlayerRepository::attendanceSummary($id),
             'attHistory' => \App\Repositories\AttendanceRepository::playerHistory($id, 10),
-            'canManage'  => Gate::allows('players.manage') && (int)$player['active'] === 1,
+            'canManage'  => Gate::allows('players.manage') && (int)$player['active'] === 1
+                && (Auth::isManager() || (bool)array_intersect(PlayerRepository::currentTeamIds($id), TeamScope::ids())),
             'absences'   => \App\Repositories\AbsenceRepository::forPlayer($id),
             'canAbsence' => (int)$player['active'] === 1 && AbsenceController::canManage($id),
             'memberships' => PlayerRepository::currentMemberships($id),
