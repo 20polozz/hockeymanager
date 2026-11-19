@@ -17,14 +17,6 @@ $labels = ['present' => ['check', 'Present'], 'retard' => ['clock', 'Retard'], '
   <?php if (!$sheet): ?>
     <section class="panel"><?= component('empty_state', ['icon' => 'users', 'text' => 'Aquest equip encara no té jugadors/es.']) ?></section>
   <?php else: ?>
-    <?php if ($awayList): ?>
-      <div class="away-note">
-        <?= icon('alert', 'icon icon-sm') ?>
-        <span><strong>No disponibles (<?= count($awayList) ?>):</strong>
-          <?php foreach ($awayList as $i => $p): ?><?= $i ? ', ' : '' ?><?= e($p['first_name'] . ' ' . $p['last_name']) ?> <span class="muted">(<?= e(App\Repositories\AbsenceRepository::label($p['absence'])) ?>)</span><?php endforeach; ?>
-        </span>
-      </div>
-    <?php endif; ?>
     <form method="post" action="<?= e(url('/assistencia/' . (int)$event['id'])) ?>" class="take-form" data-attendance>
       <?= csrf_field() ?>
       <ul class="roll">

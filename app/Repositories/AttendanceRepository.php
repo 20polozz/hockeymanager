@@ -13,10 +13,21 @@ final class AttendanceRepository
     /**
      * @return array{present:int,retard:int,justificat:int,absent:int,total:int}
      */
+    /**
+     * Condició SQL: fila d'assistència que compta com a "llista passada"
+     * (no és la justificada automàtica d'una jugadora de baixa aquell dia).
+     */
+    public static function realRowSql(string $a = 'a', string $e = 'e'): string
+    {
+        return "NOT ($a.status = 'justificat' AND EXISTS (SELECT 1 FROM player_absences pa WHERE pa.player_id = $a.player_id
+                AND pa.starts_on <= DATE($e.starts_at) AND (pa.ends_on IS NULL OR pa.ends_on >= DATE($e.starts_at))))";
+    }
+
     public static function summaryForEvent(int $eventId): array
     {
         $out = ['present' => 0, 'retard' => 0, 'justificat' => 0, 'absent' => 0, 'total' => 0];
-        foreach (Database::all('SELECT status, COUNT(*) AS n FROM attendance WHERE event_id = ? GROUP BY status', [$eventId]) as $r) {
+        foreach (Database::all('SELECT a.status, COUNT(*) AS n FROM attendance a JOIN events e ON e.id = a.event_id
+                                WHERE a.event_id = ? AND ' . self::realRowSql() . ' GROUP BY a.status', [$eventId]) as $r) {
             $out[$r['status']] = (int)$r['n'];
             $out['total'] += (int)$r['n'];
         }

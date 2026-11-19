@@ -92,7 +92,7 @@ final class EventRepository
         $events = Database::all(
             "SELECT e.id, e.type AS kind, e.title, e.starts_at, e.ends_at, e.location, e.team_id,
                     " . self::labelSql() . " AS team_name, COALESCE(t.color, '#64748b') AS color,
-                    (SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.id) AS attendance_count,
+                    (SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.id AND " . AttendanceRepository::realRowSql() . ") AS attendance_count,
                     (SELECT COUNT(*) FROM event_players ep WHERE ep.event_id = e.id) AS participants
              FROM events e LEFT JOIN teams t ON t.id = e.team_id
              WHERE $vw AND e.starts_at >= ? AND e.starts_at < ?",
@@ -143,7 +143,7 @@ final class EventRepository
         return Database::all(
             "SELECT e.id, e.type, e.title, e.starts_at, e.ends_at, e.location, e.team_id,
                     " . self::labelSql() . " AS team_name, COALESCE(t.color, '#64748b') AS color,
-                    (SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.id) AS marked,
+                    (SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.id AND " . AttendanceRepository::realRowSql() . ") AS marked,
                     (SELECT COUNT(*) FROM attendance a WHERE a.event_id = e.id AND a.status IN ('present','retard')) AS attended
              FROM events e LEFT JOIN teams t ON t.id = e.team_id
              WHERE e.type IN ('entrenament','gimnas') AND $vw AND e.starts_at >= ? AND e.starts_at < ?
